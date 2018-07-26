@@ -19,6 +19,11 @@ namespace NEL_Wallet_API.Controllers
         private httpHelper hh = new httpHelper();
         private mongoHelper mh = new mongoHelper();
 
+        private static Api testApi = new Api("testnet");
+        private static Api mainApi = new Api("mainnet");
+        public static Api getTestApi() { return testApi; }
+        public static Api getMainApi() { return mainApi; }
+
         public Api(string node) {
             netnode = node;
             switch (netnode)

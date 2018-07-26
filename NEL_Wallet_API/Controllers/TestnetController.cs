@@ -10,7 +10,8 @@ namespace NEL_Wallet_API.Controllers
     [Route("api/[controller]")]
     public class TestnetController : Controller
     {
-        Api api = new Api("testnet");
+        //Api api = new Api("testnet");
+        Api api = Api.getTestApi();
 
         [HttpGet]
         public JsonResult Get(string @jsonrpc, string @method, string @params, long @id)
