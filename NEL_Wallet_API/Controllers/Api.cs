@@ -173,6 +173,16 @@ namespace NEL_Wallet_API.Controllers
                         result = auctionService.getDomainInfoByAddress(req.@params[0].ToString(), req.@params[1].ToString());
                         break;
                     // 根据地址查询竞拍域名列表
+                    case "getbidlistbyaddressNew":
+                        if (req.@params.Length < 3)
+                        {
+                            result = auctionService.getBidListByAddressNew(req.@params[0].ToString());
+                        }
+                        else
+                        {
+                            result = auctionService.getBidListByAddressNew(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
+                        }
+                        break;
                     case "getbidlistbyaddress":
                         if(req.@params.Length < 3)
                         {
