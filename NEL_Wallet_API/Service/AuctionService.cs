@@ -569,7 +569,7 @@ namespace NEL_Wallet_API.Controllers
         {
             // 地址参拍域名
             string domainUserStateCol = "nnsDomainUserState";
-            JObject domainFilter = new JObject() { { "who", address }, { "displayName", "addprice" } };
+            JObject domainFilter = new JObject() { { "who", address }};
             if (prefixDomain != "")
             {
                 domainFilter.Add("fulldomain", new JObject() { { "$regex", prefixDomain }, { "$options", "i" } });

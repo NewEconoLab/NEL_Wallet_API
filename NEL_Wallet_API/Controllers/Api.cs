@@ -203,6 +203,16 @@ namespace NEL_Wallet_API.Controllers
                         }
                         break;
                     // 根据域名查询域名竞拍详情
+                    case "getbiddetailbydomainNew":
+                        if (req.@params.Length < 3)
+                        {
+                            result = auctionService.getBidDetailByAuctionId(req.@params[0].ToString());
+                        }
+                        else
+                        {
+                            result = auctionService.getBidDetailByAuctionId(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
+                        }
+                        break;
                     case "getbiddetailbydomain":
                         if (req.@params.Length < 3)
                         { 
