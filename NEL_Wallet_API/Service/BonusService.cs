@@ -17,60 +17,53 @@ namespace NEL_Wallet_API.Controllers
         public string Block_mongodbDatabase { set; get; }
 
 
-        public JArray getBonusHistByAddress(string address)
+        public JArray getBonusHistByAddress(string address, int pageNum = 1, int pageSize = 10)
         {
-            return getBonusHistByAddress(address, 0, 0);
-        }
-        public JArray getBonusHistByAddress(string address, int pageNum, int pageSize) 
-        {
-            MyJson.JsonNode_Object getBonusFilter = new MyJson.JsonNode_Object();
-            getBonusFilter.Add("from", new MyJson.JsonNode_ValueString(BonusNofityFrom));
-            getBonusFilter.Add("to", new MyJson.JsonNode_ValueString(address));
-            string findFliter = getBonusFilter.ToString();
+            JObject queryFilter = new JObject() { { "from", BonusNofityFrom }, { "to", address } };
+            string querySort = "{\"blockindex\":-1,\"txid\":-1}";
+            JObject queryField = new JObject() { { "value", 1 }, { "blockindex", 1 } };
+            JArray queryRes = mh.GetDataPagesWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, BonusNofityCol, queryField.ToString(), pageSize, pageNum, querySort, queryFilter.ToString());
+            if (queryRes == null || queryRes.Count() == 0)
+            {
+                return new JArray() { };
+            }
 
-            JArray result = null;
-            if ( pageNum <= 0 || pageSize <= 0)
+            //
+            long[] blockindexArr = queryRes.Select(p => long.Parse(p["blockindex"].ToString())).Distinct().ToArray();
+            Dictionary<string, long> blockTimeDict = getBlockTime(blockindexArr);
+
+            // 
+            JObject[] arr = queryRes.Select(item =>
             {
-                result = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, BonusNofityCol, findFliter);
-            } else
-            {
-                string sortStr = "{\"blockindex\":-1,\"txid\":-1}";
-                result = mh.GetDataPages(Notify_mongodbConnStr, Notify_mongodbDatabase, BonusNofityCol, sortStr, pageSize, pageNum, findFliter);
-            }
-            List<JObject> res = null;
-            if ( result != null)
-            {
-                res = result.Select(item =>
-                {
-                    JObject obj = new JObject();
-                    obj.Add("value", Convert.ToString(((JObject)item)["value"]));
-                    obj.Add("blocktime", getBlockTime(Convert.ToString(((JObject)item)["blockindex"])));
-                    return obj;
-                }).ToList();
-            } else
-            {
-                res = new List<JObject>();
-            }
-            
-            JObject rr = new JObject();
-            rr.Add("list", new JArray() { res });
-            rr.Add("count", res.Count);
-            return new JArray() { rr };
+                JObject obj = new JObject();
+                obj.Add("value", item["value"]);
+                obj.Add("blocktime", blockTimeDict.GetValueOrDefault(item["blockindex"].ToString()));
+                return obj;
+            }).ToArray();
+
+            // 总量
+            long cnt = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, BonusNofityCol, queryFilter.ToString());
+            // 返回
+            JObject res = new JObject();
+            res.Add("list", new JArray() { arr });
+            res.Add("count", cnt);
+            return new JArray() { res };
 
         }
-
+        
         private long getBlockTime(string blockHeightStrSt)
         {
             string blockHeightFilter = "{\"index\":" + long.Parse(blockHeightStrSt) + "}";
-            JArray queryBlockRes = queryBlock("block", blockHeightFilter);
+            JArray queryBlockRes = mh.GetData(Block_mongodbConnStr, Block_mongodbDatabase, "block", blockHeightFilter);
             long blockTime = long.Parse(Convert.ToString(queryBlockRes[0]["time"]));
             return blockTime;
         }
-        private JArray queryBlock(string coll, string filter)
+        private Dictionary<string, long> getBlockTime(long[] blockindexArr)
         {
-            return mh.GetData(Block_mongodbConnStr, Block_mongodbDatabase, coll, filter);
+            JObject queryFilter = MongoFieldHelper.toFilter(blockindexArr, "index", "$or");
+            JObject returnFilter = MongoFieldHelper.toReturn(new string[] { "index", "time" });
+            JArray blocktimeRes = mh.GetDataWithField(Block_mongodbConnStr, Block_mongodbDatabase, "block", returnFilter.ToString(), queryFilter.ToString());
+            return blocktimeRes.ToDictionary(key => key["index"].ToString(), val => long.Parse(val["time"].ToString()));
         }
-
-
     }
 }

@@ -160,6 +160,16 @@ namespace NEL_Wallet_API.Controllers
                         }
                         break;
                     // 根据地址查询竞拍域名列表(域名支持模糊匹配)
+                    case "searchdomainbyaddressNew":
+                        if (req.@params.Length < 3)
+                        {
+                            result = auctionService.getBidListByAddressLikeDomainNew(req.@params[0].ToString(), req.@params[1].ToString());
+                        }
+                        else
+                        {
+                            result = auctionService.getBidListByAddressLikeDomainNew(req.@params[0].ToString(), req.@params[1].ToString(), int.Parse(req.@params[2].ToString()), int.Parse(req.@params[3].ToString()));
+                        }
+                        break;
                     case "searchdomainbyaddress":
                         if (req.@params.Length < 3)
                         {
@@ -169,16 +179,16 @@ namespace NEL_Wallet_API.Controllers
                             result = auctionService.getBidListByAddressLikeDomain(req.@params[0].ToString(), req.@params[1].ToString(), int.Parse(req.@params[2].ToString()), int.Parse(req.@params[3].ToString()));
                         }
                         break;
+                    // 查询域名状态
                     case "getdomainstate":
-                        result = auctionService.getDomainInfoByAddress(req.@params[0].ToString(), req.@params[1].ToString());
+                        result = auctionService.getDomainState(req.@params[0].ToString(), req.@params[1].ToString());
                         break;
                     // 根据地址查询竞拍域名列表
                     case "getbidlistbyaddressNew":
                         if (req.@params.Length < 3)
                         {
                             result = auctionService.getBidListByAddressNew(req.@params[0].ToString());
-                        }
-                        else
+                        } else
                         {
                             result = auctionService.getBidListByAddressNew(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
                         }
@@ -210,7 +220,7 @@ namespace NEL_Wallet_API.Controllers
                     case "getdomainbyaddress":
                         result = domainService.getDomainByAddress(req.@params[0].ToString(), req.@params[1].ToString());
                         break;
-
+                    // 根据地址查询交易列表
                     case "gettransbyaddress":
                         result = commonService.getTransByAddress(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
                         break;
@@ -234,28 +244,6 @@ namespace NEL_Wallet_API.Controllers
             res.result = result;
 
             return res;
-        }
-
-        private JArray getJAbyKV(string key, object value)
-        {
-            return new JArray
-                        {
-                            new JObject
-                            {
-                                {
-                                    key,
-                                    value.ToString()
-                                }
-                            }
-                        };
-        }
-
-        private JArray getJAbyJ(JObject J)
-        {
-            return new JArray
-                        {
-                            J
-                        };
         }
     }
 }

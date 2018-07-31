@@ -90,13 +90,13 @@ namespace NEL_Wallet_API.lib
             domainResolver_mainnet = config["domainResolver_mainnet"];
         }
 
-        public JArray GetData(string mongodbConnStr,string mongodbDatabase, string coll,string findFliter)
+        public JArray GetData(string mongodbConnStr,string mongodbDatabase, string coll, string findBson)
         {
             var client = new MongoClient(mongodbConnStr);
             var database = client.GetDatabase(mongodbDatabase);
             var collection = database.GetCollection<BsonDocument>(coll);
 
-            List<BsonDocument> query = collection.Find(BsonDocument.Parse(findFliter)).ToList();
+            List<BsonDocument> query = collection.Find(BsonDocument.Parse(findBson)).ToList();
             client = null;
 
             if (query.Count > 0)
@@ -112,36 +112,13 @@ namespace NEL_Wallet_API.lib
             else { return new JArray(); }      
         }
 
-        public JArray GetDataPages(string mongodbConnStr, string mongodbDatabase, string coll,string sortStr, int pageCount, int pageNum, string findBson = "{}")
+        public JArray GetDataPages(string mongodbConnStr, string mongodbDatabase, string coll,string sortStr, int pageSize, int pageNum, string findBson = "{}")
         {
             var client = new MongoClient(mongodbConnStr);
             var database = client.GetDatabase(mongodbDatabase);
             var collection = database.GetCollection<BsonDocument>(coll);
 
-            List<BsonDocument> query = collection.Find(BsonDocument.Parse(findBson)).Sort(sortStr).Skip(pageCount * (pageNum-1)).Limit(pageCount).ToList();
-            client = null;
-
-            if (query.Count > 0)
-            {
-
-                var jsonWriterSettings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
-                JArray JA = JArray.Parse(query.ToJson(jsonWriterSettings));
-                foreach (JObject j in JA)
-                {
-                    j.Remove("_id");
-                }
-                return JA;
-            }
-            else { return new JArray(); }
-        }
-
-        public JArray GetDataPagesWithField(string mongodbConnStr, string mongodbDatabase, string coll, string fieldBson, int pageCount, int pageNum, string sortStr = "{}", string findBson = "{}")
-        {
-            var client = new MongoClient(mongodbConnStr);
-            var database = client.GetDatabase(mongodbDatabase);
-            var collection = database.GetCollection<BsonDocument>(coll);
-
-            List<BsonDocument> query = collection.Find(BsonDocument.Parse(findBson)).Project(BsonDocument.Parse(fieldBson)).Sort(sortStr).Skip(pageCount * (pageNum - 1)).Limit(pageCount).ToList();
+            List<BsonDocument> query = collection.Find(BsonDocument.Parse(findBson)).Sort(sortStr).Skip(pageSize * (pageNum-1)).Limit(pageSize).ToList();
             client = null;
 
             if (query.Count > 0)
@@ -156,9 +133,10 @@ namespace NEL_Wallet_API.lib
             }
             else { return new JArray(); }
         }
+
         public JArray GetDataWithField(string mongodbConnStr, string mongodbDatabase, string coll, string fieldBson, string findBson = "{}")
         {
-            var client = new MongoClient(mongodbConnStr);
+            var client = mongodbConnStr == null ? new MongoClient() : new MongoClient(mongodbConnStr);
             var database = client.GetDatabase(mongodbDatabase);
             var collection = database.GetCollection<BsonDocument>(coll);
 
@@ -178,102 +156,41 @@ namespace NEL_Wallet_API.lib
             else { return new JArray(); }
         }
 
-        public long GetDataCount(string mongodbConnStr, string mongodbDatabase,string coll)
+        public JArray GetDataPagesWithField(string mongodbConnStr, string mongodbDatabase, string coll, string fieldBson, int pageCount, int pageNum, string sortBson = "{}", string findBson = "{}")
         {
             var client = new MongoClient(mongodbConnStr);
             var database = client.GetDatabase(mongodbDatabase);
             var collection = database.GetCollection<BsonDocument>(coll);
 
-            var txCount = collection.Find(new BsonDocument()).Count();
-
+            List<BsonDocument> query = collection.Find(BsonDocument.Parse(findBson)).Project(BsonDocument.Parse(fieldBson)).Sort(sortBson).Skip(pageCount * (pageNum - 1)).Limit(pageCount).ToList();
             client = null;
 
-            return txCount;
-        }
-
-        public long GetDataCount(string mongodbConnStr, string mongodbDatabase, string coll, string findBson)
-        {
-            var client = new MongoClient(mongodbConnStr);
-            var database = client.GetDatabase(mongodbDatabase);
-            var collection = database.GetCollection<BsonDocument>(coll);
-
-            var txCount = collection.Find(BsonDocument.Parse(findBson)).Count();
-
-            client = null;
-
-            return txCount;
-        }
-
-        public JArray Getdatablockheight(string mongodbConnStr, string mongodbDatabase)
-        {
-            int blockDataHeight = -1;
-            int txDataHeight = -1;
-            int utxoDataHeight = -1;
-            int notifyDataHeight = -1;
-            int fulllogDataHeight = -1;
-
-            var client = new MongoClient(mongodbConnStr);
-            var database = client.GetDatabase(mongodbDatabase);
-
-            var collection = database.GetCollection<BsonDocument>("block");
-            var sortBson = BsonDocument.Parse("{index:-1}");
-            var query = collection.Find(new BsonDocument()).Sort(sortBson).Limit(1).ToList();
-            if (query.Count > 0)
-            {blockDataHeight = (int)query[0]["index"];}
-
-            collection = database.GetCollection<BsonDocument>("tx");
-            sortBson = BsonDocument.Parse("{blockindex:-1}");
-            query = collection.Find(new BsonDocument()).Sort(sortBson).Limit(1).ToList();
-            if (query.Count > 0)
-            { txDataHeight = (int)query[0]["blockindex"]; }
-
-            collection = database.GetCollection<BsonDocument>("system_counter");
-            query = collection.Find(new BsonDocument()).ToList();
             if (query.Count > 0)
             {
-                foreach (var q in query)
+                var jsonWriterSettings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
+                JArray JA = JArray.Parse(query.ToJson(jsonWriterSettings));
+                foreach (JObject j in JA)
                 {
-                    if ((string)q["counter"] == "utxo") { utxoDataHeight = (int)q["lastBlockindex"]; };
-                    if ((string)q["counter"] == "notify") { notifyDataHeight = (int)q["lastBlockindex"]; };
-                    if ((string)q["counter"] == "fulllog") { fulllogDataHeight = (int)q["lastBlockindex"]; };
+                    j.Remove("_id");
                 }
+                return JA;
             }
-
-            client = null;
-
-            JObject J = new JObject
-            {
-                { "blockDataHeight", blockDataHeight },
-                { "txDataHeight", txDataHeight },
-                { "utxoDataHeight", utxoDataHeight },
-                { "notifyDataHeight", notifyDataHeight },
-                { "fulllogDataHeight", fulllogDataHeight }
-            };
-            JArray JA = new JArray
-            {
-                J
-            };
-
-            return JA;
+            else { return new JArray(); }
         }
 
-        public void InsertOneDataByCheckKey(string mongodbConnStr, string mongodbDatabase, string coll, JObject Jdata,string key,string value)
+        public long GetDataCount(string mongodbConnStr, string mongodbDatabase, string coll, string findBson="{}")
         {
             var client = new MongoClient(mongodbConnStr);
             var database = client.GetDatabase(mongodbDatabase);
             var collection = database.GetCollection<BsonDocument>(coll);
 
-            var query = collection.Find("{'" + key + "':'" + value +"'}").ToList();
-            if (query.Count == 0) {
-                string strData = Newtonsoft.Json.JsonConvert.SerializeObject(Jdata);
-                BsonDocument bson = BsonDocument.Parse(strData);
-                bson.Add("getTime", DateTime.Now);
-                collection.InsertOne(bson);
-            }
+            var txCount = collection.Find(BsonDocument.Parse(findBson)).CountDocuments();
 
             client = null;
-        }
 
+            return txCount;
+        }
+        
         public string InsertOneData(string mongodbConnStr, string mongodbDatabase, string coll,string insertBson)
         {
             var client = new MongoClient(mongodbConnStr);
@@ -296,26 +213,7 @@ namespace NEL_Wallet_API.lib
             }
 
         }
-
-        public string InsertOneData(string mongodbConnStr, string mongodbDatabase, string coll, BsonDocument insertBson)
-        {
-            var client = new MongoClient(mongodbConnStr);
-            var database = client.GetDatabase(mongodbDatabase);
-            var collection = database.GetCollection<BsonDocument>(coll);
-            try
-            {
-                collection.InsertOne(insertBson);
-                client = null;
-                return "suc";
-            }
-            catch (Exception e)
-            {
-                client = null;
-                return "faild"; ;
-            }
-
-        }
-
+        
         public string DeleteData(string mongodbConnStr, string mongodbDatabase, string coll, string deleteBson)
         {
             var client = new MongoClient(mongodbConnStr);
@@ -337,26 +235,7 @@ namespace NEL_Wallet_API.lib
                 return e.ToString();
             }
         }
-
-        public decimal GetTotalSysFeeByBlock(string mongodbConnStr, string mongodbDatabase, int blockindex)
-        {
-            var client = new MongoClient(mongodbConnStr);
-            var database = client.GetDatabase(mongodbDatabase);
-            var collection = database.GetCollection<BsonDocument>("block_sysfee");
-
-            decimal totalSysFee = 0;
-            var query = collection.Find("{'index':" + blockindex + "}").ToList();
-            if (query.Count > 0)
-            {
-                totalSysFee = decimal.Parse(query[0]["totalSysfee"].AsString);
-            }
-            else {
-                totalSysFee = -1;
-            }
-            client = null;
-            return totalSysFee;
-        }
-
+        
         public string ReplaceData(string mongodbConnStr, string mongodbDatabase, string collName, string whereFliter, string replaceFliter)
         {
             var client = new MongoClient(mongodbConnStr);
@@ -411,28 +290,6 @@ namespace NEL_Wallet_API.lib
                 client = null;
                 return e.ToString();
             }
-        }
-
-        public JArray GetDataAtBlock(string mongodbConnStr, string mongodbDatabase, string coll, string findFliter)
-        {
-            var client = new MongoClient(mongodbConnStr);
-            var database = client.GetDatabase(mongodbDatabase);
-            var collection = database.GetCollection<BsonDocument>(coll);
-
-            List<BsonDocument> query = collection.Find(BsonDocument.Parse(findFliter)).ToList();
-            client = null;
-
-            if (query.Count > 0)
-            {
-                var jsonWriterSettings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
-                JArray JA = JArray.Parse(query.ToJson(jsonWriterSettings));
-                foreach (JObject j in JA)
-                {
-                    j.Remove("_id");
-                }
-                return JA;
-            }
-            else { return new JArray(); }
         }
 
     }
