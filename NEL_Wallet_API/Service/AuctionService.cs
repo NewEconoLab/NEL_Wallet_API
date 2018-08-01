@@ -356,16 +356,11 @@ namespace NEL_Wallet_API.Controllers
         }
         public JArray getDomainState(string address, /*string domain*/ string auctionid)
         {
-            //string[] domainArr = domain.Split(".");
-            //JObject filter = new JObject();
-            //filter.Add("domain", domainArr[0]);
-            //filter.Add("parenthash", getNameHash(domainArr[1]));
-            //filter.Add("displayName", "addprice");
             JObject filter = new JObject();
             filter.Add("id", auctionid);
             filter.Add("displayName", "addprice");
 
-            JObject fieldFilter = new JObject() { { "maxBuyer", 1 }, { "maxPrice", 1 }, { "startBlockSelling", 1 } };
+            JObject fieldFilter = new JObject() { { "maxBuyer", 1 }, { "maxPrice", 1 }, { "startBlockSelling", 1 }, { "who", 1 }, { "value", 1 } };
             JArray maxPriceObj = mh.GetDataWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, queryBidListCollection, fieldFilter.ToString(), filter.ToString());
             if(maxPriceObj == null || maxPriceObj.Count == 0)
             {
@@ -374,18 +369,12 @@ namespace NEL_Wallet_API.Controllers
             JObject obj = (JObject)maxPriceObj[0];
             string maxBuyer = obj["maxBuyer"].ToString();
             string maxPrice = obj["maxPrice"].ToString();
-            string mybidprice = "";
-            if (address == maxBuyer)
+            string mybidprice = maxPrice;
+            if (address != maxBuyer)
             {
-                mybidprice = maxPrice;
+                mybidprice = maxPriceObj.Where(p => p["who"].ToString() == address).Sum(p => double.Parse(p["value"].ToString())).ToString();
             }
-            else
-            {
-                filter.Add("who", address);
-                fieldFilter.Add("value", 1);
-                JArray maxPriceSlf = mh.GetDataWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, queryBidListCollection, fieldFilter.ToString(), filter.ToString());
-                mybidprice = maxPriceSlf.Sum(p => double.Parse(p["value"].ToString())).ToString();
-            }
+            
             return new JArray() { { new JObject() { { "id", auctionid }, { "maxBuyer", maxBuyer }, { "maxPrice", maxPrice }, { "mybidprice", mybidprice } } } };
 
         }
