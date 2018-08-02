@@ -554,10 +554,13 @@ namespace NEL_Wallet_API.Controllers
         {
             return queryBidListByAddressNew(address, pageNum, pageSize);
         }
+
+        public string domainUserStateCol { get; set; }
+        public string domainStateCol { get; set; }
         private JArray queryBidListByAddressNew(string address, int pageNum, int pageSize, string prefixDomain="")
         {
             // 地址参拍域名
-            string domainUserStateCol = "nnsDomainUserState";
+            //string domainUserStateCol = "nnsDomainUserState";
             JObject domainFilter = new JObject() { { "who", address }};
             if (prefixDomain != "")
             {
@@ -571,7 +574,7 @@ namespace NEL_Wallet_API.Controllers
             }
 
             // 域名当前状态
-            string domainStateCol = "nnsDomainState";
+            //string domainStateCol = "nnsDomainState";
             JObject queryFilter = new JObject(); queryFilter.Add("$and", new JArray() { MongoFieldHelper.toFilter(domainRes.ToArray().Select(p => p["fulldomain"].ToString()).ToArray(), "fulldomain"), new JObject() { { "auctionState", new JObject() { { "$ne", "4"} } } } });
             JObject querySort = new JObject() { { "blockindex", -1 } };
             JObject queryField = toField(new string[] { "fulldomain", "startBlockSellingTime","auctionState","maxPrice","maxBuyer","endBlock","blockindex","id","owner","auctionSpentTime"});
@@ -584,7 +587,14 @@ namespace NEL_Wallet_API.Controllers
             }
             long cnt = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, domainStateCol, queryFilter.ToString());
             JObject rr = new JObject();
-            rr.Add("list", new JArray() { res });
+            rr.Add("list", new JArray() { res.Select(p => {
+                JObject jo = (JObject)p;
+                jo.Add("domain", jo["fulldomain"].ToString());
+                jo.Add("startAuctiontime", jo["startBlockSellingTime"].ToString());
+                jo.Remove("fulldomain");
+                jo.Remove("startBlockSellingTime");
+                return jo;
+            }).ToArray() });
             rr.Add("count", cnt);
             
             return new JArray() { rr };

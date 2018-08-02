@@ -93,7 +93,8 @@ namespace NEL_Wallet_API.Controllers
                         Block_mongodbDatabase = mh.block_mongodbDatabase_mainnet,
                         queryDomainCollection = mh.queryDomainCollection_mainnet,
                         queryBidListCollection = mh.queryBidListCollection_mainnet,
-                        auctionRecharge = auctionRechargetMainNet
+                        auctionRecharge = auctionRechargetMainNet,
+                        
                     };
                     bonusService = new BonusService
                     {
@@ -184,7 +185,7 @@ namespace NEL_Wallet_API.Controllers
                         result = auctionService.getDomainState(req.@params[0].ToString(), req.@params[1].ToString());
                         break;
                     // 根据地址查询竞拍域名列表
-                    case "getbidlistbyaddressNew":
+                    case "getbidlistbyaddress":
                         if (req.@params.Length < 3)
                         {
                             result = auctionService.getBidListByAddressNew(req.@params[0].ToString());
@@ -193,7 +194,7 @@ namespace NEL_Wallet_API.Controllers
                             result = auctionService.getBidListByAddressNew(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
                         }
                         break;
-                    case "getbidlistbyaddress":
+                    case "getbidlistbyaddressOld":
                         if(req.@params.Length < 3)
                         {
                             result = auctionService.getBidListByAddress(req.@params[0].ToString());
@@ -203,7 +204,7 @@ namespace NEL_Wallet_API.Controllers
                         }
                         break;
                     // 根据域名查询域名竞拍详情
-                    case "getbiddetailbydomainNew":
+                    case "getbiddetailbydomain":
                         if (req.@params.Length < 3)
                         {
                             result = auctionService.getBidDetailByAuctionId(req.@params[0].ToString());
@@ -213,7 +214,7 @@ namespace NEL_Wallet_API.Controllers
                             result = auctionService.getBidDetailByAuctionId(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
                         }
                         break;
-                    case "getbiddetailbydomain":
+                    case "getbiddetailbydomainOld":
                         if (req.@params.Length < 3)
                         { 
                             result = auctionService.getBidDetailByDomain(req.@params[0].ToString());
@@ -227,10 +228,10 @@ namespace NEL_Wallet_API.Controllers
                         result = auctionService.getBidResByDomain(req.@params[0].ToString());
                         break;
                     // 根据地址查询域名
-                    case "getdomainbyaddressNew":
+                    case "getdomainbyaddress":
                         result = domainService.getDomainByAddressNew(req.@params[0].ToString(), req.@params[1].ToString());
                         break;
-                    case "getdomainbyaddress":
+                    case "getdomainbyaddressOld":
                         result = domainService.getDomainByAddress(req.@params[0].ToString(), req.@params[1].ToString());
                         break;
                     // 根据地址查询交易列表

@@ -45,7 +45,11 @@ namespace NEL_Wallet_API.lib
 
         public string domainResolver_testnet = string.Empty;
         public string domainResolver_mainnet = string.Empty;
-        
+
+        public string domainUserStateCol_testnet = string.Empty;
+        public string domainUserStateCol_mainnet = string.Empty;
+        public string domainStateCol_testnet = string.Empty;
+        public string domainStateCol_mainnet = string.Empty;
 
 
         public mongoHelper() {
@@ -88,7 +92,13 @@ namespace NEL_Wallet_API.lib
 
             domainResolver_testnet = config["domainResolver_testnet"];
             domainResolver_mainnet = config["domainResolver_mainnet"];
-        }
+
+            domainUserStateCol_testnet = config["domainUserStateCol_testnet"];
+            domainUserStateCol_mainnet = config["domainUserStateCol_mainnet"];
+            domainStateCol_testnet = config["domainStateCol_testnet"];
+            domainStateCol_mainnet = config["domainStateCol_mainnet"];
+
+    }
 
         public JArray GetData(string mongodbConnStr,string mongodbDatabase, string coll, string findBson)
         {
