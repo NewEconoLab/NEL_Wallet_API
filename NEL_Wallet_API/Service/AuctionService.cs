@@ -557,30 +557,60 @@ namespace NEL_Wallet_API.Controllers
 
         public string domainUserStateCol { get; set; }
         public string domainStateCol { get; set; }
-        private JArray queryBidListByAddressNew(string address, int pageNum, int pageSize, string prefixDomain="")
+        public JArray getBidListByAddressTsc(string address, int pageNum=1, int pageSize=10)
+        {
+            return queryBidListByAddressTsc(address, pageNum, pageSize);
+        }
+        private JArray queryBidListByAddressTsc(string address, int pageNum, int pageSize, string prefixDomain="")
         {
             // 地址参拍域名
-            //string domainUserStateCol = "nnsDomainUserState";
-            JObject domainFilter = new JObject() { { "who", address }};
+            JObject domainFilter = new JObject() { { "who", address } };
             if (prefixDomain != "")
             {
                 domainFilter.Add("fulldomain", new JObject() { { "$regex", prefixDomain }, { "$options", "i" } });
             }
-            JArray domainRes = mh.GetDataWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, domainUserStateCol, new JObject() { {"fulldomain",1 } }.ToString(), domainFilter.ToString());
-            //JArray domainRes = mh.GetDataWithField(null, "test6", domainUserStateCol, new JObject() { {"fulldomain",1 } }.ToString(), new JObject() { { "who",address} }.ToString());
+            JArray domainRes = mh.GetDataWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, domainUserStateCol, new JObject() { { "fulldomain", 1 } }.ToString(), domainFilter.ToString());
             if (domainRes == null || domainRes.Count() == 0)
             {
                 return new JArray() { };
             }
 
             // 域名当前状态
-            //string domainStateCol = "nnsDomainState";
+            JObject queryFilter = new JObject(); queryFilter.Add("$and", new JArray() { MongoFieldHelper.toFilter(domainRes.ToArray().Select(p => p["fulldomain"].ToString()).ToArray(), "fulldomain"), new JObject() { { "auctionState", new JObject() { { "$ne", "4" } } } } });
+            JObject querySort = new JObject() { { "blockindex", -1 } };
+            JObject queryField = toField(new string[] { "fulldomain", "startBlockSellingTime", "auctionState", "maxPrice", "maxBuyer", "endBlock", "blockindex", "id", "owner", "auctionSpentTime" });
+
+            JArray res = mh.GetDataPagesWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, domainStateCol, queryField.ToString(), pageSize, pageNum, querySort.ToString(), queryFilter.ToString());
+            if (res == null || res.Count() == 0)
+            {
+                return new JArray() { };
+            }
+            long cnt = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, domainStateCol, queryFilter.ToString());
+            JObject rr = new JObject();
+            rr.Add("list", res);
+            rr.Add("count", cnt);
+            return new JArray() { rr };
+        }
+        private JArray queryBidListByAddressNew(string address, int pageNum, int pageSize, string prefixDomain="")
+        {
+            // 地址参拍域名
+            JObject domainFilter = new JObject() { { "who", address }};
+            if (prefixDomain != "")
+            {
+                domainFilter.Add("fulldomain", new JObject() { { "$regex", prefixDomain }, { "$options", "i" } });
+            }
+            JArray domainRes = mh.GetDataWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, domainUserStateCol, new JObject() { {"fulldomain",1 } }.ToString(), domainFilter.ToString());
+            if (domainRes == null || domainRes.Count() == 0)
+            {
+                return new JArray() { };
+            }
+
+            // 域名当前状态
             JObject queryFilter = new JObject(); queryFilter.Add("$and", new JArray() { MongoFieldHelper.toFilter(domainRes.ToArray().Select(p => p["fulldomain"].ToString()).ToArray(), "fulldomain"), new JObject() { { "auctionState", new JObject() { { "$ne", "4"} } } } });
             JObject querySort = new JObject() { { "blockindex", -1 } };
             JObject queryField = toField(new string[] { "fulldomain", "startBlockSellingTime","auctionState","maxPrice","maxBuyer","endBlock","blockindex","id","owner","auctionSpentTime"});
 
             JArray res = mh.GetDataPagesWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, domainStateCol, queryField.ToString(), pageSize, pageNum, querySort.ToString(), queryFilter.ToString());
-            //JArray res = mh.GetDataWithField(null, "test6", domainStateCol, queryField.ToString(), queryFilter.ToString());
             if (res == null || res.Count() == 0)
             {
                 return new JArray() { };
@@ -590,9 +620,15 @@ namespace NEL_Wallet_API.Controllers
             rr.Add("list", new JArray() { res.Select(p => {
                 JObject jo = (JObject)p;
                 jo.Add("domain", jo["fulldomain"].ToString());
-                jo.Add("startAuctiontime", jo["startBlockSellingTime"].ToString());
+                jo.Add("startAuctionTime", jo["startBlockSellingTime"].ToString());
                 jo.Remove("fulldomain");
                 jo.Remove("startBlockSellingTime");
+                string auctionState = jo["auctionState"].ToString();
+                if(auctionState == "3" || auctionState == "5")
+                {
+                    jo.Remove("auctionState");
+                    jo.Add("auctionState", "0");
+                }
                 return jo;
             }).ToArray() });
             rr.Add("count", cnt);

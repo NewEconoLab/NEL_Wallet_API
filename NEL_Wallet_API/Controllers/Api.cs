@@ -165,17 +165,16 @@ namespace NEL_Wallet_API.Controllers
                         }
                         break;
                     // 根据地址查询竞拍域名列表(域名支持模糊匹配)
-                    case "searchdomainbyaddressNew":
+                    case "searchdomainbyaddress":
                         if (req.@params.Length < 3)
                         {
                             result = auctionService.getBidListByAddressLikeDomainNew(req.@params[0].ToString(), req.@params[1].ToString());
-                        }
-                        else
+                        } else
                         {
                             result = auctionService.getBidListByAddressLikeDomainNew(req.@params[0].ToString(), req.@params[1].ToString(), int.Parse(req.@params[2].ToString()), int.Parse(req.@params[3].ToString()));
                         }
                         break;
-                    case "searchdomainbyaddress":
+                    case "searchdomainbyaddressOld":
                         if (req.@params.Length < 3)
                         {
                             result = auctionService.getBidListByAddressLikeDomain(req.@params[0].ToString(), req.@params[1].ToString());
@@ -197,6 +196,9 @@ namespace NEL_Wallet_API.Controllers
                         {
                             result = auctionService.getBidListByAddressNew(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
                         }
+                        break;
+                    case "getbidlistbyaddressTsc":
+                        result = auctionService.getBidListByAddressTsc(req.@params[0].ToString());
                         break;
                     case "getbidlistbyaddressOld":
                         if(req.@params.Length < 3)
