@@ -15,6 +15,24 @@ namespace NEL_Wallet_API.Service
         public string domainResolver { get; set; }
 
 
+        public JArray getDomainByAddressNew(string owner, string root = ".test")
+        {
+            string parenthash = DomainHelper.nameHash(root.Substring(1)).ToString();
+            JObject queryFilter = new JObject() { { "owner", owner },{ "parenthash", parenthash } };
+            JObject queryField = MongoFieldHelper.toReturn(new string[] { "domain", "resolver" , "TTL", "data" }) ;
+            JArray queryRes = mh.GetDataWithField(notify_mongodbConnStr, notify_mongodbDatabase, "domainOwnerCol", queryField.ToString(), queryFilter.ToString());
+            if (queryRes == null || queryRes.Count == 0)
+            {
+                return new JArray() { };
+            }
+            return new JArray() {queryRes.Select(p => {
+                JObject jo = (JObject)p;
+                string resolverAddr = jo["data"].ToString();
+                jo.Add("resolverAddr", resolverAddr);
+                jo.Remove("data");
+                return jo;
+            }).ToArray() };
+        }
         public JArray getDomainByAddress(string owner, string root = ".test")
         {
             string parenthash = DomainHelper.nameHash(root.StartsWith(".") ? root.Substring(1) : root).ToString();
@@ -26,6 +44,7 @@ namespace NEL_Wallet_API.Service
             {
                 return new JArray() { };
             }
+            
             return new JArray(){
                 queryRes.Select(item => {
 

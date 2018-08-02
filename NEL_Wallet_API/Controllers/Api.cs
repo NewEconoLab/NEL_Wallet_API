@@ -227,6 +227,9 @@ namespace NEL_Wallet_API.Controllers
                         result = auctionService.getBidResByDomain(req.@params[0].ToString());
                         break;
                     // 根据地址查询域名
+                    case "getdomainbyaddressNew":
+                        result = domainService.getDomainByAddressNew(req.@params[0].ToString(), req.@params[1].ToString());
+                        break;
                     case "getdomainbyaddress":
                         result = domainService.getDomainByAddress(req.@params[0].ToString(), req.@params[1].ToString());
                         break;
