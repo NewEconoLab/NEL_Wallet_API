@@ -3,7 +3,6 @@ using NEL_Wallet_API.RPC;
 using NEL_Wallet_API.Service;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Linq;
 
 namespace NEL_Wallet_API.Controllers
 {
@@ -164,17 +163,13 @@ namespace NEL_Wallet_API.Controllers
                             result = bonusService.getBonusHistByAddress(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
                         }
                         break;
+
+                    // 查询域名状态
+                    case "getdomainstate":
+                        result = auctionService.getDomainState(req.@params[0].ToString(), req.@params[1].ToString());
+                        break;
                     // 根据地址查询竞拍域名列表(域名支持模糊匹配)
                     case "searchdomainbyaddress":
-                        if (req.@params.Length < 3)
-                        {
-                            result = auctionService.getBidListByAddressLikeDomainNew(req.@params[0].ToString(), req.@params[1].ToString());
-                        } else
-                        {
-                            result = auctionService.getBidListByAddressLikeDomainNew(req.@params[0].ToString(), req.@params[1].ToString(), int.Parse(req.@params[2].ToString()), int.Parse(req.@params[3].ToString()));
-                        }
-                        break;
-                    case "searchdomainbyaddressOld":
                         if (req.@params.Length < 3)
                         {
                             result = auctionService.getBidListByAddressLikeDomain(req.@params[0].ToString(), req.@params[1].ToString());
@@ -183,25 +178,9 @@ namespace NEL_Wallet_API.Controllers
                             result = auctionService.getBidListByAddressLikeDomain(req.@params[0].ToString(), req.@params[1].ToString(), int.Parse(req.@params[2].ToString()), int.Parse(req.@params[3].ToString()));
                         }
                         break;
-                    // 查询域名状态
-                    case "getdomainstate":
-                        result = auctionService.getDomainState(req.@params[0].ToString(), req.@params[1].ToString());
-                        break;
                     // 根据地址查询竞拍域名列表
                     case "getbidlistbyaddress":
                         if (req.@params.Length < 3)
-                        {
-                            result = auctionService.getBidListByAddressNew(req.@params[0].ToString());
-                        } else
-                        {
-                            result = auctionService.getBidListByAddressNew(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
-                        }
-                        break;
-                    case "getbidlistbyaddressTsc":
-                        result = auctionService.getBidListByAddressTsc(req.@params[0].ToString());
-                        break;
-                    case "getbidlistbyaddressOld":
-                        if(req.@params.Length < 3)
                         {
                             result = auctionService.getBidListByAddress(req.@params[0].ToString());
                         } else
@@ -209,7 +188,7 @@ namespace NEL_Wallet_API.Controllers
                             result = auctionService.getBidListByAddress(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
                         }
                         break;
-                    // 根据域名查询域名竞拍详情
+                    // 根据域名查询域名竞拍详情(已更新为根据竞拍id查询)
                     case "getbiddetailbydomain":
                         if (req.@params.Length < 3)
                         {
@@ -220,24 +199,8 @@ namespace NEL_Wallet_API.Controllers
                             result = auctionService.getBidDetailByAuctionId(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
                         }
                         break;
-                    case "getbiddetailbydomainOld":
-                        if (req.@params.Length < 3)
-                        { 
-                            result = auctionService.getBidDetailByDomain(req.@params[0].ToString());
-                        } else
-                        {
-                            result = auctionService.getBidDetailByDomain(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
-                        }
-                        break;
-                    // 根据域名查询域名竞拍结果
-                    case "getbidresbydomain":
-                        result = auctionService.getBidResByDomain(req.@params[0].ToString());
-                        break;
                     // 根据地址查询域名
                     case "getdomainbyaddress":
-                        result = domainService.getDomainByAddressNew(req.@params[0].ToString(), req.@params[1].ToString());
-                        break;
-                    case "getdomainbyaddressOld":
                         result = domainService.getDomainByAddress(req.@params[0].ToString(), req.@params[1].ToString());
                         break;
                     // 根据地址查询交易列表
