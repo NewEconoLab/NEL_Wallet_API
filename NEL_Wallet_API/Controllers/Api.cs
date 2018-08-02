@@ -46,7 +46,9 @@ namespace NEL_Wallet_API.Controllers
                         Block_mongodbDatabase = mh.block_mongodbDatabase_testnet,
                         queryDomainCollection = mh.queryDomainCollection_testnet,
                         queryBidListCollection = mh.queryBidListCollection_testnet,
-                        auctionRecharge = auctionRechargetTestNet
+                        auctionRecharge = auctionRechargetTestNet,
+                        domainStateCol = mh.domainStateCol_testnet,
+                        domainUserStateCol = mh.domainUserStateCol_testnet
                     };
                     bonusService = new BonusService
                     {
@@ -94,7 +96,9 @@ namespace NEL_Wallet_API.Controllers
                         queryDomainCollection = mh.queryDomainCollection_mainnet,
                         queryBidListCollection = mh.queryBidListCollection_mainnet,
                         auctionRecharge = auctionRechargetMainNet,
-                        
+                        domainStateCol = mh.domainStateCol_mainnet,
+                        domainUserStateCol = mh.domainUserStateCol_mainnet
+
                     };
                     bonusService = new BonusService
                     {
