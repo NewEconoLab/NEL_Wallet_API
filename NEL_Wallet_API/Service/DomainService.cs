@@ -28,8 +28,11 @@ namespace NEL_Wallet_API.Service
             return new JArray() {queryRes.Select(p => {
                 JObject jo = (JObject)p;
                 string resolverAddr = jo["data"].ToString();
-                jo.Add("resolverAddr", resolverAddr);
                 jo.Remove("data");
+                jo.Add("resolverAddr", resolverAddr);
+                string ttl = jo["TTL"].ToString();
+                jo.Remove("TTL");
+                jo.Add("ttl", ttl);
                 return jo;
             }).ToArray() };
         }
