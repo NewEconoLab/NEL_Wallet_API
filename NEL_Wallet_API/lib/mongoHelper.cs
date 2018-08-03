@@ -56,7 +56,8 @@ namespace NEL_Wallet_API.lib
         public string id_gas = string.Empty;
         public string prikeywif_testnet = string.Empty;
         public string prikeywif_mainnet = string.Empty;
-
+        public string gasClaimCol_testnet = string.Empty;
+        public string gasClaimCol_mainnet = string.Empty;
 
         public mongoHelper() {
             var config = new ConfigurationBuilder()
@@ -108,6 +109,8 @@ namespace NEL_Wallet_API.lib
             id_gas = config["id_gas"];
             prikeywif_testnet = config["prikeywif_testnet"];
             prikeywif_mainnet = config["prikeywif_mainnet"];
+            gasClaimCol_testnet = config["gasClaimCol_testnet"];
+            gasClaimCol_mainnet = config["gasClaimCol_mainnet"];
         }
 
         public JArray GetData(string mongodbConnStr,string mongodbDatabase, string coll, string findBson)

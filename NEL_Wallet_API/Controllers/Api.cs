@@ -78,7 +78,12 @@ namespace NEL_Wallet_API.Controllers
                     {
                         nelJsonRpcUrl = mh.nelJsonRPCUrl_testnet,
                         assetid = mh.id_gas,
-                        accountInfo = AccountInfo.getAccountInfoFromWif(mh.prikeywif_testnet)
+                        accountInfo = AccountInfo.getAccountInfoFromWif(mh.prikeywif_testnet),
+                        mh = mh,
+                        notify_mongodbConnStr = mh.notify_mongodbConnStr_testnet,
+                        notify_mongodbDatabase = mh.notify_mongodbDatabase_testnet,
+                        gasClaimCol = mh.gasClaimCol_testnet,
+                        
                     };
                     
                     break;
@@ -133,7 +138,11 @@ namespace NEL_Wallet_API.Controllers
                     {
                         nelJsonRpcUrl = mh.nelJsonRPCUrl_mainnet,
                         assetid = mh.id_gas,
-                        accountInfo = AccountInfo.getAccountInfoFromWif(mh.prikeywif_mainnet)
+                        accountInfo = AccountInfo.getAccountInfoFromWif(mh.prikeywif_mainnet),
+                        mh = mh,
+                        notify_mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
+                        notify_mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
+                        gasClaimCol = mh.gasClaimCol_mainnet,
                     };
                     break;
             }
@@ -149,14 +158,18 @@ namespace NEL_Wallet_API.Controllers
             {
                 switch (req.method)
                 {
-                    // 申领Gas(即向客户地址转账，默认10gas
-                    case "applygas":
+                    // 查询是否可以申领Gas
+                    case "hasclaimgas":
+                        result = txService.hasClaimGas(req.@params[0].ToString());
+                        break;
+                    // 申领Gas(即向客户地址转账，默认1gas
+                    case "claimgas":
                         if (req.@params.Length < 2)
                         {
-                            result = txService.applyGas(req.@params[0].ToString());
+                            result = txService.claimGas(req.@params[0].ToString());
                         } else
                         {
-                            result = txService.applyGas(req.@params[0].ToString(), decimal.Parse(req.@params[1].ToString()));
+                            result = txService.claimGas(req.@params[0].ToString(), decimal.Parse(req.@params[1].ToString()));
                         }
                         break;
                     // 根据txid查询交易是否成功

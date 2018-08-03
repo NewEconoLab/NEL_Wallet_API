@@ -1,4 +1,5 @@
-﻿using NEL_Wallet_API.lib;
+﻿using NEL_Wallet_API.Controllers;
+using NEL_Wallet_API.lib;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -10,9 +11,15 @@ namespace NEL_Wallet_API.Service
 {
     public class TransactionService
     {
+        public const long ONE_DAY_SECONDS = 24 * 60 * 60;
         public string nelJsonRpcUrl { get; set; }
         public string assetid { get; set; }
         public AccountInfo accountInfo { get; set; }
+        public mongoHelper mh { set; get; }
+        public string notify_mongodbConnStr { get; set; }
+        public string notify_mongodbDatabase { get; set; }
+        public string gasClaimCol { get; set; }
+
 
         /// <summary>
         /// 
@@ -23,14 +30,37 @@ namespace NEL_Wallet_API.Service
         /// </summary>
         /// <param name="address"></param>
         /// <returns></returns>
-        public JArray applyGas(string address, decimal amount = 1)
+        public JArray claimGas(string address, decimal amount = 1)
         {
             TransactionHandler handler = new TransactionHandler();
             handler.nelJsonRpcUrl = nelJsonRpcUrl;
             handler.assetid = assetid;
             handler.accountInfo = accountInfo;
             handler.applyGas(address, amount);
-            return new JArray() { handler.getResult() };
+            JObject res = handler.getResult();
+            // 成功则写入库标记(一天只能领取一次)
+            if(res["code"].ToString() == "0000")
+            {
+                JObject jo = new JObject() { { "address", address}, { "amount", amount }, { "lasttime", TimeHelper.GetTimeStamp() } };
+                mh.ReplaceOrInsertData(notify_mongodbConnStr, notify_mongodbDatabase, gasClaimCol, new JObject() { { "address", address } }.ToString(), jo.ToString());
+            }
+            return new JArray() { res };
+        }
+
+        public JArray hasClaimGas(string address)
+        {
+            Boolean flag = true;
+            JArray res = mh.GetDataWithField(notify_mongodbConnStr, notify_mongodbDatabase, gasClaimCol, new JObject() { { "lasttime", 1 } }.ToString(), new JObject() { { "address", address } }.ToString());
+            if(res != null && res.Count() != 0)
+            {
+                long lasttime = long.Parse(res[0]["lasttime"].ToString());
+                long nowtime = TimeHelper.GetTimeStamp();
+                if(nowtime < lasttime  + ONE_DAY_SECONDS)
+                {
+                    flag = false;
+                }
+            }
+            return new JArray() { new JObject() { { "flag", flag} } }; ;
         }
 
     }
