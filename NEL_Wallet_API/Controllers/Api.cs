@@ -14,6 +14,7 @@ namespace NEL_Wallet_API.Controllers
         private BonusService bonusService;
         private DomainService domainService;
         private CommonService commonService;
+        private TransactionService txService;
 
         private httpHelper hh = new httpHelper();
         private mongoHelper mh = new mongoHelper();
@@ -73,8 +74,13 @@ namespace NEL_Wallet_API.Controllers
                         mongodbConnStr = mh.analy_mongodbConnStr_testnet,
                         mongodbDatabase = mh.analy_mongodbDatabase_testnet,
                     };
-
-
+                    txService = new TransactionService
+                    {
+                        nelJsonRpcUrl = mh.nelJsonRPCUrl_testnet,
+                        assetid = mh.id_gas,
+                        accountInfo = AccountInfo.getAccountInfoFromWif(mh.prikeywif_testnet)
+                    };
+                    
                     break;
                 case "mainnet":
                     AuctionRecharge auctionRechargetMainNet = new AuctionRecharge()
@@ -123,6 +129,12 @@ namespace NEL_Wallet_API.Controllers
                         mongodbConnStr = mh.analy_mongodbConnStr_mainnet,
                         mongodbDatabase = mh.analy_mongodbDatabase_mainnet,
                     };
+                    txService = new TransactionService
+                    {
+                        nelJsonRpcUrl = mh.nelJsonRPCUrl_mainnet,
+                        assetid = mh.id_gas,
+                        accountInfo = AccountInfo.getAccountInfoFromWif(mh.prikeywif_mainnet)
+                    };
                     break;
             }
         }
@@ -137,6 +149,16 @@ namespace NEL_Wallet_API.Controllers
             {
                 switch (req.method)
                 {
+                    // 申领Gas(即向客户地址转账，默认10gas
+                    case "applygas":
+                        if (req.@params.Length < 2)
+                        {
+                            result = txService.applyGas(req.@params[0].ToString());
+                        } else
+                        {
+                            result = txService.applyGas(req.@params[0].ToString(), decimal.Parse(req.@params[1].ToString()));
+                        }
+                        break;
                     // 根据txid查询交易是否成功
                     case "hastx":
                         result = auctionService.hasTx(req.@params[0].ToString());

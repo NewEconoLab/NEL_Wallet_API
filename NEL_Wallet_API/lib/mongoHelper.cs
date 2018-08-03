@@ -52,6 +52,12 @@ namespace NEL_Wallet_API.lib
         public string domainStateCol_mainnet = string.Empty;
 
 
+        public string id_neo = string.Empty;
+        public string id_gas = string.Empty;
+        public string prikeywif_testnet = string.Empty;
+        public string prikeywif_mainnet = string.Empty;
+
+
         public mongoHelper() {
             var config = new ConfigurationBuilder()
                 .AddInMemoryCollection()    //将配置文件的数据加载到内存中
@@ -98,7 +104,11 @@ namespace NEL_Wallet_API.lib
             domainStateCol_testnet = config["domainStateCol_testnet"];
             domainStateCol_mainnet = config["domainStateCol_mainnet"];
 
-    }
+            id_neo = config["id_neo"];
+            id_gas = config["id_gas"];
+            prikeywif_testnet = config["prikeywif_testnet"];
+            prikeywif_mainnet = config["prikeywif_mainnet"];
+        }
 
         public JArray GetData(string mongodbConnStr,string mongodbDatabase, string coll, string findBson)
         {
