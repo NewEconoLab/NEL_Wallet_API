@@ -148,6 +148,10 @@ namespace NEL_Wallet_API.Controllers
 
         public JArray getBidDetailByAuctionId(string auctionId, int pageNum = 1, int pageSize = 10)
         {
+            if(!auctionId.StartsWith("0x"))
+            {
+                auctionId = "0x" + auctionId;
+            }
             JObject filter = new JObject();
             filter.Add("id", auctionId);
             filter.Add("displayName", "addprice");
