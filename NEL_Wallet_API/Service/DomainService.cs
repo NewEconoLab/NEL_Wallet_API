@@ -33,6 +33,10 @@ namespace NEL_Wallet_API.Service
                 string ttl = jo["TTL"].ToString();
                 jo.Remove("TTL");
                 jo.Add("ttl", ttl);
+                string domain = jo["domain"].ToString();
+                jo.Remove("domain");
+                jo.Add("domain",domain+root);
+                
                 return jo;
             }).ToArray() };
         }
