@@ -28,7 +28,7 @@ namespace NEL_Wallet_API.Controllers
             JObject res = PostTx("sendrawtransaction", txhex1);
             string result = Convert.ToString(res["sendrawtransactionresult"]);
             string txid = Convert.ToString(res["txid"]);
-            if (result != "true" && txid == "")
+            /*if (result != "true" && txid == "")
             {
                 // 第一笔交易未发送成功
                 res = new JObject();
@@ -36,7 +36,7 @@ namespace NEL_Wallet_API.Controllers
                 res.Add("errMessage", "send tx1 failed");
                 res.Add("txid", txid);
             }
-            else
+            else*/
             {
                 // 保存交易状态
                 saveTxState(txid, TxState.TX_WAITING);
