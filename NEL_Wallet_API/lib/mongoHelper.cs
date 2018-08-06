@@ -43,6 +43,10 @@ namespace NEL_Wallet_API.lib
         public string rechargeCollection_mainnet = string.Empty;
         public string rechargeCollection_testnet = string.Empty;
 
+        public string domainOwnerCol_testnet = string.Empty;
+        public string domainOwnerCol_mainnet = string.Empty;
+        public string maxClaimAmount_testnet = string.Empty;
+        public string maxClaimAmount_mainnet = string.Empty;
         public string domainResolver_testnet = string.Empty;
         public string domainResolver_mainnet = string.Empty;
 
@@ -97,6 +101,9 @@ namespace NEL_Wallet_API.lib
             rechargeCollection_mainnet = config["rechargeCollection_mainnet"];
             rechargeCollection_testnet = config["rechargeCollection_testnet"];
 
+
+            domainOwnerCol_testnet = config["domainOwnerCol_testnet"];
+            domainOwnerCol_mainnet = config["domainOwnerCol_mainnet"];
             domainResolver_testnet = config["domainResolver_testnet"];
             domainResolver_mainnet = config["domainResolver_mainnet"];
 
@@ -111,6 +118,8 @@ namespace NEL_Wallet_API.lib
             prikeywif_mainnet = config["prikeywif_mainnet"];
             gasClaimCol_testnet = config["gasClaimCol_testnet"];
             gasClaimCol_mainnet = config["gasClaimCol_mainnet"];
+            maxClaimAmount_testnet = config["maxClaimAmount_testnet"];
+            maxClaimAmount_mainnet = config["maxClaimAmount_mainnet"];
         }
 
         public JArray GetData(string mongodbConnStr,string mongodbDatabase, string coll, string findBson)

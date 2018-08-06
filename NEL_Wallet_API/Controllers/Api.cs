@@ -65,8 +65,8 @@ namespace NEL_Wallet_API.Controllers
                         mh = mh,
                         notify_mongodbConnStr = mh.notify_mongodbConnStr_testnet,
                         notify_mongodbDatabase = mh.notify_mongodbDatabase_testnet,
-                        queryDomainCollection = mh.queryDomainCollection_testnet,
                         domainResolver = mh.domainResolver_testnet,
+                        domainOwnerCol = mh.domainOwnerCol_testnet,
                     };
                     commonService = new CommonService
                     {
@@ -83,7 +83,7 @@ namespace NEL_Wallet_API.Controllers
                         notify_mongodbConnStr = mh.notify_mongodbConnStr_testnet,
                         notify_mongodbDatabase = mh.notify_mongodbDatabase_testnet,
                         gasClaimCol = mh.gasClaimCol_testnet,
-                        
+                        maxClaimAmount = int.Parse(mh.maxClaimAmount_testnet),
                     };
                     
                     break;
@@ -125,8 +125,8 @@ namespace NEL_Wallet_API.Controllers
                         mh = mh,
                         notify_mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
                         notify_mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
-                        queryDomainCollection = mh.queryDomainCollection_mainnet,
                         domainResolver = mh.domainResolver_mainnet,
+                        domainOwnerCol = mh.domainOwnerCol_testnet,
                     };
                     commonService = new CommonService
                     {
@@ -143,6 +143,7 @@ namespace NEL_Wallet_API.Controllers
                         notify_mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
                         notify_mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
                         gasClaimCol = mh.gasClaimCol_mainnet,
+                        maxClaimAmount = int.Parse(mh.maxClaimAmount_mainnet),
                     };
                     break;
             }

@@ -19,6 +19,7 @@ namespace NEL_Wallet_API.Service
         public string notify_mongodbConnStr { get; set; }
         public string notify_mongodbDatabase { get; set; }
         public string gasClaimCol { get; set; }
+        public int maxClaimAmount { get; set; }
 
 
         /// <summary>
@@ -32,6 +33,17 @@ namespace NEL_Wallet_API.Service
         /// <returns></returns>
         public JArray claimGas(string address, decimal amount = 1)
         {
+            JArray hasClaimArr = hasClaimGas(address);
+            if(hasClaimArr[0]["flag"].ToString() == "False")
+            {
+                // 已领取
+                return new JArray() { hasClaimGas() };
+            }
+            if(amount > maxClaimAmount)
+            {
+                // 超过最大金额
+                return new JArray() { overLimitAmount() };
+            }
             TransactionHandler handler = new TransactionHandler();
             handler.nelJsonRpcUrl = nelJsonRpcUrl;
             handler.assetid = assetid;
@@ -61,6 +73,17 @@ namespace NEL_Wallet_API.Service
                 }
             }
             return new JArray() { new JObject() { { "flag", flag} } }; ;
+        }
+
+
+
+        private JObject hasClaimGas()
+        {
+            return new JObject() { { "code", "3003" }, { "codeMessage", "已经领取" }, { "txid", "" } };
+        }
+        private JObject overLimitAmount()
+        {
+            return new JObject() { { "code", "3004" }, { "codeMessage", "超过限制金额" }, { "txid", "" } };
         }
 
     }
