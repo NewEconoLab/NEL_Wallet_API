@@ -127,7 +127,7 @@ namespace NEL_Wallet_API.Controllers
                     flag = true;
                     break;
                 }
-                Thread.Sleep(200);
+                Thread.Sleep(2000);
             } while (getBlockCount() <= curHeight + 2);
             return flag;
         }
