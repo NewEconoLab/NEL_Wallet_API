@@ -31,6 +31,36 @@ namespace NEL_Wallet_API.Service
         /// </summary>
         /// <param name="address"></param>
         /// <returns></returns>
+        public JArray claimGasNew(string address, decimal amount = 1)
+        {
+            if (amount > maxClaimAmount)
+            {
+                // 超过最大金额
+                return new JArray() { overLimitAmount() };
+            }
+            long nowtime = TimeHelper.GetTimeStamp();
+            string filter = new JObject() { { "address", address} }.ToString();
+            JArray res = mh.GetData(notify_mongodbConnStr, notify_mongodbDatabase, gasClaimCol, filter);
+            if(res == null || res.Count() == 0)
+            {
+                // 从未申请直接入库
+                mh.InsertOneData(notify_mongodbConnStr, notify_mongodbDatabase, gasClaimCol, new JObject() { {"address", address }, { "amount", amount }, { "lasttime", nowtime }, { "state", "1" }, { "times", 1 } }.ToString());
+                return new JArray() { txWait() };
+            }
+            // 隔天重复申请更新库
+            long times = long.Parse(res[0]["times"].ToString());
+            long lasttime = long.Parse(res[0]["lasttime"].ToString());
+            if (nowtime - lasttime > ONE_DAY_SECONDS)
+            {
+                mh.ReplaceData(notify_mongodbConnStr, notify_mongodbDatabase, gasClaimCol, filter, new JObject() { { "address", address }, { "amount", amount }, { "lasttime", nowtime }, { "state", "1" }, { "times", times+1 } }.ToString());
+                return new JArray() { txWait() };
+            }
+            return new JArray() { hasClaimGas() };
+        }
+        
+        
+
+
         public JArray claimGas(string address, decimal amount = 1)
         {
             JArray hasClaimArr = hasClaimGas(address);
@@ -84,6 +114,10 @@ namespace NEL_Wallet_API.Service
         private JObject overLimitAmount()
         {
             return new JObject() { { "code", "3004" }, { "codeMessage", "超过限制金额" }, { "txid", "" } };
+        }
+        private JObject txWait()
+        {
+            return new JObject() { { "code", "3000" }, { "codeMessage", "交易待发送" }, { "txid", "" } };
         }
 
     }
@@ -148,7 +182,7 @@ namespace NEL_Wallet_API.Service
             }
             return txSucc(txid);
         }
-
+        
         private JObject txSucc(string txid)
         {
             return new JObject() { { "code", "0000" }, { "codeMessage", "交易发送成功" }, { "txid", txid } };

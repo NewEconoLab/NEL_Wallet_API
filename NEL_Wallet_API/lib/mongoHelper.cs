@@ -62,6 +62,12 @@ namespace NEL_Wallet_API.lib
         public string prikeywif_mainnet = string.Empty;
         public string gasClaimCol_testnet = string.Empty;
         public string gasClaimCol_mainnet = string.Empty;
+        public string batchSendInterval_testnet = string.Empty;
+        public string batchSendInterval_mainnet = string.Empty;
+        public string checkTxInterval_testnet = string.Empty;
+        public string checkTxInterval_mainnet = string.Empty;
+        public string checkTxCount_testnet = string.Empty;
+        public string checkTxCount_mainnet = string.Empty;
 
         public mongoHelper() {
             var config = new ConfigurationBuilder()
@@ -77,7 +83,7 @@ namespace NEL_Wallet_API.lib
             notify_mongodbConnStr_testnet = config["notify_mongodbConnStr_testnet"];
             notify_mongodbDatabase_testnet = config["notify_mongodbDatabase_testnet"];
             nelJsonRPCUrl_testnet = config["nelJsonRPCUrl_testnet"];
-
+            
 
             block_mongodbConnStr_mainnet = config["block_mongodbConnStr_mainnet"];
             block_mongodbDatabase_mainnet = config["block_mongodbDatabase_mainnet"];
@@ -120,6 +126,14 @@ namespace NEL_Wallet_API.lib
             gasClaimCol_mainnet = config["gasClaimCol_mainnet"];
             maxClaimAmount_testnet = config["maxClaimAmount_testnet"];
             maxClaimAmount_mainnet = config["maxClaimAmount_mainnet"];
+
+            batchSendInterval_testnet = config["batchSendInterval_testnet"];
+            batchSendInterval_mainnet = config["batchSendInterval_mainnet"];
+            checkTxInterval_testnet = config["checkTxInterval_testnet"];
+            checkTxInterval_mainnet = config["checkTxInterval_mainnet"];
+            checkTxCount_testnet = config["checkTxCount_testnet"];
+            checkTxCount_mainnet = config["checkTxCount_mainnet"];
+
         }
 
         public JArray GetData(string mongodbConnStr,string mongodbDatabase, string coll, string findBson)
@@ -322,6 +336,16 @@ namespace NEL_Wallet_API.lib
                 client = null;
                 return e.ToString();
             }
+        }
+
+        public void UpdateData(string mongodbConnStr, string mongodbDatabase, string coll, string Jdata, string Jcondition)
+        {
+            var client = new MongoClient(mongodbConnStr);
+            var database = client.GetDatabase(mongodbDatabase);
+            var collection = database.GetCollection<BsonDocument>(coll);
+            collection.UpdateMany(BsonDocument.Parse(Jcondition), BsonDocument.Parse(Jdata));
+
+            client = null;
         }
 
     }
