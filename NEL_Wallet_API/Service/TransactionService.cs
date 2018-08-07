@@ -89,20 +89,49 @@ namespace NEL_Wallet_API.Service
             return new JArray() { res };
         }
 
+        /// <summary>
+        /// 查询该地址是否可以申领GAS
+        /// 0 可领取： 从未领取 + 24h后重复领取
+        /// 1 派发中
+        /// 2 已领取
+        /// 
+        /// </summary>
+        /// <param name="address"></param>
+        /// <returns></returns>
         public JArray hasClaimGas(string address)
         {
-            Boolean flag = true;
-            JArray res = mh.GetDataWithField(notify_mongodbConnStr, notify_mongodbDatabase, gasClaimCol, new JObject() { { "lasttime", 1 } }.ToString(), new JObject() { { "address", address } }.ToString());
-            if(res != null && res.Count() != 0)
+            //Boolean flag = true;
+            JArray res = mh.GetDataWithField(notify_mongodbConnStr, notify_mongodbDatabase, gasClaimCol, new JObject() { { "lasttime", 1 }, { "state", 1 } }.ToString(), new JObject() { { "address", address } }.ToString());
+            if (res == null || res.Count() == 0)
             {
-                long lasttime = long.Parse(res[0]["lasttime"].ToString());
-                long nowtime = TimeHelper.GetTimeStamp();
-                if(nowtime < lasttime  + ONE_DAY_SECONDS)
-                {
-                    flag = false;
-                }
+                // 可领取：从未领取
+                return new JArray() { canClaimState() };
+
             }
-            return new JArray() { new JObject() { { "flag", flag} } }; ;
+            long lasttime = long.Parse(res[0]["lasttime"].ToString());
+            long nowtime = TimeHelper.GetTimeStamp();
+            if (lasttime < nowtime - ONE_DAY_SECONDS)
+            {
+                // 可领取：24h后重复领取
+                return new JArray() { canClaimState() };
+            }
+
+            if(res[0]["state"] == null)
+            {
+                return new JArray() { hasClaimState() };
+            }
+            string state = res[0]["state"].ToString();
+            if (state == "1")
+            {
+                // 派发中
+                return new JArray() { dealingState() };
+            }
+            else
+            {
+                // 已领取
+                return new JArray() { hasClaimState() };
+
+            }
         }
 
 
@@ -118,6 +147,18 @@ namespace NEL_Wallet_API.Service
         private JObject txWait()
         {
             return new JObject() { { "code", "3000" }, { "codeMessage", "交易待发送" }, { "txid", "" } };
+        }
+        private JObject canClaimState()
+        {
+            return new JObject() { { "code", "3010" }, { "codeMessage", "可领取" }, { "txid", "" } };
+        }
+        private JObject dealingState()
+        {
+            return new JObject() { { "code", "3011" }, { "codeMessage", "排队中" }, { "txid", "" } };
+        }
+        private JObject hasClaimState()
+        {
+            return new JObject() { { "code", "3012" }, { "codeMessage", "已领取" }, { "txid", "" } };
         }
 
     }
