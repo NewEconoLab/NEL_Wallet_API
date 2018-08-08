@@ -31,9 +31,9 @@ namespace NEL_Wallet_API.Service
         /// </summary>
         /// <param name="address"></param>
         /// <returns></returns>
-        public JArray claimGasNew(string address, decimal amount = 1)
+        public JArray claimGas(string address, decimal amount = 1)
         {
-            if (amount > maxClaimAmount)
+            if (amount > maxClaimAmount || amount <= 0)
             {
                 // 超过最大金额
                 return new JArray() { overLimitAmount() };
@@ -59,36 +59,6 @@ namespace NEL_Wallet_API.Service
             return new JArray() { hasClaimGas() };
         }
         
-        
-
-
-        public JArray claimGas(string address, decimal amount = 1)
-        {
-            JArray hasClaimArr = hasClaimGas(address);
-            if(hasClaimArr[0]["flag"].ToString() == "False")
-            {
-                // 已领取
-                return new JArray() { hasClaimGas() };
-            }
-            if(amount > maxClaimAmount)
-            {
-                // 超过最大金额
-                return new JArray() { overLimitAmount() };
-            }
-            TransactionHandler handler = new TransactionHandler();
-            handler.nelJsonRpcUrl = nelJsonRpcUrl;
-            handler.assetid = assetid;
-            handler.accountInfo = accountInfo;
-            handler.applyGas(address, amount);
-            JObject res = handler.getResult();
-            // 成功则写入库标记(一天只能领取一次)
-            if(res["code"].ToString() == "0000")
-            {
-                JObject jo = new JObject() { { "address", address}, { "amount", amount }, { "lasttime", TimeHelper.GetTimeStamp() } };
-                mh.ReplaceOrInsertData(notify_mongodbConnStr, notify_mongodbDatabase, gasClaimCol, new JObject() { { "address", address } }.ToString(), jo.ToString());
-            }
-            return new JArray() { res };
-        }
 
         /// <summary>
         /// 查询该地址是否可以申领GAS
@@ -178,11 +148,16 @@ namespace NEL_Wallet_API.Service
             }
             return res;
         }
+        
         public async void applyGas(string address, decimal amount = 1)
         {
-            res = await asyncApplyGas(address, amount);
+            res = await asyncApplyGas(new string[] { address }.ToList(), amount);
         }
-        private async Task<JObject> asyncApplyGas(string targetAddress, decimal amount)
+        public async void applyGas(List<string> addresses, decimal amount = 1)
+        {
+            res = await asyncApplyGas(addresses, amount);
+        }
+        private async Task<JObject> asyncApplyGas(List<string> targetAddress, decimal amount)
         {
             // 转换私钥
             byte[] prikey = accountInfo.prikey;
@@ -193,7 +168,7 @@ namespace NEL_Wallet_API.Service
             string id_gas = assetid;
             Dictionary<string, List<Utxo>> dir = await TransHelper.GetBalanceByAddress(nelJsonRpcUrl, address);
             List<Utxo> balanceUtxo = dir[id_gas];
-            if (balanceUtxo.Sum(p => p.value) < amount)
+            if (balanceUtxo.Sum(p => p.value) < amount * targetAddress.Count())
             {
                 // 余额不足
                 return insufficientBalance();

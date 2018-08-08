@@ -1,6 +1,7 @@
 ﻿using NEL_Wallet_API.Controllers;
 using NEL_Wallet_API.lib;
 using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
@@ -32,28 +33,29 @@ namespace NEL_Wallet_API.Service
                 string filter = new JObject() { { "lasttime", new JObject() { { "$gt", nowtime - ONE_DAY_SECONDS } } }, { "state", "1" } }.ToString();
                 JArray res = mh.GetDataWithField(notify_mongodbConnStr, notify_mongodbDatabase, gasClaimCol, new JObject() { { "address", 1 }, { "amount", 1 } }.ToString(), filter);
                 if (res == null || res.Count() == 0) continue;
-
-                foreach (JObject jo in res)
+                
+                // 一笔交易多输出
+                mergeClaimGasTx(res.Select(p => p["address"].ToString()).ToList(), long.Parse(res[0]["amount"].ToString()));
+            }
+        }
+        
+        private void mergeClaimGasTx(List<string> address, decimal amount)
+        {
+            TransactionHandler handler = new TransactionHandler();
+            handler.nelJsonRpcUrl = nelJsonRpcUrl;
+            handler.assetid = assetid;
+            handler.accountInfo = accountInfo;
+            handler.applyGas(address, amount);
+            JObject rr = handler.getResult();
+            string code = rr["code"].ToString();
+            string txid = rr["txid"].ToString();
+            if (code == "0000" || code == "3001")
+            {
+                // 若入链成功，则更新状态
+                if (checkTxHasInBlock(txid))
                 {
-                    string address = jo["address"].ToString();
-                    long amount = long.Parse(jo["amount"].ToString());
-                    TransactionHandler handler = new TransactionHandler();
-                    handler.nelJsonRpcUrl = nelJsonRpcUrl;
-                    handler.assetid = assetid;
-                    handler.accountInfo = accountInfo;
-                    handler.applyGas(address, amount);
-                    JObject rr = handler.getResult();
-                    string code = rr["code"].ToString();
-                    string txid = rr["txid"].ToString();
-                    if (code == "0000" || txid == "3001")
-                    {
-                        // 若入链成功，则更新状态
-                        if (checkTxHasInBlock(txid))
-                        {
-                            JObject updateData = new JObject() { { "state", "2" } };
-                            mh.UpdateData(notify_mongodbConnStr, notify_mongodbDatabase, gasClaimCol, new JObject() { { "$set", updateData } }.ToString(), new JObject() { { "address", address } }.ToString());
-                        }
-                    }
+                    JObject updateData = new JObject() { { "state", "2" } };
+                    mh.UpdateData(notify_mongodbConnStr, notify_mongodbDatabase, gasClaimCol, new JObject() { { "$set", updateData } }.ToString(), MongoFieldHelper.toFilter(address.ToArray(), "address").ToString());
                 }
             }
         }

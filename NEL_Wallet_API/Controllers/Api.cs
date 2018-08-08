@@ -182,23 +182,14 @@ namespace NEL_Wallet_API.Controllers
                         result = txService.hasClaimGas(req.@params[0].ToString());
                         break;
                     // 申领Gas(即向客户地址转账，默认1gas
-                    case "claimgasOld":
-                        if (req.@params.Length < 2)
-                        {
-                            result = txService.claimGas(req.@params[0].ToString());
-                        } else
-                        {
-                            result = txService.claimGas(req.@params[0].ToString(), decimal.Parse(req.@params[1].ToString()));
-                        }
-                        break;
                     case "claimgas":
                         if (req.@params.Length < 2)
                         {
-                            result = txService.claimGasNew(req.@params[0].ToString());
+                            result = txService.claimGas(req.@params[0].ToString());
                         }
                         else
                         {
-                            result = txService.claimGasNew(req.@params[0].ToString(), decimal.Parse(req.@params[1].ToString()));
+                            result = txService.claimGas(req.@params[0].ToString(), decimal.Parse(req.@params[1].ToString()));
                         }
                         break;
                     // 根据txid查询交易是否成功
