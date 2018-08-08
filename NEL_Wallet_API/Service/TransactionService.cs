@@ -48,8 +48,9 @@ namespace NEL_Wallet_API.Service
                 return new JArray() { txWait() };
             }
             // 隔天重复申请更新库
-            long times = long.Parse(res[0]["times"].ToString());
             long lasttime = long.Parse(res[0]["lasttime"].ToString());
+
+            long times = res[0]["times"] == null ? 1:long.Parse(res[0]["times"].ToString());
             if (nowtime - lasttime > ONE_DAY_SECONDS)
             {
                 mh.ReplaceData(notify_mongodbConnStr, notify_mongodbDatabase, gasClaimCol, filter, new JObject() { { "address", address }, { "amount", amount }, { "lasttime", nowtime }, { "state", "1" }, { "times", times+1 } }.ToString());
