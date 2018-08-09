@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NEL_Wallet_API.RPC;
+using log4net;
+using NEL_Wallet_API.lib;
 
 namespace NEL_Wallet_API.Controllers
 {
@@ -13,13 +15,18 @@ namespace NEL_Wallet_API.Controllers
         //Api api = new Api("testnet");
         Api api = Api.getTestApi();
 
+        private long logExeTimeMax = 15000; // 运行最大时间15秒
+        private ILog log = LogManager.GetLogger(Startup.repository.Name, typeof(TestnetController));
+
         [HttpGet]
         public JsonResult Get(string @jsonrpc, string @method, string @params, long @id)
         {
-
+            DateTime start = DateTime.Now;
+            JsonResult res = null;
+            JsonRPCrequest req = null;
             try
             {
-                JsonRPCrequest req = new JsonRPCrequest
+                req = new JsonRPCrequest
                 {
                     jsonrpc = @jsonrpc,
                     method = @method,
@@ -28,24 +35,38 @@ namespace NEL_Wallet_API.Controllers
                 };
 
                 string ipAddr = Request.HttpContext.Connection.RemoteIpAddress.ToString();
-                return Json(api.getRes(req,ipAddr));
+                res = Json(api.getRes(req,ipAddr));
+
+                // 超时记录
+                if (DateTime.Now.Subtract(start).TotalSeconds > logExeTimeMax)
+                {
+                    log.Info(logHelper.logInfoFormat(req, res, start));
+                }
             }
             catch (Exception e)
             {
                 Console.WriteLine("errMsg:{0},errStack:{1}", e.Message, e.StackTrace);
                 JsonPRCresponse_Error resE = new JsonPRCresponse_Error(0, -100, "Parameter Error", e.Message);
-                return Json(resE);
+                res = Json(resE);
+
+                // 错误记录
+                log.Info(logHelper.logInfoFormat(req, res, start));
             }
+
+            
+            return res;
         }
 
         [HttpPost]
         public async Task<JsonResult> Post()
         {
+            DateTime start = DateTime.Now;
+            JsonResult res = null;
+            JsonRPCrequest req = null;
             try
             {
                 var ctype = HttpContext.Request.ContentType;
                 LitServer.FormData form = null;
-                JsonRPCrequest req = null;
                 if (ctype == "application/x-www-form-urlencoded" ||
                      (ctype.IndexOf("multipart/form-data;") == 0))
                 {
@@ -70,14 +91,25 @@ namespace NEL_Wallet_API.Controllers
                 }
 
                 string ipAddr = Request.HttpContext.Connection.RemoteIpAddress.ToString();
-                return Json(api.getRes(req, ipAddr));
+                res = Json(api.getRes(req, ipAddr));
+
+                // 超时记录
+                if (DateTime.Now.Subtract(start).TotalSeconds > logExeTimeMax)
+                {
+                    log.Info(logHelper.logInfoFormat(req, res, start));
+                }
             }
             catch (Exception e)
             {
                 Console.WriteLine("errMsg:{0},errStack:{1}", e.Message, e.StackTrace);
                 JsonPRCresponse_Error resE = new JsonPRCresponse_Error(0, -100, "Parameter Error", e.Message);
-                return Json(resE);
+                res = Json(resE);
+
+                // 错误记录
+                log.Info(logHelper.logInfoFormat(req, res, start));
             }
+            
+            return res;
 
         }
 
