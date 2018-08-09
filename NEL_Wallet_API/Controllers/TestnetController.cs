@@ -15,7 +15,7 @@ namespace NEL_Wallet_API.Controllers
         //Api api = new Api("testnet");
         Api api = Api.getTestApi();
 
-        private long logExeTimeMax = 15000; // 运行最大时间15秒
+        private long logExeTimeMax = 15; // 运行最大请求耗时15秒
         private ILog log = LogManager.GetLogger(Startup.repository.Name, typeof(TestnetController));
 
         [HttpGet]
