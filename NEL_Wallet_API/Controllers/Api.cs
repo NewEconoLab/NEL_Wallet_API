@@ -10,7 +10,8 @@ namespace NEL_Wallet_API.Controllers
     public class Api
     {
         private string netnode { get; set; }
-        
+
+        private NewAuctionService newAuctionService;
         private AuctionService auctionService;
         private BonusService bonusService;
         private DomainService domainService;
@@ -31,6 +32,13 @@ namespace NEL_Wallet_API.Controllers
             switch (netnode)
             {
                 case "testnet":
+                    newAuctionService = new NewAuctionService()
+                    {
+                        mongodbConnStr = mh.notify_mongodbConnStr_testnet,
+                        mongodbDatabase = mh.notify_mongodbDatabase_testnet,
+                        mh = mh,
+                        auctionStateCol = mh.auctionStateCol_testnet
+                    };
                     AuctionRecharge auctionRechargetTestNet = new AuctionRecharge()
                     {
                         Notify_mongodbConnStr = mh.notify_mongodbConnStr_testnet,
@@ -106,6 +114,13 @@ namespace NEL_Wallet_API.Controllers
                     new Task(() => claimService.claimGasLoop()).Start();
                     break;
                 case "mainnet":
+                    newAuctionService = new NewAuctionService()
+                    {
+                        mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
+                        mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
+                        mh = mh,
+                        auctionStateCol = mh.auctionStateCol_mainnet
+                    };
                     AuctionRecharge auctionRechargetMainNet = new AuctionRecharge()
                     {
                         Notify_mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
@@ -163,11 +178,30 @@ namespace NEL_Wallet_API.Controllers
                         gasClaimCol = mh.gasClaimCol_mainnet,
                         maxClaimAmount = int.Parse(mh.maxClaimAmount_mainnet),
                     };
+                    /*
+                    claimService = new ClaimGasService
+                    {
+                        nelJsonRpcUrl = mh.nelJsonRPCUrl_mainnet,
+                        assetid = mh.id_gas,
+                        accountInfo = AccountInfo.getAccountInfoFromWif(mh.prikeywif_mainnet),
+                        mh = mh,
+                        notify_mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
+                        notify_mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
+                        gasClaimCol = mh.gasClaimCol_mainnet,
+                        block_mongodbConnStr = mh.block_mongodbConnStr_mainnet,
+                        block_mongodbDatabase = mh.block_mongodbDatabase_mainnet,
+                        batchSendInterval = int.Parse(mh.batchSendInterval_mainnet),
+                        checkTxInterval = int.Parse(mh.checkTxInterval_mainnet),
+                        checkTxCount = int.Parse(mh.checkTxCount_mainnet)
+                    };
+                    // 暂时放在这里，后续考虑单独整出来
+                    new Task(() => claimService.claimGasLoop()).Start();
+                    */
                     break;
             }
         }
 
-        public object getRes(JsonRPCrequest req,string reqAddr)
+        public object getRes(JsonRPCrequest req, string reqAddr)
         {
             JArray result = new JArray();
             string resultStr = string.Empty;
@@ -177,6 +211,20 @@ namespace NEL_Wallet_API.Controllers
             {
                 switch (req.method)
                 {
+                    case "getauctioninfobyaddress":
+                        if (req.@params.Length < 3)
+                        {
+                            result = newAuctionService.getAuctionInfoByAddress(req.@params[0].ToString());
+                        } else
+                        {
+                            result = newAuctionService.getAuctionInfoByAddress(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
+                        }
+                        break;
+                    case "getauctioninfobyaucitonid":
+                        string address = req.@params[0].ToString();  // address
+                        string auctionIdsStr = req.@params[1].ToString();             // auctionIdArr
+                        result = newAuctionService.getAuctionInfoByAuctionId(JArray.Parse(auctionIdsStr), address);
+                        break;
                     // 查询是否可以申领Gas
                     case "hasclaimgas":
                         result = txService.hasClaimGas(req.@params[0].ToString());
@@ -283,5 +331,6 @@ namespace NEL_Wallet_API.Controllers
 
             return res;
         }
+
     }
 }

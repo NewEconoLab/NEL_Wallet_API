@@ -69,6 +69,9 @@ namespace NEL_Wallet_API.lib
         public string checkTxCount_testnet = string.Empty;
         public string checkTxCount_mainnet = string.Empty;
 
+        public string auctionStateCol_testnet = string.Empty;
+        public string auctionStateCol_mainnet = string.Empty;
+
         public mongoHelper() {
             var config = new ConfigurationBuilder()
                 .AddInMemoryCollection()    //将配置文件的数据加载到内存中
@@ -133,6 +136,10 @@ namespace NEL_Wallet_API.lib
             checkTxInterval_mainnet = config["checkTxInterval_mainnet"];
             checkTxCount_testnet = config["checkTxCount_testnet"];
             checkTxCount_mainnet = config["checkTxCount_mainnet"];
+
+
+            auctionStateCol_testnet = config["auctionStateCol_testnet"];
+            auctionStateCol_mainnet = config["auctionStateCol_mainnet"];
 
         }
 
