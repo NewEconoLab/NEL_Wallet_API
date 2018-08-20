@@ -13,7 +13,7 @@ namespace NEL_Wallet_API.Service
 
         public JArray getAuctionInfoByAddress(string address, int pageNum = 1, int pageSize = 10)
         {
-            JObject findObj = MongoFieldHelper.toFilter(new string[] { AuctionState.STATE_START, AuctionState.STATE_CONFIRM, AuctionState.STATE_EXPIRED }, "auctionState");
+            JObject findObj = MongoFieldHelper.toFilter(new string[] { AuctionState.STATE_START, AuctionState.STATE_CONFIRM, AuctionState.STATE_RANDOM }, "auctionState");
             findObj.Add("addwholist.address", address);
             string findStr = findObj.ToString();
             //string findStr = new JObject() { { "addwholist.address",address}}.ToString();
