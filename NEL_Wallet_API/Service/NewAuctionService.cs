@@ -13,7 +13,10 @@ namespace NEL_Wallet_API.Service
 
         public JArray getAuctionInfoByAddress(string address, int pageNum = 1, int pageSize = 10)
         {
-            string findStr = new JObject() { { "addwholist.address",address} }.ToString();
+            JObject findObj = MongoFieldHelper.toFilter(new string[] { AuctionState.STATE_START, AuctionState.STATE_CONFIRM, AuctionState.STATE_EXPIRED }, "auctionState");
+            findObj.Add("addwholist.address", address);
+            string findStr = findObj.ToString();
+            //string findStr = new JObject() { { "addwholist.address",address}}.ToString();
             string sortStr = new JObject() { { "startTime.blockindex", -1} }.ToString();
             JArray res = mh.GetDataPages(mongodbConnStr, mongodbDatabase, auctionStateCol, sortStr, pageSize, pageNum, findStr);
             if(res == null || res.Count == 0)
@@ -72,5 +75,14 @@ namespace NEL_Wallet_API.Service
             return new JArray() { new JObject() { { "count", res.Count }, { "list", res } } };
         }
 
+    }
+    class AuctionState
+    {
+        public const string STATE_START = "0101";
+        public const string STATE_CONFIRM = "0201";
+        public const string STATE_RANDOM = "0301";
+        public const string STATE_END = "0401"; // 触发结束、3D/5D到期结束
+        public const string STATE_ABORT = "0501";
+        public const string STATE_EXPIRED = "0601";
     }
 }
