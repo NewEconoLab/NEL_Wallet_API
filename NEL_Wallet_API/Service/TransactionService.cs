@@ -44,7 +44,7 @@ namespace NEL_Wallet_API.Service
             if(res == null || res.Count() == 0)
             {
                 // 从未申请直接入库
-                mh.InsertOneData(notify_mongodbConnStr, notify_mongodbDatabase, gasClaimCol, new JObject() { {"address", address }, { "amount", amount }, { "lasttime", nowtime }, { "state", "1" }, { "times", 1 } }.ToString());
+                mh.InsertOneData(notify_mongodbConnStr, notify_mongodbDatabase, gasClaimCol, new JObject() { {"address", address }, { "amount", amount }, { "lasttime", nowtime }, { "state", "1" }, { "times", 1 }, { "txid", "" } }.ToString());
                 return new JArray() { txWait() };
             }
             // 隔天重复申请更新库
@@ -53,7 +53,7 @@ namespace NEL_Wallet_API.Service
             long times = res[0]["times"] == null ? 1:long.Parse(res[0]["times"].ToString());
             if (nowtime - lasttime > ONE_DAY_SECONDS)
             {
-                mh.ReplaceData(notify_mongodbConnStr, notify_mongodbDatabase, gasClaimCol, filter, new JObject() { { "address", address }, { "amount", amount }, { "lasttime", nowtime }, { "state", "1" }, { "times", times+1 } }.ToString());
+                mh.ReplaceData(notify_mongodbConnStr, notify_mongodbDatabase, gasClaimCol, filter, new JObject() { { "address", address }, { "amount", amount }, { "lasttime", nowtime }, { "state", "1" }, { "times", times+1 }, { "txid", "" } }.ToString());
                 return new JArray() { txWait() };
             }
             return new JArray() { hasClaimGas() };
@@ -62,7 +62,7 @@ namespace NEL_Wallet_API.Service
 
         /// <summary>
         /// 查询该地址是否可以申领GAS
-        /// 0 可领取： 从未领取 + 24h后重复领取
+        /// 0 可领取： 从未领取 + 24h后再次领取
         /// 1 派发中
         /// 2 已领取
         /// 

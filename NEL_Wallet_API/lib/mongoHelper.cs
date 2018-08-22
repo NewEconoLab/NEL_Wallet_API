@@ -30,9 +30,8 @@ namespace NEL_Wallet_API.lib
         public string nelJsonRPCUrl_mainnet = string.Empty;
         
         public string queryDomainCollection_testnet = string.Empty;
-        public string queryBidListCollection_testnet = string.Empty; 
-
         public string queryDomainCollection_mainnet = string.Empty;
+        public string queryBidListCollection_testnet = string.Empty; 
         public string queryBidListCollection_mainnet = string.Empty;
         
         public string bonusNotifyCol_testnet = string.Empty;
@@ -45,11 +44,7 @@ namespace NEL_Wallet_API.lib
 
         public string domainOwnerCol_testnet = string.Empty;
         public string domainOwnerCol_mainnet = string.Empty;
-        public string maxClaimAmount_testnet = string.Empty;
-        public string maxClaimAmount_mainnet = string.Empty;
-        public string domainResolver_testnet = string.Empty;
-        public string domainResolver_mainnet = string.Empty;
-
+        
         public string domainUserStateCol_testnet = string.Empty;
         public string domainUserStateCol_mainnet = string.Empty;
         public string domainStateCol_testnet = string.Empty;
@@ -62,6 +57,8 @@ namespace NEL_Wallet_API.lib
         public string prikeywif_mainnet = string.Empty;
         public string gasClaimCol_testnet = string.Empty;
         public string gasClaimCol_mainnet = string.Empty;
+        public string maxClaimAmount_testnet = string.Empty;
+        public string maxClaimAmount_mainnet = string.Empty;
         public string batchSendInterval_testnet = string.Empty;
         public string batchSendInterval_mainnet = string.Empty;
         public string checkTxInterval_testnet = string.Empty;
@@ -113,8 +110,6 @@ namespace NEL_Wallet_API.lib
 
             domainOwnerCol_testnet = config["domainOwnerCol_testnet"];
             domainOwnerCol_mainnet = config["domainOwnerCol_mainnet"];
-            domainResolver_testnet = config["domainResolver_testnet"];
-            domainResolver_mainnet = config["domainResolver_mainnet"];
 
             domainUserStateCol_testnet = config["domainUserStateCol_testnet"];
             domainUserStateCol_mainnet = config["domainUserStateCol_mainnet"];
@@ -129,7 +124,6 @@ namespace NEL_Wallet_API.lib
             gasClaimCol_mainnet = config["gasClaimCol_mainnet"];
             maxClaimAmount_testnet = config["maxClaimAmount_testnet"];
             maxClaimAmount_mainnet = config["maxClaimAmount_mainnet"];
-
             batchSendInterval_testnet = config["batchSendInterval_testnet"];
             batchSendInterval_mainnet = config["batchSendInterval_mainnet"];
             checkTxInterval_testnet = config["checkTxInterval_testnet"];

@@ -75,7 +75,6 @@ namespace NEL_Wallet_API.Controllers
                         mh = mh,
                         notify_mongodbConnStr = mh.notify_mongodbConnStr_testnet,
                         notify_mongodbDatabase = mh.notify_mongodbDatabase_testnet,
-                        domainResolver = mh.domainResolver_testnet,
                         domainOwnerCol = mh.domainOwnerCol_testnet,
                     };
                     commonService = new CommonService
@@ -158,7 +157,6 @@ namespace NEL_Wallet_API.Controllers
                         mh = mh,
                         notify_mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
                         notify_mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
-                        domainResolver = mh.domainResolver_mainnet,
                         domainOwnerCol = mh.domainOwnerCol_testnet,
                     };
                     commonService = new CommonService

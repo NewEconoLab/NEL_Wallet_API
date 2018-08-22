@@ -11,7 +11,6 @@ namespace NEL_Wallet_API.Service
         public mongoHelper mh { get; set; }
         public string notify_mongodbConnStr { get; set; }
         public string notify_mongodbDatabase { get; set; }
-        public string domainResolver { get; set; }
         public string domainOwnerCol { get; set; }
 
 
