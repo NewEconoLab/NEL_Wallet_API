@@ -45,7 +45,8 @@ namespace NEL_Wallet_API.Service
             handler.nelJsonRpcUrl = nelJsonRpcUrl;
             handler.assetid = assetid;
             handler.accountInfo = accountInfo;
-            handler.applyGas(address, amount);
+            //handler.applyGas(address, amount);
+            handler.applyGas(address, amount, getBalance(accountInfo.address));
             JObject rr = handler.getResult();
             string code = rr["code"].ToString();
             string txid = rr["txid"].ToString();
@@ -82,6 +83,39 @@ namespace NEL_Wallet_API.Service
         private bool hasTx(string txid)
         {
             return mh.GetDataCount(block_mongodbConnStr, block_mongodbDatabase, "tx", new JObject() { { "txid", txid } }.ToString()) > 0;
+        }
+
+        private Dictionary<string, List<Utxo>> getBalance(string address)
+        {
+            string findFliter = "{addr:'" + address + "',used:''}";
+            JArray result = mh.GetData(block_mongodbConnStr, block_mongodbDatabase, "utxo", findFliter);
+            if(result == null || result.Count == 0)
+            {
+                return null;
+            }
+            Utxo[] utxoArr = result.Select(p => new Utxo(
+                p["addr"].ToString(),
+                new ThinNeo.Hash256(p["txid"].ToString()),
+                p["asset"].ToString(),
+                decimal.Parse(p["value"].ToString()),
+                int.Parse(p["n"].ToString())
+                )).ToArray();
+            Dictionary<string, List<Utxo>> res = new Dictionary<string, List<Utxo>>();
+            foreach(Utxo utxo in utxoArr)
+            {
+                string assetid = utxo.asset;
+                if (res.ContainsKey(assetid))
+                {
+                    res[assetid].Add(utxo);
+                }
+                else
+                {
+                    List<Utxo> list = new List<Utxo>();
+                    list.Add(utxo);
+                    res[assetid] = list;
+                }
+            }
+            return res;
         }
     }
 }

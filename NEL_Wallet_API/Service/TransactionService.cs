@@ -18,6 +18,9 @@ namespace NEL_Wallet_API.Service
         public mongoHelper mh { set; get; }
         public string notify_mongodbConnStr { get; set; }
         public string notify_mongodbDatabase { get; set; }
+        public string block_mongodbConnStr { get; set; }
+        public string block_mongodbDatabase { get; set; }
+        
         public string gasClaimCol { get; set; }
         public int maxClaimAmount { get; set; }
 
@@ -149,15 +152,15 @@ namespace NEL_Wallet_API.Service
             return res;
         }
         
-        public async void applyGas(string address, decimal amount = 1)
+        public async void applyGas(string address, decimal amount = 1, Dictionary<string, List<Utxo>> dir = null)
         {
-            res = await asyncApplyGas(new string[] { address }.ToList(), amount);
+            res = await asyncApplyGas(new string[] { address }.ToList(), amount, dir);
         }
-        public async void applyGas(List<string> addresses, decimal amount = 1)
+        public async void applyGas(List<string> addresses, decimal amount = 1, Dictionary<string, List<Utxo>> dir = null)
         {
-            res = await asyncApplyGas(addresses, amount);
+            res = await asyncApplyGas(addresses, amount, dir);
         }
-        private async Task<JObject> asyncApplyGas(List<string> targetAddress, decimal amount)
+        private async Task<JObject> asyncApplyGas(List<string> targetAddress, decimal amount, Dictionary<string, List<Utxo>> dir)
         {
             // 转换私钥
             byte[] prikey = accountInfo.prikey;
@@ -166,7 +169,12 @@ namespace NEL_Wallet_API.Service
 
             // 获取余额
             string id_gas = assetid;
-            Dictionary<string, List<Utxo>> dir = await TransHelper.GetBalanceByAddress(nelJsonRpcUrl, address);
+            //Dictionary<string, List<Utxo>> dir2 = await TransHelper.GetBalanceByAddress(nelJsonRpcUrl, address);
+            if(dir == null || dir[id_gas] == null)
+            {
+                // 余额不足
+                return insufficientBalance();
+            }
             List<Utxo> balanceUtxo = dir[id_gas];
             if (balanceUtxo.Sum(p => p.value) < amount * targetAddress.Count())
             {
