@@ -83,9 +83,8 @@ namespace NEL_Wallet_API.Controllers
                         mongodbConnStr = mh.analy_mongodbConnStr_testnet,
                         mongodbDatabase = mh.analy_mongodbDatabase_testnet,
                     };
-                    txService = new TransactionService
+                    claimService = new ClaimGasService
                     {
-                        nelJsonRpcUrl = mh.nelJsonRPCUrl_testnet,
                         assetid = mh.id_gas,
                         accountInfo = AccountInfo.getAccountInfoFromWif(mh.prikeywif_testnet),
                         mh = mh,
@@ -94,7 +93,7 @@ namespace NEL_Wallet_API.Controllers
                         gasClaimCol = mh.gasClaimCol_testnet,
                         maxClaimAmount = int.Parse(mh.maxClaimAmount_testnet),
                     };
-                    claimService = new ClaimGasService
+                    txService = new TransactionService
                     {
                         nelJsonRpcUrl = mh.nelJsonRPCUrl_testnet,
                         assetid = mh.id_gas,
@@ -110,7 +109,7 @@ namespace NEL_Wallet_API.Controllers
                         checkTxCount = int.Parse(mh.checkTxCount_testnet)
                     };
                     // 暂时放在这里，后续考虑单独整出来
-                    new Task(() => claimService.claimGasLoop()).Start();
+                    new Task(() => txService.claimGasLoop()).Start();
                     break;
                 case "mainnet":
                     newAuctionService = new NewAuctionService()
@@ -165,9 +164,8 @@ namespace NEL_Wallet_API.Controllers
                         mongodbConnStr = mh.analy_mongodbConnStr_mainnet,
                         mongodbDatabase = mh.analy_mongodbDatabase_mainnet,
                     };
-                    txService = new TransactionService
+                    claimService = new ClaimGasService
                     {
-                        nelJsonRpcUrl = mh.nelJsonRPCUrl_mainnet,
                         assetid = mh.id_gas,
                         accountInfo = AccountInfo.getAccountInfoFromWif(mh.prikeywif_mainnet),
                         mh = mh,
@@ -177,7 +175,7 @@ namespace NEL_Wallet_API.Controllers
                         maxClaimAmount = int.Parse(mh.maxClaimAmount_mainnet),
                     };
                     /*
-                    claimService = new ClaimGasService
+                    txService = new TransactionService
                     {
                         nelJsonRpcUrl = mh.nelJsonRPCUrl_mainnet,
                         assetid = mh.id_gas,
@@ -193,7 +191,7 @@ namespace NEL_Wallet_API.Controllers
                         checkTxCount = int.Parse(mh.checkTxCount_mainnet)
                     };
                     // 暂时放在这里，后续考虑单独整出来
-                    new Task(() => claimService.claimGasLoop()).Start();
+                    new Task(() => txService.claimGasLoop()).Start();
                     */
                     break;
             }
@@ -225,17 +223,17 @@ namespace NEL_Wallet_API.Controllers
                         break;
                     // 查询是否可以申领Gas
                     case "hasclaimgas":
-                        result = txService.hasClaimGas(req.@params[0].ToString());
+                        result = claimService.hasClaimGas(req.@params[0].ToString());
                         break;
                     // 申领Gas(即向客户地址转账，默认1gas
                     case "claimgas":
                         if (req.@params.Length < 2)
                         {
-                            result = txService.claimGas(req.@params[0].ToString());
+                            result = claimService.claimGas(req.@params[0].ToString());
                         }
                         else
                         {
-                            result = txService.claimGas(req.@params[0].ToString(), decimal.Parse(req.@params[1].ToString()));
+                            result = claimService.claimGas(req.@params[0].ToString(), decimal.Parse(req.@params[1].ToString()));
                         }
                         break;
                     // 根据txid查询交易是否成功

@@ -9,10 +9,10 @@ using System.Threading.Tasks;
 
 namespace NEL_Wallet_API.Service
 {
-    public class TransactionService
+    public class ClaimGasService
     {
         public const long ONE_DAY_SECONDS = 24 * 60 * 60;
-        public string nelJsonRpcUrl { get; set; }
+        //public string nelJsonRpcUrl { get; set; }
         public string assetid { get; set; }
         public AccountInfo accountInfo { get; set; }
         public mongoHelper mh { set; get; }

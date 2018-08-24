@@ -1,13 +1,14 @@
 ﻿using NEL_Wallet_API.Controllers;
 using NEL_Wallet_API.lib;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
 namespace NEL_Wallet_API.Service
 {
-    public class ClaimGasService
+    public class TransactionService
     {
         public const long ONE_DAY_SECONDS = 24 * 60 * 60;
         public string nelJsonRpcUrl { get; set; }
@@ -29,13 +30,21 @@ namespace NEL_Wallet_API.Service
             while (true)
             {
                 Thread.Sleep(batchSendInterval);
-                long nowtime = TimeHelper.GetTimeStamp();
-                string filter = new JObject() { { "lasttime", new JObject() { { "$gt", nowtime - ONE_DAY_SECONDS } } }, { "state", "1" } }.ToString();
-                JArray res = mh.GetDataWithField(notify_mongodbConnStr, notify_mongodbDatabase, gasClaimCol, new JObject() { { "address", 1 }, { "amount", 1 } }.ToString(), filter);
-                if (res == null || res.Count() == 0) continue;
-                
-                // 一笔交易多输出
-                mergeClaimGasTx(res.Select(p => p["address"].ToString()).ToList(), long.Parse(res[0]["amount"].ToString()));
+                try
+                {
+                    long nowtime = TimeHelper.GetTimeStamp();
+                    string filter = new JObject() { { "lasttime", new JObject() { { "$gt", nowtime - ONE_DAY_SECONDS } } }, { "state", "1" } }.ToString();
+                    JArray res = mh.GetDataWithField(notify_mongodbConnStr, notify_mongodbDatabase, gasClaimCol, new JObject() { { "address", 1 }, { "amount", 1 } }.ToString(), filter);
+                    if (res == null || res.Count() == 0) continue;
+
+                    // 一笔交易多输出
+                    mergeClaimGasTx(res.Select(p => p["address"].ToString()).ToList(), long.Parse(res[0]["amount"].ToString()));
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine("claimGasLoopErrMsg:"+e.Message);
+                    Console.WriteLine("claimGasLoopErrStack:" + e.StackTrace);
+                }
             }
         }
         
