@@ -37,7 +37,10 @@ namespace NEL_Wallet_API.Service
         }
         public JArray getAuctionInfoByAuctionId(string[] auctionIdArr, string address = "")
         {
-            string findStr = MongoFieldHelper.toFilter(auctionIdArr, "auctionId").ToString();
+            //string findStr = MongoFieldHelper.toFilter(auctionIdArr, "auctionId").ToString();
+            JObject auctionIdFilter = MongoFieldHelper.toFilter(auctionIdArr, "auctionId");
+            JObject addressFilter = new JObject() { { "$or", new JArray() { new JObject() { { "addwholist.address", address } }, new JObject() { { "startAddress", address } }, new JObject() { { "endAddress", address } } } } };
+            string findStr = new JObject() { { "$and", new JArray() { auctionIdFilter, addressFilter } } }.ToString();
             JArray res = mh.GetData(mongodbConnStr, mongodbDatabase, auctionStateCol, findStr);
             if (res == null || res.Count == 0)
             {
@@ -47,8 +50,12 @@ namespace NEL_Wallet_API.Service
             {
                 return new JArray() { new JObject() { { "count", res.Count }, { "list", res } } };
             }
-            foreach(JObject jo in res)
+            foreach (JObject jo in res)
             {
+                if (jo["addwholist"] == null || jo["addwholist"].ToString() == "" || ((JArray)jo["addwholist"]).Count == 0)
+                {
+                    continue;
+                }
                 JArray addwholist = (JArray)jo["addwholist"];
                 jo.Remove("addwholist");
 
