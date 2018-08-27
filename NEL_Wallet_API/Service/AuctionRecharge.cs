@@ -121,7 +121,11 @@ namespace NEL_Wallet_API.Controllers
             JObject res = null;
             do
             {
-                res = PostTx("getrawtransaction", txid);
+                res = null;
+                try
+                {
+                    PostTx("getrawtransaction", txid);
+                } catch { }
                 if (res != null)
                 {
                     flag = true;
@@ -129,6 +133,7 @@ namespace NEL_Wallet_API.Controllers
                 }
                 Thread.Sleep(2000);
             } while (getBlockCount() <= curHeight + 2);
+            flag = true;
             return flag;
         }
         private int getBlockCount()
