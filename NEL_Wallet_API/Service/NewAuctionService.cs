@@ -18,8 +18,9 @@ namespace NEL_Wallet_API.Service
         {
             JObject stateFilter = MongoFieldHelper.toFilter(new string[] { AuctionState.STATE_START, AuctionState.STATE_CONFIRM, AuctionState.STATE_RANDOM, AuctionState.STATE_END }, "auctionState");
             JObject addressFilter = new JObject() { {"$or", new JArray() { new JObject() { { "addwholist.address", address } }, new JObject() { { "startAddress", address } }, new JObject() { { "endAddress", address } } } } };
-            JObject expireFilter = new JObject() { {"startTime.blocktime", new JObject() { {"$gt",  TimeHelper.GetTimeStamp() - ONE_YEAR_SECONDS } } } };
-            string findStr = new JObject() { { "$and", new JArray() { stateFilter, addressFilter, expireFilter } } }.ToString();
+            //JObject expireFilter = new JObject() { {"startTime.blocktime", new JObject() { {"$gt",  TimeHelper.GetTimeStamp() - ONE_YEAR_SECONDS } } } };
+            //string findStr = new JObject() { { "$and", new JArray() { stateFilter, addressFilter, expireFilter } } }.ToString();
+            string findStr = new JObject() { { "$and", new JArray() { stateFilter, addressFilter } } }.ToString();
             string sortStr = new JObject() { { "startTime.blockindex", -1} }.ToString();
             JArray res = mh.GetDataPages(mongodbConnStr, mongodbDatabase, auctionStateCol, sortStr, pageSize, pageNum, findStr);
             if(res == null || res.Count == 0)
@@ -35,7 +36,9 @@ namespace NEL_Wallet_API.Service
             List<string> list = new List<string>();
             foreach (JValue jv in auctionIdsJA)
             {
-                list.Add(jv.ToString());
+                //list.Add(jv.ToString());
+                string auctionId = jv.ToString();
+                list.Add(auctionId.StartsWith("0x") ? auctionId : "0x" + auctionId);
             }
             return getAuctionInfoByAuctionId(list.ToArray(), address);
         }
@@ -58,6 +61,7 @@ namespace NEL_Wallet_API.Service
             {
                 return new JArray() { };
             }
+            /*
             // 过期与否判断
             foreach (JObject jo in res)
             {
@@ -72,6 +76,7 @@ namespace NEL_Wallet_API.Service
                     }
                 }
             }
+            */
 
             if (address == "")
             {
