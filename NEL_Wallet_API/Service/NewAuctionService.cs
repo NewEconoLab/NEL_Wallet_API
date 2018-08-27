@@ -1,4 +1,5 @@
-﻿using NEL_Wallet_API.lib;
+﻿using NEL_Wallet_API.Controllers;
+using NEL_Wallet_API.lib;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 
@@ -10,12 +11,15 @@ namespace NEL_Wallet_API.Service
         public mongoHelper mh { get; set; }
         public string mongodbConnStr { get; set; }
         public string mongodbDatabase { get; set; }
+        private const long ONE_DAY_SECONDS = 1 * /*24 * 60 * */60 /*测试时5分钟一天*/* 5;
+        private const long ONE_YEAR_SECONDS = ONE_DAY_SECONDS * 365;
 
         public JArray getAuctionInfoByAddress(string address, int pageNum = 1, int pageSize = 10)
         {
             JObject stateFilter = MongoFieldHelper.toFilter(new string[] { AuctionState.STATE_START, AuctionState.STATE_CONFIRM, AuctionState.STATE_RANDOM, AuctionState.STATE_END }, "auctionState");
             JObject addressFilter = new JObject() { {"$or", new JArray() { new JObject() { { "addwholist.address", address } }, new JObject() { { "startAddress", address } }, new JObject() { { "endAddress", address } } } } };
-            string findStr = new JObject() { { "$and", new JArray() { stateFilter, addressFilter } } }.ToString();
+            JObject expireFilter = new JObject() { {"startTime.blocktime", new JObject() { {"$gt",  TimeHelper.GetTimeStamp() - ONE_YEAR_SECONDS } } } };
+            string findStr = new JObject() { { "$and", new JArray() { stateFilter, addressFilter, expireFilter } } }.ToString();
             string sortStr = new JObject() { { "startTime.blockindex", -1} }.ToString();
             JArray res = mh.GetDataPages(mongodbConnStr, mongodbDatabase, auctionStateCol, sortStr, pageSize, pageNum, findStr);
             if(res == null || res.Count == 0)
@@ -54,7 +58,22 @@ namespace NEL_Wallet_API.Service
             {
                 return new JArray() { };
             }
-            if(address == "")
+            // 过期与否判断
+            foreach (JObject jo in res)
+            {
+                string auctionState = jo["auctionState"].ToString();
+                if (auctionState == "0401")
+                {
+                    long startBlocktime = long.Parse(jo["startTime"]["blocktime"].ToString());
+                    if (startBlocktime <= TimeHelper.GetTimeStamp() - ONE_YEAR_SECONDS)
+                    {
+                        jo.Remove("auctionState");
+                        jo.Add("auctionState", "0601");
+                    }
+                }
+            }
+
+            if (address == "")
             {
                 return new JArray() { new JObject() { { "count", res.Count }, { "list", res } } };
             }
@@ -83,7 +102,7 @@ namespace NEL_Wallet_API.Service
                     }
                 }
                 jo.Add("addwholist", addwholist);
-
+                
             }
 
             return new JArray() { new JObject() { { "count", res.Count }, { "list", res } } };
