@@ -38,9 +38,17 @@ namespace NEL_Wallet_API.Service
         public JArray getAuctionInfoByAuctionId(string[] auctionIdArr, string address = "")
         {
             //string findStr = MongoFieldHelper.toFilter(auctionIdArr, "auctionId").ToString();
-            JObject auctionIdFilter = MongoFieldHelper.toFilter(auctionIdArr, "auctionId");
-            JObject addressFilter = new JObject() { { "$or", new JArray() { new JObject() { { "addwholist.address", address } }, new JObject() { { "startAddress", address } }, new JObject() { { "endAddress", address } } } } };
-            string findStr = new JObject() { { "$and", new JArray() { auctionIdFilter, addressFilter } } }.ToString();
+            string findStr = null;
+            if (address!= null && address != "")
+            {
+                JObject auctionIdFilter = MongoFieldHelper.toFilter(auctionIdArr, "auctionId");
+                JObject addressFilter = new JObject() { { "$or", new JArray() { new JObject() { { "addwholist.address", address } }, new JObject() { { "startAddress", address } }, new JObject() { { "endAddress", address } } } } };
+                findStr = new JObject() { { "$and", new JArray() { auctionIdFilter, addressFilter } } }.ToString();
+            } else
+            {
+                findStr = MongoFieldHelper.toFilter(auctionIdArr, "auctionId").ToString();
+            }
+           
             JArray res = mh.GetData(mongodbConnStr, mongodbDatabase, auctionStateCol, findStr);
             if (res == null || res.Count == 0)
             {
