@@ -36,14 +36,18 @@ namespace NEL_Wallet_API.Controllers
             JArray queryRes = queryNotifyFromBlock("notify", new JObject() { { "txid", txid } }.ToString());
             if (queryRes == null || queryRes.Count == 0)
             {
-                return new JArray() { new JObject() { { "displayNameList", new JArray() { } } } };
+                return new JArray() { new JObject() { { "vmstate", ""},{ "displayNameList", new JArray() { } } } };
             }
+            
             string[] res = queryRes.Where(p => ((JArray)p["notifications"]).Count() != 0).SelectMany(p =>
             {
                 JArray pArr = (JArray)p["notifications"];
                 return pArr.Select(pp => pp["state"]["value"][0]["value"].ToString()).Select(pp => pp.Hexstring2String()).ToArray();
             }).ToArray();
-            return new JArray() { new JObject() { { "displayNameList", new JArray() { res } } } };
+
+
+            string vmstate = queryRes[0]["vmstate"].ToString();
+            return new JArray() { new JObject() { { "vmstate", vmstate }, { "displayNameList", new JArray() { res } } } };
         }
 
         public JArray rechargeAndTransfer(string txhex1, string txhex2)
