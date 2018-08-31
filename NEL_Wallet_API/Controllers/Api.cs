@@ -207,6 +207,9 @@ namespace NEL_Wallet_API.Controllers
             {
                 switch (req.method)
                 {
+                    case "getauctioninfocount":
+                        result = newAuctionService.getAcutionInfoCount(req.@params[0].ToString());
+                        break;
                     case "getauctioninfobyaddress":
                         if (req.@params.Length < 3)
                         {

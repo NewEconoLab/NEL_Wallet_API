@@ -2,6 +2,7 @@
 using NEL_Wallet_API.lib;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace NEL_Wallet_API.Service
 {
@@ -14,6 +15,15 @@ namespace NEL_Wallet_API.Service
         private const long ONE_DAY_SECONDS = 1 * /*24 * 60 * */60 /*测试时5分钟一天*/* 5;
         private const long ONE_YEAR_SECONDS = ONE_DAY_SECONDS * 365;
 
+        public JArray getAcutionInfoCount(string address)
+        {
+            JObject stateFilter = MongoFieldHelper.toFilter(new string[] { AuctionState.STATE_START, AuctionState.STATE_CONFIRM, AuctionState.STATE_RANDOM, AuctionState.STATE_END }, "auctionState");
+            JObject addressFilter = new JObject() { { "$or", new JArray() { new JObject() { { "addwholist.address", address } }, new JObject() { { "startAddress", address } }, new JObject() { { "endAddress", address } } } } };
+            string findStr = new JObject() { { "$and", new JArray() { stateFilter, addressFilter } } }.ToString();
+            long count = mh.GetDataCount(mongodbConnStr, mongodbDatabase, auctionStateCol, findStr);
+
+            return new JArray() { new JObject() { { "count", count } } };
+        }
         public JArray getAuctionInfoByAddress(string address, int pageNum = 1, int pageSize = 10)
         {
             JObject stateFilter = MongoFieldHelper.toFilter(new string[] { AuctionState.STATE_START, AuctionState.STATE_CONFIRM, AuctionState.STATE_RANDOM, AuctionState.STATE_END }, "auctionState");
@@ -33,14 +43,8 @@ namespace NEL_Wallet_API.Service
 
         public JArray getAuctionInfoByAuctionId(JArray auctionIdsJA, string address = "")
         {
-            List<string> list = new List<string>();
-            foreach (JValue jv in auctionIdsJA)
-            {
-                //list.Add(jv.ToString());
-                string auctionId = jv.ToString();
-                list.Add(auctionId.StartsWith("0x") ? auctionId : "0x" + auctionId);
-            }
-            return getAuctionInfoByAuctionId(list.ToArray(), address);
+            string[] auctionIdArr = auctionIdsJA.Select(p => p.ToString().StartsWith("0x") ? p.ToString() : "0x" + p.ToString()).ToArray();
+            return getAuctionInfoByAuctionId(auctionIdArr, address);
         }
         public JArray getAuctionInfoByAuctionId(string[] auctionIdArr, string address = "")
         {
