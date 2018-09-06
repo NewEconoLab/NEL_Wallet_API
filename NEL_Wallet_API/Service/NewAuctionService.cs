@@ -12,25 +12,25 @@ namespace NEL_Wallet_API.Service
         public mongoHelper mh { get; set; }
         public string mongodbConnStr { get; set; }
         public string mongodbDatabase { get; set; }
-        private const long ONE_DAY_SECONDS = 1 * /*24 * 60 * */60 /*测试时5分钟一天*/* 5;
-        private const long ONE_YEAR_SECONDS = ONE_DAY_SECONDS * 365;
+        
 
-        public JArray getAcutionInfoCount(string address)
+        public JArray getAcutionInfoCount(string address, string root=".neo")
         {
             JObject stateFilter = MongoFieldHelper.toFilter(new string[] { AuctionState.STATE_START, AuctionState.STATE_CONFIRM, AuctionState.STATE_RANDOM, AuctionState.STATE_END }, "auctionState");
             JObject addressFilter = new JObject() { { "$or", new JArray() { new JObject() { { "addwholist.address", address } }, new JObject() { { "startAddress", address } }, new JObject() { { "endAddress", address } } } } };
-            string findStr = new JObject() { { "$and", new JArray() { stateFilter, addressFilter } } }.ToString();
+            JObject rootFilter = MongoFieldHelper.likeFilter("fulldomain", root);
+
+            string findStr = new JObject() { { "$and", new JArray() { stateFilter, addressFilter, rootFilter } } }.ToString();
             long count = mh.GetDataCount(mongodbConnStr, mongodbDatabase, auctionStateCol, findStr);
 
             return new JArray() { new JObject() { { "count", count } } };
         }
-        public JArray getAuctionInfoByAddress(string address, int pageNum = 1, int pageSize = 10)
+        public JArray getAuctionInfoByAddress(string address, int pageNum = 1, int pageSize = 10, string root=".neo")
         {
             JObject stateFilter = MongoFieldHelper.toFilter(new string[] { AuctionState.STATE_START, AuctionState.STATE_CONFIRM, AuctionState.STATE_RANDOM, AuctionState.STATE_END }, "auctionState");
             JObject addressFilter = new JObject() { {"$or", new JArray() { new JObject() { { "addwholist.address", address } }, new JObject() { { "startAddress", address } }, new JObject() { { "endAddress", address } } } } };
-            //JObject expireFilter = new JObject() { {"startTime.blocktime", new JObject() { {"$gt",  TimeHelper.GetTimeStamp() - ONE_YEAR_SECONDS } } } };
-            //string findStr = new JObject() { { "$and", new JArray() { stateFilter, addressFilter, expireFilter } } }.ToString();
-            string findStr = new JObject() { { "$and", new JArray() { stateFilter, addressFilter } } }.ToString();
+            JObject rootFilter = MongoFieldHelper.likeFilter("fulldomain", root);
+            string findStr = new JObject() { { "$and", new JArray() { stateFilter, addressFilter, rootFilter } } }.ToString();
             string sortStr = new JObject() { { "startTime.blockindex", -1} }.ToString();
             JArray res = mh.GetDataPages(mongodbConnStr, mongodbDatabase, auctionStateCol, sortStr, pageSize, pageNum, findStr);
             if(res == null || res.Count == 0)
@@ -46,9 +46,8 @@ namespace NEL_Wallet_API.Service
             string[] auctionIdArr = auctionIdsJA.Select(p => p.ToString().StartsWith("0x") ? p.ToString() : "0x" + p.ToString()).ToArray();
             return getAuctionInfoByAuctionId(auctionIdArr, address);
         }
-        public JArray getAuctionInfoByAuctionId(string[] auctionIdArr, string address = "")
+        private JArray getAuctionInfoByAuctionId(string[] auctionIdArr, string address = "")
         {
-            //string findStr = MongoFieldHelper.toFilter(auctionIdArr, "auctionId").ToString();
             string findStr = null;
             if (address!= null && address != "")
             {
@@ -65,22 +64,6 @@ namespace NEL_Wallet_API.Service
             {
                 return new JArray() { };
             }
-            /*
-            // 过期与否判断
-            foreach (JObject jo in res)
-            {
-                string auctionState = jo["auctionState"].ToString();
-                if (auctionState == "0401")
-                {
-                    long startBlocktime = long.Parse(jo["startTime"]["blocktime"].ToString());
-                    if (startBlocktime <= TimeHelper.GetTimeStamp() - ONE_YEAR_SECONDS)
-                    {
-                        jo.Remove("auctionState");
-                        jo.Add("auctionState", "0601");
-                    }
-                }
-            }
-            */
 
             if (address == "")
             {

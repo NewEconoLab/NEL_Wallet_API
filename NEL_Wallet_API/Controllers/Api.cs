@@ -174,25 +174,6 @@ namespace NEL_Wallet_API.Controllers
                         gasClaimCol = mh.gasClaimCol_mainnet,
                         maxClaimAmount = int.Parse(mh.maxClaimAmount_mainnet),
                     };
-                    /*
-                    txService = new TransactionService
-                    {
-                        nelJsonRpcUrl = mh.nelJsonRPCUrl_mainnet,
-                        assetid = mh.id_gas,
-                        accountInfo = AccountInfo.getAccountInfoFromWif(mh.prikeywif_mainnet),
-                        mh = mh,
-                        notify_mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
-                        notify_mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
-                        gasClaimCol = mh.gasClaimCol_mainnet,
-                        block_mongodbConnStr = mh.block_mongodbConnStr_mainnet,
-                        block_mongodbDatabase = mh.block_mongodbDatabase_mainnet,
-                        batchSendInterval = int.Parse(mh.batchSendInterval_mainnet),
-                        checkTxInterval = int.Parse(mh.checkTxInterval_mainnet),
-                        checkTxCount = int.Parse(mh.checkTxCount_mainnet)
-                    };
-                    // 暂时放在这里，后续考虑单独整出来
-                    new Task(() => txService.claimGasLoop()).Start();
-                    */
                     break;
             }
         }
@@ -208,15 +189,25 @@ namespace NEL_Wallet_API.Controllers
                 switch (req.method)
                 {
                     case "getauctioninfocount":
-                        result = newAuctionService.getAcutionInfoCount(req.@params[0].ToString());
+                        if (req.@params.Length < 2)
+                        {
+                            result = newAuctionService.getAcutionInfoCount(req.@params[0].ToString());
+                        } else
+                        {
+                            result = newAuctionService.getAcutionInfoCount(req.@params[0].ToString(), req.@params[2].ToString());
+                        }
                         break;
                     case "getauctioninfobyaddress":
                         if (req.@params.Length < 3)
                         {
                             result = newAuctionService.getAuctionInfoByAddress(req.@params[0].ToString());
-                        } else
+                        }
+                        else if(req.@params.Length < 4)
                         {
                             result = newAuctionService.getAuctionInfoByAddress(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
+                        } else
+                        {
+                            result = newAuctionService.getAuctionInfoByAddress(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()), req.@params[3].ToString());
                         }
                         break;
                     case "getauctioninfobyaucitonid":

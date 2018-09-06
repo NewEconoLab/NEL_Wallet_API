@@ -5,6 +5,10 @@ namespace NEL_Wallet_API.lib
 {
     public class MongoFieldHelper
     {
+        public static JObject likeFilter(string key, string regex)
+        {
+            return new JObject() { { key, new JObject() { { "$regex", regex }, { "$options", "i" } } } };
+        }
         public static JObject toFilter(long[] blockindexArr, string field, string logicalOperator = "$or")
         {
             if (blockindexArr.Count() == 1)

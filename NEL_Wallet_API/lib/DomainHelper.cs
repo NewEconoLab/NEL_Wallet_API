@@ -1,23 +1,22 @@
 ﻿using System;
 using System.Linq;
+using System.Security.Cryptography;
 
 namespace NEL_Wallet_API.lib
 {
     public class DomainHelper
     {
-        public static readonly System.Security.Cryptography.SHA256 sha256 = System.Security.Cryptography.SHA256.Create();
-
         public static Hash256 nameHash(string domain)
         {
             byte[] data = System.Text.Encoding.UTF8.GetBytes(domain);
-            return new Hash256(sha256.ComputeHash(data));
+            return new Hash256(SHA256.Create().ComputeHash(data));
         }
         public static Hash256 nameHashSub(byte[] roothash, string subdomain)
         {
             var bs = System.Text.Encoding.UTF8.GetBytes(subdomain);
             if (bs.Length == 0)
                 return roothash;
-
+            SHA256 sha256 = SHA256.Create();
             var domain = sha256.ComputeHash(bs).Concat(roothash).ToArray();
             return new Hash256(sha256.ComputeHash(domain));
         }
