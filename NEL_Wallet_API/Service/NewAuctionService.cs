@@ -32,7 +32,8 @@ namespace NEL_Wallet_API.Service
             JObject rootFilter = MongoFieldHelper.likeFilter("fulldomain", root);
             string findStr = new JObject() { { "$and", new JArray() { stateFilter, addressFilter, rootFilter } } }.ToString();
             string sortStr = new JObject() { { "startTime.blockindex", -1} }.ToString();
-            JArray res = mh.GetDataPages(mongodbConnStr, mongodbDatabase, auctionStateCol, sortStr, pageSize, pageNum, findStr);
+            //JArray res = mh.GetDataPages(mongodbConnStr, mongodbDatabase, auctionStateCol, sortStr, pageSize, pageNum, findStr);
+            JArray res = mh.GetDataPagesWithField(mongodbConnStr, mongodbDatabase, auctionStateCol, new JObject() { { "addwholist.addpricelist", 0 } }.ToString(), pageSize, pageNum, sortStr, findStr);
             if(res == null || res.Count == 0)
             {
                 return new JArray() { };
