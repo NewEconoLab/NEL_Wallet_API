@@ -194,7 +194,7 @@ namespace NEL_Wallet_API.Controllers
                             result = newAuctionService.getAcutionInfoCount(req.@params[0].ToString());
                         } else
                         {
-                            result = newAuctionService.getAcutionInfoCount(req.@params[0].ToString(), req.@params[2].ToString());
+                            result = newAuctionService.getAcutionInfoCount(req.@params[0].ToString(), req.@params[1].ToString());
                         }
                         break;
                     case "getauctioninfobyaddress":
