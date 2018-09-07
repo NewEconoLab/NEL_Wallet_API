@@ -60,7 +60,8 @@ namespace NEL_Wallet_API.Service
                 findStr = MongoFieldHelper.toFilter(auctionIdArr, "auctionId").ToString();
             }
            
-            JArray res = mh.GetData(mongodbConnStr, mongodbDatabase, auctionStateCol, findStr);
+            //JArray res = mh.GetData(mongodbConnStr, mongodbDatabase, auctionStateCol, findStr);
+            JArray res = mh.GetDataWithField(mongodbConnStr, mongodbDatabase, auctionStateCol, new JObject() { { "addwholist.addpricelist", 0 } }.ToString(), findStr);
             if (res == null || res.Count == 0)
             {
                 return new JArray() { };
