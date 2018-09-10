@@ -68,7 +68,9 @@ namespace NEL_Wallet_API.Controllers
                         BonusNofityCol = mh.bonusNotifyCol_testnet,
                         BonusNofityFrom = mh.bonusNotifyFrom_testnet,
                         Block_mongodbConnStr = mh.block_mongodbConnStr_testnet,
-                        Block_mongodbDatabase = mh.block_mongodbDatabase_testnet
+                        Block_mongodbDatabase = mh.block_mongodbDatabase_testnet,
+                        Bonus_mongodbConnStr = mh.bonusConnStr_testnet,
+                        Bonus_mongodbDatabase = mh.bonusDatabase_testnet
                     };
                     domainService = new DomainService
                     {
@@ -247,13 +249,23 @@ namespace NEL_Wallet_API.Controllers
                         result = auctionService.getRechargeAndTransfer(req.@params[0].ToString());
                         break;
                     // 根据地址查询分红历史
-                    case "getbonushistbyaddress":
+                    case "getbonushistbyaddressOld":
                         if(req.@params.Length < 3)
                         {
                             result = bonusService.getBonusHistByAddress(req.@params[0].ToString());
                         } else
                         {
                             result = bonusService.getBonusHistByAddress(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
+                        }
+                        break;
+                    case "getbonushistbyaddress":
+                        if (req.@params.Length < 3)
+                        {
+                            result = bonusService.getBonusHistByAddressNew(req.@params[0].ToString());
+                        }
+                        else
+                        {
+                            result = bonusService.getBonusHistByAddressNew(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
                         }
                         break;
 

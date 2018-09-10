@@ -19,6 +19,8 @@ namespace NEL_Wallet_API.lib
         public string notify_mongodbConnStr_testnet = string.Empty;
         public string notify_mongodbDatabase_testnet = string.Empty;
         public string nelJsonRPCUrl_testnet = string.Empty;
+        public string bonusConnStr_testnet = string.Empty;
+        public string bonusDatabase_testnet = string.Empty;
 
 
         public string block_mongodbConnStr_mainnet = string.Empty;
@@ -83,7 +85,8 @@ namespace NEL_Wallet_API.lib
             notify_mongodbConnStr_testnet = config["notify_mongodbConnStr_testnet"];
             notify_mongodbDatabase_testnet = config["notify_mongodbDatabase_testnet"];
             nelJsonRPCUrl_testnet = config["nelJsonRPCUrl_testnet"];
-            
+            bonusConnStr_testnet = config["bonusConnStr_testnet"];
+            bonusDatabase_testnet = config["bonusDatabase_testnet"];
 
             block_mongodbConnStr_mainnet = config["block_mongodbConnStr_mainnet"];
             block_mongodbDatabase_mainnet = config["block_mongodbDatabase_mainnet"];
@@ -347,6 +350,16 @@ namespace NEL_Wallet_API.lib
             collection.UpdateMany(BsonDocument.Parse(Jcondition), BsonDocument.Parse(Jdata));
 
             client = null;
+        }
+
+        public List<string> listCollection(string mongodbConnStr, string mongodbDatabase)
+        {
+            var client = new MongoClient(mongodbConnStr);
+            var database = client.GetDatabase(mongodbDatabase);
+            List<string> list = database.ListCollectionNames().ToList();
+            client = null;
+
+            return list;
         }
 
     }

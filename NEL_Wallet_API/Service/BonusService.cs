@@ -15,8 +15,51 @@ namespace NEL_Wallet_API.Controllers
         public string BonusNofityFrom { set; get; }
         public string Block_mongodbConnStr { set; get; }
         public string Block_mongodbDatabase { set; get; }
+        public string Bonus_mongodbConnStr { set; get; }
+        public string Bonus_mongodbDatabase { set; get; }
 
 
+        public JArray getBonusHistByAddressNew(string address, int pageNum = 1, int pageSize = 10)
+        {
+            List<String> list = mh.listCollection(Bonus_mongodbConnStr, Bonus_mongodbDatabase);
+            if (list == null && list.Count == 0)
+            {
+                return new JArray() { };
+            }
+            string findstr = new JObject() { { "addr", address } }.ToString();
+            JToken[] res = list.Where(p => p.StartsWith("Snapshot_NNC_")).Select(p =>
+            {
+                string coll = p;
+                JArray addrbonus = mh.GetData(Bonus_mongodbConnStr, Bonus_mongodbDatabase, coll, findstr);
+                if (addrbonus == null || addrbonus.Count == 0)
+                {
+                    return null;
+                }
+                JObject bonus = (JObject)addrbonus[0];
+                JArray totalbonus = mh.GetData(Bonus_mongodbConnStr, Bonus_mongodbDatabase, "TotalSnapShot", new JObject() { { "height", bonus["height"] } }.ToString());
+                if (totalbonus == null || totalbonus.Count == 0)
+                {
+                    bonus.Add("totalValue", 0);
+                }
+                else
+                {
+                    bonus.Add("totalValue", totalbonus[0]["totalValue"]);
+                }
+
+                return new JObject() {
+                        {"address", bonus["addr"] },
+                        {"balance", bonus["balance"] },
+                        {"addrBonus", bonus["send"] },
+                        {"totalBonus", bonus["totalValue"] },
+                        {"blocktime", bonus["height"] },
+                    };
+            }).Where(p => p != null).ToArray();
+            return new JArray()
+            {
+                new JObject() {{"count", res.Count()}, { "list",new JArray() { res } } }
+            };
+            
+        }
         public JArray getBonusHistByAddress(string address, int pageNum = 1, int pageSize = 10)
         {
             JObject queryFilter = new JObject() { { "from", BonusNofityFrom }, { "to", address } };
