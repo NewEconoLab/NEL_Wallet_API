@@ -27,7 +27,7 @@ namespace NEL_Wallet_API.Controllers
                 return new JArray() { };
             }
             string findstr = new JObject() { { "addr", address } }.ToString();
-            JToken[] res = list.Where(p => p.StartsWith("Snapshot_NNC_")).Select(p =>
+            JToken[] res = list.Where(p => p.StartsWith("Snapshot_NNC_") && !p.Contains("_test")).Select(p =>
             {
                 string coll = p;
                 JArray addrbonus = mh.GetData(Bonus_mongodbConnStr, Bonus_mongodbDatabase, coll, findstr);

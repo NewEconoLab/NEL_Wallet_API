@@ -49,16 +49,10 @@ namespace NEL_Wallet_API.Controllers
                     };
                     auctionService = new AuctionService()
                     {
-                        Notify_mongodbConnStr = mh.notify_mongodbConnStr_testnet,
-                        Notify_mongodbDatabase = mh.notify_mongodbDatabase_testnet,
                         mh = mh,
                         Block_mongodbConnStr = mh.block_mongodbConnStr_testnet,
                         Block_mongodbDatabase = mh.block_mongodbDatabase_testnet,
-                        queryDomainCollection = mh.queryDomainCollection_testnet,
-                        queryBidListCollection = mh.queryBidListCollection_testnet,
                         auctionRecharge = auctionRechargetTestNet,
-                        domainStateCol = mh.domainStateCol_testnet,
-                        domainUserStateCol = mh.domainUserStateCol_testnet
                     };
                     bonusService = new BonusService
                     {
@@ -131,17 +125,10 @@ namespace NEL_Wallet_API.Controllers
                     };
                     auctionService = new AuctionService()
                     {
-                        Notify_mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
-                        Notify_mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
                         mh = mh,
                         Block_mongodbConnStr = mh.block_mongodbConnStr_mainnet,
                         Block_mongodbDatabase = mh.block_mongodbDatabase_mainnet,
-                        queryDomainCollection = mh.queryDomainCollection_mainnet,
-                        queryBidListCollection = mh.queryBidListCollection_mainnet,
-                        auctionRecharge = auctionRechargetMainNet,
-                        domainStateCol = mh.domainStateCol_mainnet,
-                        domainUserStateCol = mh.domainUserStateCol_mainnet
-
+                        auctionRecharge = auctionRechargetMainNet
                     };
                     bonusService = new BonusService
                     {
@@ -266,42 +253,6 @@ namespace NEL_Wallet_API.Controllers
                         else
                         {
                             result = bonusService.getBonusHistByAddressNew(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
-                        }
-                        break;
-
-                    // 查询域名状态
-                    case "getdomainstate":
-                        result = auctionService.getDomainState(req.@params[0].ToString(), req.@params[1].ToString());
-                        break;
-                    // 根据地址查询竞拍域名列表(域名支持模糊匹配)
-                    case "searchdomainbyaddress":
-                        if (req.@params.Length < 3)
-                        {
-                            result = auctionService.getBidListByAddressLikeDomain(req.@params[0].ToString(), req.@params[1].ToString());
-                        } else
-                        {
-                            result = auctionService.getBidListByAddressLikeDomain(req.@params[0].ToString(), req.@params[1].ToString(), int.Parse(req.@params[2].ToString()), int.Parse(req.@params[3].ToString()));
-                        }
-                        break;
-                    // 根据地址查询竞拍域名列表
-                    case "getbidlistbyaddress":
-                        if (req.@params.Length < 3)
-                        {
-                            result = auctionService.getBidListByAddress(req.@params[0].ToString());
-                        } else
-                        {
-                            result = auctionService.getBidListByAddress(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
-                        }
-                        break;
-                    // 根据域名查询域名竞拍详情(已更新为根据竞拍id查询)
-                    case "getbiddetailbydomain":
-                        if (req.@params.Length < 3)
-                        {
-                            result = auctionService.getBidDetailByAuctionId(req.@params[0].ToString());
-                        }
-                        else
-                        {
-                            result = auctionService.getBidDetailByAuctionId(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
                         }
                         break;
                     // 根据地址查询域名
