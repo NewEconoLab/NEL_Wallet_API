@@ -36,6 +36,80 @@ namespace NEL_Wallet_API.Controllers
                     return null;
                 }
                 JObject bonus = (JObject)addrbonus[0];
+                return new JObject() {
+                            {"address", bonus["addr"] },
+                            {"balance", bonus["balance"] },
+                            {"addrBonus", bonus["send"] },
+                            {"height", bonus["height"] },
+                };
+            }).Where(p => p != null).ToArray();
+
+
+            // 分红总量快照
+            long[] heightArr = res.Select(p => long.Parse(p["height"].ToString())).Distinct().ToArray();
+            string totalBonusFindstr = MongoFieldHelper.toFilter(heightArr, "height").ToString();
+            JArray totalBonusRes = mh.GetData(Bonus_mongodbConnStr, Bonus_mongodbDatabase, "TotalSnapShot", totalBonusFindstr);
+            Dictionary<long, decimal> totalBonusDict = null;
+            if(totalBonusRes != null && totalBonusRes.Count > 0)
+            {
+                totalBonusDict = totalBonusRes.ToDictionary(k => long.Parse(k["height"].ToString()), v => decimal.Parse(v["totalValue"].ToString()));
+            }
+
+            // 区块时间
+            string blocktimeFindstr = MongoFieldHelper.toFilter(heightArr, "index").ToString();
+            string blocktimeFieldstr = new JObject() { {"index",1 }, { "time", 1 } }.ToString();
+            JArray blocktimeRes = mh.GetDataWithField(Block_mongodbConnStr, Block_mongodbDatabase, "block", blocktimeFieldstr, blocktimeFindstr);
+            Dictionary<long, long> blocktimeDict = null;
+            if (blocktimeRes != null && blocktimeRes.Count > 0)
+            {
+                blocktimeDict = blocktimeRes.ToDictionary(k => long.Parse(k["index"].ToString()), v => long.Parse(v["time"].ToString()));
+            }
+            res = res.Select(p =>
+            {
+                long height = long.Parse(p["height"].ToString());
+                if(totalBonusDict != null && totalBonusDict.ContainsKey(height))
+                {
+                    p["totalValue"] = totalBonusDict.GetValueOrDefault(height);
+                } else
+                {
+                    p["totalValue"] = 0;
+                }
+
+                if(blocktimeDict != null && blocktimeDict.ContainsKey(height))
+                {
+                    p["blocktime"] = blocktimeDict.GetValueOrDefault(height);
+                } else
+                {
+                    p["blocktime"] = 0;
+                }
+                JObject jo = (JObject)p;
+                jo.Remove("height");
+                return jo;
+            }).ToArray();
+
+            return new JArray()
+            {
+                new JObject() {{"count", res.Count()}, { "list",new JArray() { res.Skip(pageSize*(pageNum-1)).Take(pageSize) } } }
+            };
+
+        }
+        public JArray getBonusHistByAddressNewOld(string address, int pageNum = 1, int pageSize = 10)
+        {
+            List<String> list = mh.listCollection(Bonus_mongodbConnStr, Bonus_mongodbDatabase);
+            if (list == null && list.Count == 0)
+            {
+                return new JArray() { };
+            }
+            string findstr = new JObject() { { "addr", address } }.ToString();
+            JToken[] res = list.Where(p => p.StartsWith("Snapshot_NNC_") && !p.Contains("_test")).Select(p =>
+            {
+                string coll = p;
+                JArray addrbonus = mh.GetData(Bonus_mongodbConnStr, Bonus_mongodbDatabase, coll, findstr);
+                if (addrbonus == null || addrbonus.Count == 0)
+                {
+                    return null;
+                }
+                JObject bonus = (JObject)addrbonus[0];
                 JArray totalbonus = mh.GetData(Bonus_mongodbConnStr, Bonus_mongodbDatabase, "TotalSnapShot", new JObject() { { "height", bonus["height"] } }.ToString());
                 if (totalbonus == null || totalbonus.Count == 0)
                 {
