@@ -85,7 +85,7 @@ namespace NEL_Wallet_API.Controllers
                 JObject jo = (JObject)p;
                 jo.Remove("height");
                 return jo;
-            }).ToArray();
+            }).OrderByDescending(p => long.Parse(p["blocktime"].ToString())).ToArray();
 
             return new JArray()
             {
