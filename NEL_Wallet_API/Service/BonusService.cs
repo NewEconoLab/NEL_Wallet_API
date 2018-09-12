@@ -56,7 +56,7 @@ namespace NEL_Wallet_API.Controllers
             }).Where(p => p != null).ToArray();
             return new JArray()
             {
-                new JObject() {{"count", res.Count()}, { "list",new JArray() { res } } }
+                new JObject() {{"count", res.Count()}, { "list",new JArray() { res.Skip(pageSize*(pageNum-1)).Take(pageSize) } } }
             };
             
         }
