@@ -36,6 +36,10 @@ namespace NEL_Wallet_API.Controllers
                     return null;
                 }
                 JObject bonus = (JObject)addrbonus[0];
+                if(bonus["txid"] == null || bonus["txid"].ToString() == "")
+                {
+                    return null;
+                }
                 return new JObject() {
                             {"address", bonus["addr"] },
                             {"balance", bonus["balance"] },
@@ -43,6 +47,10 @@ namespace NEL_Wallet_API.Controllers
                             {"height", bonus["height"] },
                 };
             }).Where(p => p != null).ToArray();
+            if(res == null || res.Count() ==0)
+            {
+                return new JArray() { };
+            }
 
 
             // 分红总量快照
