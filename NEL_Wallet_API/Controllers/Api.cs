@@ -18,6 +18,7 @@ namespace NEL_Wallet_API.Controllers
         private CommonService commonService;
         private TransactionService txService;
         private ClaimGasService claimService;
+        private UtxoService utxoService;
 
         private httpHelper hh = new httpHelper();
         private mongoHelper mh = new mongoHelper();
@@ -106,6 +107,13 @@ namespace NEL_Wallet_API.Controllers
                     };
                     // 暂时放在这里，后续考虑单独整出来
                     new Task(() => txService.claimGasLoop()).Start();
+                    utxoService = new UtxoService
+                    {
+                        mh = mh,
+                        mongodbConnStr = mh.notify_mongodbConnStr_testnet,
+                        mongodbDatabase = mh.notify_mongodbDatabase_testnet,
+                        cgasUtxoCol = mh.cgasUtxoCol_testnet
+                    };
                     break;
                 case "mainnet":
                     newAuctionService = new NewAuctionService()
@@ -163,6 +171,13 @@ namespace NEL_Wallet_API.Controllers
                         gasClaimCol = mh.gasClaimCol_mainnet,
                         maxClaimAmount = int.Parse(mh.maxClaimAmount_mainnet),
                     };
+                    utxoService = new UtxoService
+                    {
+                        mh = mh,
+                        mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
+                        mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
+                        cgasUtxoCol = mh.cgasUtxoCol_mainnet
+                    };
                     break;
             }
         }
@@ -177,6 +192,9 @@ namespace NEL_Wallet_API.Controllers
             {
                 switch (req.method)
                 {
+                    case "getavailableutxos":
+                        result = utxoService.getAvailableUtxos(req.@params[0].ToString(), decimal.Parse(req.@params[1].ToString()));
+                        break;
                     case "getauctioninfocount":
                         if (req.@params.Length < 2)
                         {
