@@ -1,4 +1,5 @@
-﻿using NEL_Wallet_API.lib;
+﻿using NEL_Wallet_API.Controllers;
+using NEL_Wallet_API.lib;
 using Newtonsoft.Json.Linq;
 using System.Linq;
 
@@ -48,6 +49,7 @@ namespace NEL_Wallet_API.Service
         private JArray selectUtxo(JArray queyRes, string address, decimal amount)
         {
             JArray res = new JArray() { };
+            long nowtime = TimeHelper.GetTimeStamp();
             decimal calcSum = 0;
             JToken[] jtArr = queyRes.OrderByDescending(p => decimal.Parse(p["value"].ToString())).ToArray();
             foreach (JToken jt in jtArr)
@@ -58,9 +60,11 @@ namespace NEL_Wallet_API.Service
                 JObject jo = (JObject)jt;
                 jo.Remove("markAddress");
                 jo.Add("markAddress", address);
+                jo.Remove("markTime");
+                jo.Add("markTime", nowtime);
                 string newdata = jo.ToString();
                 string findstr = new JObject() { { "txid", jt["txid"] }, { "n", jt["n"] }, { "value", jt["value"] }, { "markAddress", "0" } }.ToString();
-                if (markUtxo(findstr, newdata) != "suc") continue;
+                if (!markUtxo(findstr, newdata)) continue;
                 calcSum += decimal.Parse(jt["value"].ToString());
                 res.Add(new JObject(){
                             { "txid",jt["txid"]},
@@ -72,12 +76,12 @@ namespace NEL_Wallet_API.Service
             return res;
         }
 
-        private string markUtxo(string findstr, string newdata)
+        private bool markUtxo(string findstr, string newdata)
         {
             string res = mh.ReplaceData(mongodbConnStr, mongodbDatabase, cgasUtxoCol, findstr, newdata);
             // 检查返回值,是否标记成功
 
-            return res;
+            return res == "suc";
         }
     }
 }
