@@ -29,7 +29,9 @@ namespace NEL_Wallet_API.Service
         {
             JObject stateFilter = MongoFieldHelper.toFilter(new string[] { AuctionState.STATE_START, AuctionState.STATE_CONFIRM, AuctionState.STATE_RANDOM, AuctionState.STATE_END }, "auctionState");
             JObject addressFilter = new JObject() { {"$or", new JArray() { new JObject() { { "addwholist.address", address } }, new JObject() { { "startAddress", address } }, new JObject() { { "endAddress", address } } } } };
-            JObject rootFilter = MongoFieldHelper.likeFilter("fulldomain", root);
+            //JObject rootFilter = MongoFieldHelper.likeFilter("fulldomain", root);
+            string parenthash = DomainHelper.nameHash(root.Substring(1)).ToString();
+            JObject rootFilter = new JObject() { {"parenthash", parenthash } };
             string findStr = new JObject() { { "$and", new JArray() { stateFilter, addressFilter, rootFilter } } }.ToString();
             string sortStr = new JObject() { { "startTime.blockindex", -1} }.ToString();
             //JArray res = mh.GetDataPages(mongodbConnStr, mongodbDatabase, auctionStateCol, sortStr, pageSize, pageNum, findStr);
