@@ -39,5 +39,21 @@ namespace NEL_Wallet_API.Service
                 return jo;
             }).ToArray() };
         }
+
+        public JArray getResolvedAddress(string fulldomain)
+        {
+            int split = fulldomain.IndexOf(".");
+            string domain = fulldomain.Substring(0, split);
+            string root = fulldomain.Substring(split+1);
+            string parenthash = DomainHelper.nameHash(root).ToString();
+            string findstr = new JObject() { { "domain", domain}, { "parenthash", parenthash }, { "protocol", "addr" } }.ToString();
+            string fieldstr = MongoFieldHelper.toReturn(new string[] {"TTL", "data" }).ToString();
+            JArray queryRes = mh.GetDataWithField(notify_mongodbConnStr, notify_mongodbDatabase, domainOwnerCol, fieldstr, findstr);
+            if (queryRes == null || queryRes.Count == 0)
+            {
+                return new JArray() { };
+            }
+            return queryRes;
+        }
     }
 }

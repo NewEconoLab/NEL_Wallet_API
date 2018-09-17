@@ -192,6 +192,9 @@ namespace NEL_Wallet_API.Controllers
             {
                 switch (req.method)
                 {
+                    case "getresolvedaddress":
+                        result = domainService.getResolvedAddress(req.@params[0].ToString());
+                        break;
                     case "getavailableutxos":
                         result = utxoService.getAvailableUtxos(req.@params[0].ToString(), decimal.Parse(req.@params[1].ToString()));
                         break;
