@@ -37,6 +37,13 @@ namespace NEL_Wallet_API.Controllers
                 res.Add("txid", txid);
             }
             else*/
+            if(txid == null || txid == "")
+            {
+                res = new JObject();
+                res.Add("errCode", TxState.TX_FAILD.code);
+                res.Add("errMessage", TxState.TX_FAILD.codeMessage);
+                res.Add("txid", txid);
+            } else 
             {
                 // 保存交易状态
                 saveTxState(txid, TxState.TX_WAITING);

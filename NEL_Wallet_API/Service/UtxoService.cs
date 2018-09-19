@@ -15,7 +15,7 @@ namespace NEL_Wallet_API.Service
         public JArray getAvailableUtxos(string address, decimal amount)
         {
             //
-            string findstr = new JObject() { { "markAddresss", address} }.ToString();
+            string findstr = new JObject() { { "markAddress", address} }.ToString();
             JArray queryRes = mh.GetData(mongodbConnStr, mongodbDatabase, cgasUtxoCol, findstr);
             if(queryRes != null && queryRes.Count != 0)
             {
