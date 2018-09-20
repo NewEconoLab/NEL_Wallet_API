@@ -18,6 +18,7 @@ namespace NEL_Wallet_API.lib
         public string analy_mongodbDatabase_testnet = string.Empty;
         public string notify_mongodbConnStr_testnet = string.Empty;
         public string notify_mongodbDatabase_testnet = string.Empty;
+        public string neoCliJsonRPCUrl_testnet = string.Empty;
         public string nelJsonRPCUrl_testnet = string.Empty;
         public string bonusConnStr_testnet = string.Empty;
         public string bonusDatabase_testnet = string.Empty;
@@ -29,13 +30,10 @@ namespace NEL_Wallet_API.lib
         public string analy_mongodbDatabase_mainnet = string.Empty;
         public string notify_mongodbConnStr_mainnet = string.Empty;
         public string notify_mongodbDatabase_mainnet = string.Empty;
+        public string neoCliJsonRPCUrl_mainnet = string.Empty;
         public string nelJsonRPCUrl_mainnet = string.Empty;
         
-        /*public string queryDomainCollection_testnet = string.Empty;
-        public string queryDomainCollection_mainnet = string.Empty;
-        public string queryBidListCollection_testnet = string.Empty; 
-        public string queryBidListCollection_mainnet = string.Empty;
-        */
+        
         public string bonusNotifyCol_testnet = string.Empty;
         public string bonusNotifyFrom_testnet = string.Empty;
         public string bonusNotifyCol_mainnet = string.Empty;
@@ -47,13 +45,6 @@ namespace NEL_Wallet_API.lib
         public string domainOwnerCol_testnet = string.Empty;
         public string domainOwnerCol_mainnet = string.Empty;
         
-        /*
-        public string domainUserStateCol_testnet = string.Empty;
-        public string domainUserStateCol_mainnet = string.Empty;
-        public string domainStateCol_testnet = string.Empty;
-        public string domainStateCol_mainnet = string.Empty;
-        */
-
         public string id_neo = string.Empty;
         public string id_gas = string.Empty;
         public string prikeywif_testnet = string.Empty;
@@ -87,6 +78,7 @@ namespace NEL_Wallet_API.lib
             analy_mongodbDatabase_testnet = config["analy_mongodbDatabase_testnet"];
             notify_mongodbConnStr_testnet = config["notify_mongodbConnStr_testnet"];
             notify_mongodbDatabase_testnet = config["notify_mongodbDatabase_testnet"];
+            neoCliJsonRPCUrl_testnet = config["neoCliJsonRPCUrl_testnet"];
             nelJsonRPCUrl_testnet = config["nelJsonRPCUrl_testnet"];
             bonusConnStr_testnet = config["bonusConnStr_testnet"];
             bonusDatabase_testnet = config["bonusDatabase_testnet"];
@@ -97,14 +89,9 @@ namespace NEL_Wallet_API.lib
             analy_mongodbDatabase_mainnet = config["analy_mongodbDatabase_mainnet"];
             notify_mongodbConnStr_mainnet = config["notify_mongodbConnStr_mainnet"];
             notify_mongodbDatabase_mainnet = config["notify_mongodbDatabase_mainnet"];
+            neoCliJsonRPCUrl_mainnet = config["neoCliJsonRPCUrl_mainnet"];
             nelJsonRPCUrl_mainnet = config["nelJsonRPCUrl_mainnet"];
-            /*
-            queryDomainCollection_testnet = config["queryDomainCollection_testnet"];
-            queryDomainCollection_mainnet = config["queryDomainCollection_mainnet"];
-
-            queryBidListCollection_testnet = config["queryBidListCollection_testnet"];
-            queryBidListCollection_mainnet = config["queryBidListCollection_mainnet"];
-            */
+            
             bonusNotifyCol_testnet = config["bonusNotifyCol_testnet"];
             bonusNotifyFrom_testnet = config["bonusNotifyFrom_testnet"];
             bonusNotifyCol_mainnet = config["bonusNotifyCol_mainnet"];
@@ -117,12 +104,6 @@ namespace NEL_Wallet_API.lib
             domainOwnerCol_testnet = config["domainOwnerCol_testnet"];
             domainOwnerCol_mainnet = config["domainOwnerCol_mainnet"];
 
-            /*
-            domainUserStateCol_testnet = config["domainUserStateCol_testnet"];
-            domainUserStateCol_mainnet = config["domainUserStateCol_mainnet"];
-            domainStateCol_testnet = config["domainStateCol_testnet"];
-            domainStateCol_mainnet = config["domainStateCol_mainnet"];
-            */
             id_neo = config["id_neo"];
             id_gas = config["id_gas"];
             prikeywif_testnet = config["prikeywif_testnet"];
@@ -354,7 +335,17 @@ namespace NEL_Wallet_API.lib
             var client = new MongoClient(mongodbConnStr);
             var database = client.GetDatabase(mongodbDatabase);
             var collection = database.GetCollection<BsonDocument>(coll);
-            collection.UpdateMany(BsonDocument.Parse(Jcondition), BsonDocument.Parse(Jdata));
+            try
+            {
+
+
+                collection.UpdateOne(BsonDocument.Parse(Jcondition), BsonDocument.Parse(Jdata));
+            }
+            catch (Exception e)
+            {
+                Console.Write(""+e);
+            }
+            //collection.UpdateOne(BsonDocument.Parse(Jcondition), BsonDocument.Parse(Jdata));
 
             client = null;
         }

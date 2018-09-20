@@ -16,10 +16,13 @@ namespace NEL_Wallet_API.Controllers
         private BonusService bonusService;
         private DomainService domainService;
         private CommonService commonService;
-        private TransactionService txService;
         private ClaimGasService claimService;
         private UtxoService utxoService;
 
+        private ClaimGasTransaction claimTx4testnet;
+        private AuctionRechargeTransaction rechargeTx4testnet;
+        private AuctionRechargeTransaction rechargeTx4mainnet;
+        
         private httpHelper hh = new httpHelper();
         private mongoHelper mh = new mongoHelper();
 
@@ -45,7 +48,7 @@ namespace NEL_Wallet_API.Controllers
                         Notify_mongodbConnStr = mh.notify_mongodbConnStr_testnet,
                         Notify_mongodbDatabase = mh.notify_mongodbDatabase_testnet,
                         mh = mh,
-                        nelJsonRPCUrl = mh.nelJsonRPCUrl_testnet,
+                        nelJsonRPCUrl = mh.neoCliJsonRPCUrl_testnet,
                         rechargeCollection = mh.rechargeCollection_testnet
                     };
                     auctionService = new AuctionService()
@@ -90,7 +93,7 @@ namespace NEL_Wallet_API.Controllers
                         gasClaimCol = mh.gasClaimCol_testnet,
                         maxClaimAmount = int.Parse(mh.maxClaimAmount_testnet),
                     };
-                    txService = new TransactionService
+                    claimTx4testnet = new ClaimGasTransaction
                     {
                         nelJsonRpcUrl = mh.nelJsonRPCUrl_testnet,
                         assetid = mh.id_gas,
@@ -106,7 +109,7 @@ namespace NEL_Wallet_API.Controllers
                         checkTxCount = int.Parse(mh.checkTxCount_testnet)
                     };
                     // 暂时放在这里，后续考虑单独整出来
-                    new Task(() => txService.claimGasLoop()).Start();
+                    new Task(() => claimTx4testnet.claimGasLoop()).Start();
                     utxoService = new UtxoService
                     {
                         mh = mh,
@@ -114,6 +117,16 @@ namespace NEL_Wallet_API.Controllers
                         mongodbDatabase = mh.notify_mongodbDatabase_testnet,
                         cgasUtxoCol = mh.cgasUtxoCol_testnet
                     };
+                    rechargeTx4testnet = new AuctionRechargeTransaction
+                    {
+                        mh = mh,
+                        notify_mongodbConnStr = mh.notify_mongodbConnStr_testnet,
+                        notify_mongodbDatabase = mh.notify_mongodbDatabase_testnet,
+                        cgasMergeTxCol = mh.rechargeCollection_testnet,
+                        neoCliJsonRPCUrl = mh.neoCliJsonRPCUrl_testnet,
+                        netType = "testnet"
+                    };
+                    new Task(() => rechargeTx4testnet.sendTxLoop()).Start();
                     break;
                 case "mainnet":
                     newAuctionService = new NewAuctionService()
@@ -131,6 +144,7 @@ namespace NEL_Wallet_API.Controllers
                         nelJsonRPCUrl = mh.nelJsonRPCUrl_mainnet,
                         rechargeCollection = mh.rechargeCollection_mainnet
                     };
+
                     auctionService = new AuctionService()
                     {
                         mh = mh,
@@ -178,6 +192,16 @@ namespace NEL_Wallet_API.Controllers
                         mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
                         cgasUtxoCol = mh.cgasUtxoCol_mainnet
                     };
+                    rechargeTx4mainnet = new AuctionRechargeTransaction
+                    {
+                        mh = mh,
+                        notify_mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
+                        notify_mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
+                        cgasMergeTxCol = mh.rechargeCollection_mainnet,
+                        neoCliJsonRPCUrl = mh.neoCliJsonRPCUrl_mainnet,
+                        netType = "mainnet"
+                    };
+                    //new Task(() => rechargeTx4mainnet.sendTxLoop()).Start();
                     break;
             }
         }

@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace NEL_Wallet_API.Service
 {
-    public class TransactionService
+    public class ClaimGasTransaction
     {
         public const long ONE_DAY_SECONDS = 24 * 60 * 60;
         public string nelJsonRpcUrl { get; set; }
