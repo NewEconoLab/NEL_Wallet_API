@@ -142,7 +142,7 @@ namespace NEL_Wallet_API.Service
         }
         public void heartBeat()
         {
-            File.AppendAllText(netType + "_auctionRechargeTx.log", DateTime.Now + " RechargeTxLoop is running");
+            File.AppendAllText(netType + "_auctionRechargeTx.log", DateTime.Now + " RechargeTxLoop is running" + "\r\n");
         }
     }
 }
