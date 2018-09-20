@@ -37,7 +37,7 @@ namespace NEL_Wallet_API.Controllers
                 res.Add("txid", txid);
             }
             else*/
-            if(txid == null || txid == "")
+            if(txid == null || txid == "" || result.ToLower() == "false")
             {
                 res = new JObject();
                 res.Add("errCode", TxState.TX_FAILD.code);
@@ -98,7 +98,7 @@ namespace NEL_Wallet_API.Controllers
                     res = PostTx("sendrawtransaction", txhex2);
                     string result2 = Convert.ToString(res["sendrawtransactionresult"]);
                     string txid2 = Convert.ToString(res["txid"]);
-                    if (result2 != "true" && txid2 == null)
+                    if (txid2 == null || txid2 == "" || result2.ToLower() == "false")
                     {
                         // 第二笔未发送成功
                         saveTxState(txid1, TxState.TX_SECC, txid2, TxState.TX_INTERRUPT, true);
@@ -131,7 +131,7 @@ namespace NEL_Wallet_API.Controllers
                 res = null;
                 try
                 {
-                    PostTx("getrawtransaction", txid);
+                    res = PostTx("getrawtransaction", txid);
                 } catch { }
                 if (res != null)
                 {
@@ -157,7 +157,7 @@ namespace NEL_Wallet_API.Controllers
             string ss = httpHelper.HttpPost(url, postdata);
             if (JObject.Parse(ss)["result"] == null)
             {
-                return null;
+                return new JObject() { };
             }
             JObject res = (JObject)(((JArray)(JObject.Parse(ss)["result"]))[0]);
             return res;
