@@ -27,15 +27,35 @@ namespace NEL_Wallet_API.Controllers
             {
                 return new JArray() { new JObject() { { "vmstate", ""},{ "displayNameList", new JArray() { } } } };
             }
-            
+
+            // 目前取第0号位
+            JObject exe = null;
+            var exes = queryRes[0]["executions"];
+            if ( exes != null || ((JArray)exes).Count() == 0)
+            {
+                exe = (JObject)exes[0];
+            } else
+            {
+                exe = (JObject)queryRes[0];
+            }
+
+            string[] res = null;
+            var notifications = exe["notifications"];
+            if(notifications != null || ((JArray)notifications).Count() == 0)
+            {
+                res = ((JArray)notifications).Select(pp => pp["state"]["value"][0]["value"].ToString()).Select(pp => pp.Hexstring2String()).Distinct().ToArray();
+            }
+            string vmstate = exe["vmstate"].ToString();
+
+            /*
             string[] res = queryRes.Where(p => ((JArray)p["notifications"]).Count() != 0).SelectMany(p =>
             {
                 JArray pArr = (JArray)p["notifications"];
                 return pArr.Select(pp => pp["state"]["value"][0]["value"].ToString()).Select(pp => pp.Hexstring2String()).ToArray();
             }).ToArray();
-
-
+            
             string vmstate = queryRes[0]["vmstate"].ToString();
+            */
             return new JArray() { new JObject() { { "vmstate", vmstate }, { "displayNameList", new JArray() { res } } } };
         }
 
