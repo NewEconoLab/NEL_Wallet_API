@@ -55,7 +55,7 @@ namespace NEL_Wallet_API.Service
                 if (!getTx(txid1)) return "";
 
                 // 检查第二笔交易是否发送
-                TxStateCode txState = null;
+                TxStateCode txState = TxState.TX_WAITING;
                 string errMsg = "";
                 string txid2 = p["txid2"].ToString();
                 if(txid2 == "")
