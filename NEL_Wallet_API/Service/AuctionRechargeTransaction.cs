@@ -102,7 +102,11 @@ namespace NEL_Wallet_API.Service
         {
             var resp = httpHelper.Post(neoCliJsonRPCUrl, "{'jsonrpc':'2.0','method':'getrawtransaction','params':['" + txid + "'],'id':1}", System.Text.Encoding.UTF8, 1);
             JObject res = JObject.Parse(resp);
-            if (res["result"] == null)
+            if(res["error"] != null && res["error"].ToString() != "")
+            {
+                return false;
+            }
+            if (res["result"] == null || res["result"].ToString().Length < 10)
             {
                 return false;
             }
@@ -138,7 +142,7 @@ namespace NEL_Wallet_API.Service
         }
         public void printEx(Exception ex, string txid="")
         {
-            File.AppendAllText(netType + "_auctionRechargeTx.log", DateTime.Now + " txid=" + txid + ",errMsg="+ex.Message + ",errStk="+ex.StackTrace+"\r\n");
+            File.AppendAllText(netType + "_auctionRechargeTx.log", DateTime.Now + " txid=" + txid + ",errMsg="+ex.Message + ",errStk"+ex.StackTrace+"\r\n");
         }
         public void heartBeat()
         {
