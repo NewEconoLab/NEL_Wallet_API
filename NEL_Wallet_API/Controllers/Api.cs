@@ -126,7 +126,7 @@ namespace NEL_Wallet_API.Controllers
                         neoCliJsonRPCUrl = mh.neoCliJsonRPCUrl_testnet,
                         netType = "testnet"
                     };
-                    new Task(() => rechargeTx4testnet.sendTxLoop()).Start();
+                    //new Task(() => rechargeTx4testnet.sendTxLoop()).Start();
                     break;
                 case "mainnet":
                     newAuctionService = new NewAuctionService()
