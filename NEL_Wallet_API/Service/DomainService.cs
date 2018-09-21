@@ -37,7 +37,7 @@ namespace NEL_Wallet_API.Service
                 jo.Add("domain",domain+root);
                 
                 return jo;
-            }).ToArray() };
+            }).OrderByDescending(p => long.Parse(p["ttl"].ToString())).ToArray() };
         }
 
         public JArray getResolvedAddress(string fulldomain)

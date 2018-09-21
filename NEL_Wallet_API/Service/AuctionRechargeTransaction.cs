@@ -138,7 +138,7 @@ namespace NEL_Wallet_API.Service
         }
         public void printEx(Exception ex, string txid="")
         {
-            File.AppendAllText(netType + "_auctionRechargeTx.log", DateTime.Now + " txid=" + txid + ",errMsg="+ex.Message + "\r\n");
+            File.AppendAllText(netType + "_auctionRechargeTx.log", DateTime.Now + " txid=" + txid + ",errMsg="+ex.Message + ",errStk="+ex.StackTrace+"\r\n");
         }
         public void heartBeat()
         {
