@@ -102,15 +102,11 @@ namespace NEL_Wallet_API.Service
         {
             var resp = httpHelper.Post(neoCliJsonRPCUrl, "{'jsonrpc':'2.0','method':'getrawtransaction','params':['" + txid + "'],'id':1}", System.Text.Encoding.UTF8, 1);
             JObject res = JObject.Parse(resp);
-            if(res["error"] != null && res["error"].ToString() != "")
+            if (res["result"] != null && res["result"].ToString().Length > 10)
             {
-                return false;
+                return true;
             }
-            if (res["result"] == null || res["result"].ToString().Length < 10)
-            {
-                return false;
-            }
-            return true;
+            return false;
         }
         private bool sendTx(string txSigned, out string err)
         {
