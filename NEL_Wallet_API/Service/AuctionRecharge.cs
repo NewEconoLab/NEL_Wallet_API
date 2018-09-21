@@ -76,15 +76,15 @@ namespace NEL_Wallet_API.Controllers
             JObject res = null;
             //
             string findstr = new JObject() { { "txid1", txid } }.ToString();
-            string fieldstr = MongoFieldHelper.toReturn(new string[] { "txid2Code" , "txid2CodeMessage" }).ToString();
-            JArray result = mh.GetDataWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, rechargeCollection, findstr);
+            string fieldstr = MongoFieldHelper.toReturn(new string[] { "txid2", "txid2Code" , "txid2CodeMessage" }).ToString();
+            JArray result = mh.GetDataWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, rechargeCollection, fieldstr, findstr);
             if (result != null && result.Count > 0)
             {
                 res = new JObject()
                 {
                     {"errCode", Convert.ToString(result[0]["txid2Code"]) },
                     {"errMessage", Convert.ToString(result[0]["txid2CodeMessage"]) },
-                    {"txid", "" },
+                    {"txid", Convert.ToString(result[0]["txid2"])},
                 };
             }
             else
