@@ -13,6 +13,8 @@ namespace NEL_Wallet_API.Service
         public mongoHelper mh { set; get; }
         public string notify_mongodbConnStr { get; set; }
         public string notify_mongodbDatabase { get; set; }
+        public string block_mongodbConnStr { get; set; }
+        public string block_mongodbDatabase { get; set; }
         public string cgasMergeTxCol { get; set; }
         public int batchSendInterval { get; set; } = 3000;
         public string neoCliJsonRPCUrl { get; set; }
@@ -96,7 +98,12 @@ namespace NEL_Wallet_API.Service
 
         public bool getTx(string txid)
         {
+            // 第一笔交易发送到cli之后，可能还在memcache中，这时rpc查询正常返回，但此时还不能发送第二笔交易。
+            // 先修改为从库中查询该笔交易，若查到，则可以发送第二笔交易；否则，不能发送第二笔交易。
+            /*
             return getTx(neoCliJsonRPCUrl, txid);
+            */
+            return mh.GetDataCount(block_mongodbConnStr, block_mongodbDatabase, "tx", new JObject() { { "txid", txid } }.ToString()) > 0;
         }
         public static bool getTx(string neoCliJsonRPCUrl, string txid)
         {

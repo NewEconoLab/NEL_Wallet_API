@@ -122,6 +122,8 @@ namespace NEL_Wallet_API.Controllers
                         mh = mh,
                         notify_mongodbConnStr = mh.notify_mongodbConnStr_testnet,
                         notify_mongodbDatabase = mh.notify_mongodbDatabase_testnet,
+                        block_mongodbConnStr = mh.block_mongodbConnStr_testnet,
+                        block_mongodbDatabase = mh.block_mongodbDatabase_testnet,
                         cgasMergeTxCol = mh.rechargeCollection_testnet,
                         neoCliJsonRPCUrl = mh.neoCliJsonRPCUrl_testnet,
                         netType = "testnet"
@@ -197,11 +199,13 @@ namespace NEL_Wallet_API.Controllers
                         mh = mh,
                         notify_mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
                         notify_mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
+                        block_mongodbConnStr = mh.block_mongodbConnStr_mainnet,
+                        block_mongodbDatabase = mh.block_mongodbDatabase_mainnet,
                         cgasMergeTxCol = mh.rechargeCollection_mainnet,
                         neoCliJsonRPCUrl = mh.neoCliJsonRPCUrl_mainnet,
                         netType = "mainnet"
                     };
-                    //new Task(() => rechargeTx4mainnet.sendTxLoop()).Start();
+                    new Task(() => rechargeTx4mainnet.sendTxLoop()).Start();
                     break;
             }
         }
