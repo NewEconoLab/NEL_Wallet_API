@@ -1,5 +1,4 @@
-﻿using NEL_Wallet_API.Controllers;
-using NEL_Wallet_API.lib;
+﻿using NEL_Wallet_API.lib;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,12 +7,49 @@ namespace NEL_Wallet_API.Service
 {
     public class NewAuctionService
     {
-        public string auctionStateCol { get; set; }
         public mongoHelper mh { get; set; }
         public string mongodbConnStr { get; set; }
         public string mongodbDatabase { get; set; }
-        
-
+        public string auctionStateCol { get; set; }
+        public string cgasBalanceStateCol { get; set; }
+        public string domainStateCol { get; set; }
+        // 移动端调用：获取注册器竞拍账户余额
+        public JArray getRegisterAddressBalance(string address, string registerhash)
+        {
+            string findstr = new JObject() { { "address", address }, { "register", registerhash } }.ToString();
+            string fieldstr = new JObject() { {"balance",1 } }.ToString();
+            JArray res = mh.GetDataWithField(mongodbConnStr, mongodbDatabase, cgasBalanceStateCol, fieldstr, findstr);
+            if (res == null || res.Count() == 0)
+            {
+                return new JArray();
+            }
+            return new JArray() { res[0] };
+        }
+        // 移动端调用：获取竞拍状态
+        public JArray getAuctionState(string domain)
+        {
+            string findstr = new JObject() { { "fulldomain", domain } }.ToString();
+            string sortstr = new JObject() { { "startTime.blockindex", -1} }.ToString();
+            JArray res = mh.GetDataPages(mongodbConnStr, mongodbDatabase, auctionStateCol, sortstr, 1,1, findstr);
+            if(res == null || res.Count() ==0)
+            {
+                return new JArray();
+            }
+            return new JArray() { res[0] };
+        }
+        // 移动端调用：获取域名信息
+        public JArray getDomainInfo(string domain)
+        {
+            int split = domain.LastIndexOf(".");
+            string findstr = new JObject() { { "domain", domain.Substring(0, split) }, { "parenthash", DomainHelper.nameHash(domain.Substring(split+1)).ToString() } }.ToString();
+            string fieldstr = MongoFieldHelper.toReturn(new string[] { "owner","register","resolver","TTL","parentOwner","root"}).ToString();
+            JArray res = mh.GetDataWithField(mongodbConnStr, mongodbDatabase, domainStateCol, fieldstr, findstr);
+            if(res == null || res.Count() ==0)
+            {
+                return new JArray();
+            }
+            return new JArray() { res[0] };
+        }
         public JArray getAcutionInfoCount(string address, string root=".neo")
         {
             JObject stateFilter = MongoFieldHelper.toFilter(new string[] { AuctionState.STATE_START, AuctionState.STATE_CONFIRM, AuctionState.STATE_RANDOM, AuctionState.STATE_END }, "auctionState");

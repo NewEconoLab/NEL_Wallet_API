@@ -41,7 +41,9 @@ namespace NEL_Wallet_API.Controllers
                         mongodbConnStr = mh.notify_mongodbConnStr_testnet,
                         mongodbDatabase = mh.notify_mongodbDatabase_testnet,
                         mh = mh,
-                        auctionStateCol = mh.auctionStateCol_testnet
+                        auctionStateCol = mh.auctionStateCol_testnet,
+                        domainStateCol = mh.domainOwnerCol_testnet,
+                        cgasBalanceStateCol = mh.cgasBalanceStateCol_testnet,
                     };
                     AuctionRecharge auctionRechargetTestNet = new AuctionRecharge()
                     {
@@ -136,7 +138,9 @@ namespace NEL_Wallet_API.Controllers
                         mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
                         mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
                         mh = mh,
-                        auctionStateCol = mh.auctionStateCol_mainnet
+                        auctionStateCol = mh.auctionStateCol_mainnet,
+                        domainStateCol = mh.domainOwnerCol_mainnet,
+                        cgasBalanceStateCol = mh.cgasBalanceStateCol_mainnet,
                     };
                     AuctionRecharge auctionRechargetMainNet = new AuctionRecharge()
                     {
@@ -220,6 +224,17 @@ namespace NEL_Wallet_API.Controllers
             {
                 switch (req.method)
                 {
+                    // 移动端调用接口
+                    case "getregisteraddressbalance":
+                        result = newAuctionService.getRegisterAddressBalance(req.@params[0].ToString(), req.@params[1].ToString());
+                        break;
+                    case "getauctionstate":
+                        result = newAuctionService.getAuctionState(req.@params[0].ToString());
+                        break;
+                    case "getdomaininfo":
+                        result = newAuctionService.getDomainInfo(req.@params[0].ToString());
+                        break;
+                    //
                     case "getresolvedaddress":
                         result = domainService.getResolvedAddress(req.@params[0].ToString());
                         break;

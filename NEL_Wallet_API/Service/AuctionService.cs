@@ -31,7 +31,7 @@ namespace NEL_Wallet_API.Controllers
             // 目前取第0号位
             JObject exe = null;
             var exes = queryRes[0]["executions"];
-            if ( exes != null || ((JArray)exes).Count() == 0)
+            if ( exes != null && ((JArray)exes).Count() != 0)
             {
                 exe = (JObject)exes[0];
             } else
@@ -41,7 +41,7 @@ namespace NEL_Wallet_API.Controllers
 
             string[] res = null;
             var notifications = exe["notifications"];
-            if(notifications != null || ((JArray)notifications).Count() == 0)
+            if(notifications != null && ((JArray)notifications).Count() != 0)
             {
                 res = ((JArray)notifications).Select(pp => pp["state"]["value"][0]["value"].ToString()).Select(pp => pp.Hexstring2String()).Distinct().ToArray();
             }

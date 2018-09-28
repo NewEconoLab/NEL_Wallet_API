@@ -64,6 +64,8 @@ namespace NEL_Wallet_API.lib
         public string auctionStateCol_mainnet = string.Empty;
         public string cgasUtxoCol_testnet = string.Empty;
         public string cgasUtxoCol_mainnet = string.Empty;
+        public string cgasBalanceStateCol_testnet = string.Empty;
+        public string cgasBalanceStateCol_mainnet = string.Empty;
 
         public mongoHelper() {
             var config = new ConfigurationBuilder()
@@ -125,6 +127,9 @@ namespace NEL_Wallet_API.lib
 
             cgasUtxoCol_testnet = config["cgasUtxoCol_testnet"];
             cgasUtxoCol_mainnet = config["cgasUtxoCol_mainnet"];
+
+            cgasBalanceStateCol_testnet = config["cgasBalanceStateCol_testnet"];
+            cgasBalanceStateCol_mainnet = config["cgasBalanceStateCol_mainnet"];
 
         }
 
