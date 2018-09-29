@@ -117,20 +117,33 @@ namespace NEL_Wallet_API.Service
         }
         private bool sendTx(string txSigned, out string err)
         {
-            return sendSignedTx(neoCliJsonRPCUrl, txSigned, out err);
+            return sendSignedTx(neoCliJsonRPCUrl, txSigned, out err, netType);
         }
 
-        public static bool sendSignedTx(string neoCliJsonRPCUrl, string txSigned, out string err)
+        public static bool sendSignedTx(string neoCliJsonRPCUrl, string txSigned, out string err, string errlog="")
         {
             var resp = httpHelper.Post(neoCliJsonRPCUrl, "{'jsonrpc':'2.0','method':'sendrawtransaction','params':['" + txSigned + "'],'id':1}", System.Text.Encoding.UTF8, 1);
             JObject res = JObject.Parse(resp);
             if(res["result"] == null)
             {
                 err = Convert.ToString(res["error"]);
+                string msg = "sendTx failed, result:" + res.ToString() + ", txSigned:"+getTxidFromSignedTx(txSigned) + "\n";
+                logError(errlog, msg);
                 return false;
             }
             err = "";
-            return (bool)JObject.Parse(resp)["result"];
+            //return (bool)JObject.Parse(resp)["result"];
+            bool flag = (bool)JObject.Parse(resp)["result"];
+            if(!flag)
+            {
+                string msg = "sendTx failed, result:" + res.ToString() + ", txSigned:" + getTxidFromSignedTx(txSigned) + "\n";
+                logError(errlog, msg);
+            }
+            return flag;
+        }
+        private static void logError(string errlogPrefix, string msg)
+        {
+            File.AppendAllText(errlogPrefix + "_error.log", msg);
         }
 
         private string getTxid(string txSigned)
