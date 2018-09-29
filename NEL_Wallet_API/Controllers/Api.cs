@@ -239,7 +239,7 @@ namespace NEL_Wallet_API.Controllers
                         result = domainService.getResolvedAddress(req.@params[0].ToString());
                         break;
                     case "getavailableutxos":
-                        result = utxoService.getAvailableUtxos(req.@params[0].ToString(), decimal.Parse(req.@params[1].ToString()));
+                        result = utxoService.getAvailableUtxos(req.@params[0].ToString(), Convert.ToDecimal(req.@params[1]));
                         break;
                     case "getauctioninfocount":
                         if (req.@params.Length < 2)
