@@ -147,7 +147,7 @@ namespace NEL_Wallet_API.Controllers
                         Notify_mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
                         Notify_mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
                         mh = mh,
-                        nelJsonRPCUrl = mh.nelJsonRPCUrl_mainnet,
+                        nelJsonRPCUrl = mh.neoCliJsonRPCUrl_mainnet,
                         rechargeCollection = mh.rechargeCollection_mainnet
                     };
 
