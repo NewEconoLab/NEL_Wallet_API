@@ -31,7 +31,7 @@ namespace NEL_Wallet_API.Service
             }
 
             // 
-            findstr = new JObject() { { "markAddress", "0" } }.ToString();
+            findstr = new JObject() { { "markAddress", "0" },{ "lockAddress", "0"} }.ToString();
             queryRes = mh.GetData(mongodbConnStr, mongodbDatabase, cgasUtxoCol, findstr);
             if(queryRes == null || queryRes.Count == 0)
             {
