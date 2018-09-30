@@ -280,7 +280,7 @@ namespace NEL_Wallet_API.Controllers
                         }
                         else
                         {
-                            result = claimService.claimGas(req.@params[0].ToString(), decimal.Parse(req.@params[1].ToString()));
+                            result = claimService.claimGas(req.@params[0].ToString(), Convert.ToDecimal(req.@params[1]));
                         }
                         break;
                     // 根据txid查询交易是否成功
