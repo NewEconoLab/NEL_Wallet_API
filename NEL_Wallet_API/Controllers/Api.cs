@@ -241,6 +241,12 @@ namespace NEL_Wallet_API.Controllers
                     case "getavailableutxos":
                         result = utxoService.getAvailableUtxos(req.@params[0].ToString(), Convert.ToDecimal(req.@params[1]));
                         break;
+                    case "getCagsLockUtxo":
+                        if(req.@params.Length>0)
+                            result = utxoService.getCagsLockUtxo(req.@params[0].ToString());
+                        else
+                            result = utxoService.getCagsLockUtxo();
+                        break;
                     case "getauctioninfocount":
                         if (req.@params.Length < 2)
                         {

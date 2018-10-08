@@ -15,9 +15,9 @@ namespace NEL_Wallet_API.Service
         public JArray getAvailableUtxos(string address, decimal amount)
         {
             //
-            string findstr = new JObject() { { "markAddress", address} }.ToString();
+            string findstr = new JObject() { { "markAddress", address } }.ToString();
             JArray queryRes = mh.GetData(mongodbConnStr, mongodbDatabase, cgasUtxoCol, findstr);
-            if(queryRes != null && queryRes.Count != 0)
+            if (queryRes != null && queryRes.Count != 0)
             {
                 return new JArray() {
                     queryRes.Select(p => {
@@ -31,9 +31,9 @@ namespace NEL_Wallet_API.Service
             }
 
             // 
-            findstr = new JObject() { { "markAddress", "0" },{ "lockAddress", "0"} }.ToString();
+            findstr = new JObject() { { "markAddress", "0" }, { "lockAddress", "0" } }.ToString();
             queryRes = mh.GetData(mongodbConnStr, mongodbDatabase, cgasUtxoCol, findstr);
-            if(queryRes == null || queryRes.Count == 0)
+            if (queryRes == null || queryRes.Count == 0)
             {
                 return new JArray() { };
             }
@@ -82,6 +82,15 @@ namespace NEL_Wallet_API.Service
             // 检查返回值,是否标记成功
 
             return res == "suc";
+        }
+
+        public JArray getCagsLockUtxo(string address = null)
+        {
+            string findstr = " { \"lockAddress\" : {\"$ne\":\"0\", $exists: true }}";
+            if (address != null)
+                findstr = new JObject() { { "lockAddress",address} }.ToString();
+            JArray queryRes = mh.GetData(mongodbConnStr, mongodbDatabase, cgasUtxoCol, findstr);
+            return queryRes;
         }
     }
 }
