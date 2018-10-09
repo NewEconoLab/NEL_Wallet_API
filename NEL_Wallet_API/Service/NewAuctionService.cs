@@ -40,8 +40,22 @@ namespace NEL_Wallet_API.Service
         // 移动端调用：获取域名信息
         public JArray getDomainInfo(string domain)
         {
-            int split = domain.LastIndexOf(".");
-            string findstr = new JObject() { { "domain", domain.Substring(0, split) }, { "parenthash", DomainHelper.nameHash(domain.Substring(split+1)).ToString() } }.ToString();
+            string domainSub = null;
+            string parenthash = null;
+            if(domain.StartsWith(".") || !domain.Contains("."))
+            {
+                // 根域名查询
+                domainSub = domain.StartsWith(".") ? domain.Substring(1) : domain;
+                parenthash = "";
+            } else
+            {
+                // 二级域名查询
+                int split = domain.LastIndexOf(".");
+                domainSub = domain.Substring(0, split);
+                parenthash = DomainHelper.nameHash(domain.Substring(split + 1)).ToString();
+            }
+            
+            string findstr = new JObject() { { "domain", domainSub }, { "parenthash", parenthash } }.ToString();
             string fieldstr = MongoFieldHelper.toReturn(new string[] { "owner","register","resolver","TTL","parentOwner","root"}).ToString();
             JArray res = mh.GetDataWithField(mongodbConnStr, mongodbDatabase, domainStateCol, fieldstr, findstr);
             if(res == null || res.Count() ==0)
