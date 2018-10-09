@@ -13,6 +13,19 @@ namespace NEL_Wallet_API.Service
         public string auctionStateCol { get; set; }
         public string cgasBalanceStateCol { get; set; }
         public string domainStateCol { get; set; }
+
+        public JArray getdomainAuctionInfo(string domain)
+        {
+            string findstr = new JObject() { { "fulldomain", domain } }.ToString();
+            string sortstr = new JObject() { { "startTime.blockindex", -1 } }.ToString();
+            string fieldstr = new JObject() { { "auctionState",1} }.ToString();
+            JArray res = mh.GetDataPagesWithField(mongodbConnStr, mongodbDatabase, auctionStateCol, fieldstr, 1, 1, sortstr, findstr);
+            if(res == null ||res.Count() == 0)
+            {
+                return new JArray() { new JObject() { { "auctionState", AuctionState.STATE_NoUsed } } };
+            }
+            return new JArray() { res[0] };
+        }
         // 移动端调用：获取注册器竞拍账户余额
         public JArray getRegisterAddressBalance(string address, string registerhash)
         {
@@ -163,5 +176,6 @@ namespace NEL_Wallet_API.Service
         public const string STATE_END = "0401"; // 触发结束、3D/5D到期结束
         public const string STATE_ABORT = "0501";
         public const string STATE_EXPIRED = "0601";
+        public const string STATE_NoUsed = "0701";
     }
 }

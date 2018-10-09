@@ -224,6 +224,10 @@ namespace NEL_Wallet_API.Controllers
             {
                 switch (req.method)
                 {
+                    // 查询域名竞拍状态
+                    case "getdomainauctioninfo":
+                        result = newAuctionService.getdomainAuctionInfo(req.@params[0].ToString());
+                        break;
                     // 移动端调用接口
                     case "getregisteraddressbalance":
                         result = newAuctionService.getRegisterAddressBalance(req.@params[0].ToString(), req.@params[1].ToString());
