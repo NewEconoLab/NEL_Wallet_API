@@ -111,7 +111,7 @@ namespace NEL_Wallet_API.Controllers
                         checkTxCount = int.Parse(mh.checkTxCount_testnet)
                     };
                     // 暂时放在这里，后续考虑单独整出来
-                    //new Task(() => claimTx4testnet.claimGasLoop()).Start();
+                    new Task(() => claimTx4testnet.claimGasLoop()).Start();
                     utxoService = new UtxoService
                     {
                         mh = mh,
