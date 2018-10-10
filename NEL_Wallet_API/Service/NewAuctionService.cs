@@ -98,13 +98,14 @@ namespace NEL_Wallet_API.Service
             string findStr = new JObject() { { "$and", new JArray() { stateFilter, addressFilter, rootFilter } } }.ToString();
             string sortStr = new JObject() { { "startTime.blockindex", -1} }.ToString();
             //JArray res = mh.GetDataPages(mongodbConnStr, mongodbDatabase, auctionStateCol, sortStr, pageSize, pageNum, findStr);
-            JArray res = mh.GetDataPagesWithField(mongodbConnStr, mongodbDatabase, auctionStateCol, new JObject() { { "addwholist.addpricelist", 0 } }.ToString(), pageSize, pageNum, sortStr, findStr);
+            string fieldStr = new JObject() { { "addwholist.addpricelist", 0 } }.ToString();
+            JArray res = mh.GetDataPagesWithField(mongodbConnStr, mongodbDatabase, auctionStateCol, fieldStr, pageSize, pageNum, sortStr, findStr);
             if(res == null || res.Count == 0)
             {
                 return new JArray() { };
             }
-
-            return new JArray() { new JObject() { {"count",res.Count },{ "list", res} } };
+            long count = mh.GetDataCount(mongodbConnStr, mongodbDatabase, auctionStateCol, findStr);
+            return new JArray() { new JObject() { {"count",count },{ "list", formatRes(res) } } };
         }
 
         public JArray getAuctionInfoByAuctionId(JArray auctionIdsJA, string address = "")
@@ -134,7 +135,7 @@ namespace NEL_Wallet_API.Service
 
             if (address == "")
             {
-                return new JArray() { new JObject() { { "count", res.Count }, { "list", res } } };
+                return new JArray() { new JObject() { { "count", res.Count }, { "list", formatRes(res) } } };
             }
             foreach (JObject jo in res)
             {
@@ -164,7 +165,48 @@ namespace NEL_Wallet_API.Service
                 
             }
 
-            return new JArray() { new JObject() { { "count", res.Count }, { "list", res } } };
+            return new JArray() { new JObject() { { "count", res.Count }, { "list", formatRes(res) } } };
+        }
+
+        private JArray formatRes(JArray res)
+        {
+            return new JArray()
+            {
+                res.Select(p => {
+                    JObject jo = (JObject)p;
+                    string joStr = jo.ToString();
+                    if(joStr.Contains("maxPrice"))
+                    {
+                        string value = jo["maxPrice"].ToString();
+                        value = NumberDecimalHelper.formatDecimal(value);
+                        jo.Remove("maxPrice");
+                        jo.Add("maxPrice", value);
+                    }
+                    if(joStr.Contains("addwholist") && joStr.Contains("totalValue"))
+                    {
+                        JArray ja = JArray.Parse(jo["addwholist"].ToString());
+                        ja = new JArray()
+                        {
+                            ja.Select(pb => {
+                                JObject job = (JObject)pb;
+                                string vb = job["totalValue"].ToString();
+                                vb = NumberDecimalHelper.formatDecimal(vb);
+                                job.Remove("totalValue");
+                                job.Add("totalValue", vb);
+
+                                vb = job["curTotalValue"].ToString();
+                                vb = NumberDecimalHelper.formatDecimal(vb);
+                                job.Remove("curTotalValue");
+                                job.Add("curTotalValue", vb);
+                                return job;
+                            }).ToArray()
+                        };
+                        jo.Remove("addwholist");
+                        jo.Add("addwholist", ja);
+                    }
+                    return jo;
+                }).ToArray()
+            };
         }
 
     }
