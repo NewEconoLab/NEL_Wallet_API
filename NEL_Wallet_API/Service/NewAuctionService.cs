@@ -24,6 +24,7 @@ namespace NEL_Wallet_API.Service
             {
                 return new JArray() { new JObject() { { "auctionState", AuctionState.STATE_NoUsed } } };
             }
+            
             return new JArray() { res[0] };
         }
         // 移动端调用：获取注册器竞拍账户余额
@@ -36,7 +37,12 @@ namespace NEL_Wallet_API.Service
             {
                 return new JArray();
             }
-            return new JArray() { res[0] };
+            JObject jo = (JObject)res[0];
+            string value = jo["balance"].ToString();
+            value = NumberDecimalHelper.formatDecimal(value);
+            jo.Remove("balance");
+            jo.Add("balance", value);
+            return new JArray() { jo };
         }
         // 移动端调用：获取竞拍状态
         public JArray getAuctionState(string domain)
