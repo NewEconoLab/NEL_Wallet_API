@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace NEL_Wallet_API.Controllers
@@ -60,7 +61,7 @@ namespace NEL_Wallet_API.Controllers
             Dictionary<long, decimal> totalBonusDict = null;
             if(totalBonusRes != null && totalBonusRes.Count > 0)
             {
-                totalBonusDict = totalBonusRes.ToDictionary(k => long.Parse(k["height"].ToString()), v => decimal.Parse(v["totalValue"].ToString()));
+                totalBonusDict = totalBonusRes.ToDictionary(k => long.Parse(k["height"].ToString()), v => decimal.Parse(v["totalValue"].ToString(), NumberStyles.Float));
             }
 
             // 区块时间

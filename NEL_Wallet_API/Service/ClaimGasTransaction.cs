@@ -3,6 +3,7 @@ using NEL_Wallet_API.lib;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 
@@ -115,7 +116,7 @@ namespace NEL_Wallet_API.Service
                 p["addr"].ToString(),
                 new ThinNeo.Hash256(p["txid"].ToString()),
                 p["asset"].ToString(),
-                decimal.Parse(p["value"].ToString()),
+                decimal.Parse(p["value"].ToString(), NumberStyles.Float),
                 int.Parse(p["n"].ToString())
                 )).ToArray();
             Dictionary<string, List<Utxo>> res = new Dictionary<string, List<Utxo>>();

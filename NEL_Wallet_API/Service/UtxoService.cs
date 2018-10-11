@@ -1,6 +1,7 @@
 ﻿using NEL_Wallet_API.Controllers;
 using NEL_Wallet_API.lib;
 using Newtonsoft.Json.Linq;
+using System.Globalization;
 using System.Linq;
 
 namespace NEL_Wallet_API.Service
@@ -38,7 +39,7 @@ namespace NEL_Wallet_API.Service
                 return new JArray() { };
             }
 
-            decimal sum = queryRes.Sum(p => decimal.Parse(p["value"].ToString()));
+            decimal sum = queryRes.Sum(p => decimal.Parse(p["value"].ToString(), NumberStyles.Float));
             if (amount > sum)
             {
                 return new JArray() { };
@@ -51,7 +52,7 @@ namespace NEL_Wallet_API.Service
             JArray res = new JArray() { };
             long nowtime = TimeHelper.GetTimeStamp();
             decimal calcSum = 0;
-            JToken[] jtArr = queyRes.OrderByDescending(p => decimal.Parse(p["value"].ToString())).ToArray();
+            JToken[] jtArr = queyRes.OrderByDescending(p => decimal.Parse(p["value"].ToString(), NumberStyles.Float)).ToArray();
             foreach (JToken jt in jtArr)
             {
                 if (calcSum >= amount) break;
@@ -65,14 +66,14 @@ namespace NEL_Wallet_API.Service
                 string newdata = jo.ToString();
                 string findstr = new JObject() { { "txid", jt["txid"] }, { "n", jt["n"] }, { "value", jt["value"] }, { "markAddress", "0" } }.ToString();
                 if (!markUtxo(findstr, newdata)) continue;
-                calcSum += decimal.Parse(jt["value"].ToString());
+                calcSum += decimal.Parse(jt["value"].ToString(), NumberStyles.Float);
                 res.Add(new JObject(){
                             { "txid",jt["txid"]},
                             { "n",jt["n"]},
                             { "value",jt["value"]},
                         });
             }
-            if (res.Sum(p => decimal.Parse(p["value"].ToString())) < amount) return new JArray() { };
+            if (res.Sum(p => decimal.Parse(p["value"].ToString(), NumberStyles.Float)) < amount) return new JArray() { };
             return res;
         }
 

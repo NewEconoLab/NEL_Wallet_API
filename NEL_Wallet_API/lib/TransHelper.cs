@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -76,7 +77,7 @@ namespace NEL_Wallet_API.lib
             Dictionary<string, List<Utxo>> _dir = new Dictionary<string, List<Utxo>>();
             foreach (MyJson.JsonNode_Object j in resJA)
             {
-                Utxo utxo = new Utxo(j["addr"].ToString(), new ThinNeo.Hash256(j["txid"].ToString()), j["asset"].ToString(), decimal.Parse(j["value"].ToString()), int.Parse(j["n"].ToString()));
+                Utxo utxo = new Utxo(j["addr"].ToString(), new ThinNeo.Hash256(j["txid"].ToString()), j["asset"].ToString(), decimal.Parse(j["value"].ToString(), NumberStyles.Float), int.Parse(j["n"].ToString()));
                 if (_dir.ContainsKey(j["asset"].ToString()))
                 {
                     _dir[j["asset"].ToString()].Add(utxo);
