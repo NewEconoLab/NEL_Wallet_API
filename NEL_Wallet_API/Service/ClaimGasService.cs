@@ -162,6 +162,7 @@ namespace NEL_Wallet_API.Service
         }
         private async Task<JObject> asyncApplyGas(List<string> targetAddress, decimal amount, Dictionary<string, List<Utxo>> dir)
         {
+           
             // 转换私钥
             byte[] prikey = accountInfo.prikey;
             byte[] pubkey = accountInfo.pubkey;
@@ -192,6 +193,8 @@ namespace NEL_Wallet_API.Service
             byte[] data = tran.GetRawData();
             string rawdata = ThinNeo.Helper.Bytes2HexString(data);
             byte[] postdata;
+            try
+            {
             string url = TransHelper.MakeRpcUrlPost(nelJsonRpcUrl, "sendrawtransaction", out postdata, new MyJson.JsonNode_ValueString(rawdata));
             var result = await TransHelper.HttpPost(url, postdata);
             Console.WriteLine("result:" + result);
@@ -206,6 +209,10 @@ namespace NEL_Wallet_API.Service
                 return txFail(txid);
             }
             return txSucc(txid);
+            } catch (Exception )
+            {
+                return txFail(txid);
+            }
         }
         
         private JObject txSucc(string txid)

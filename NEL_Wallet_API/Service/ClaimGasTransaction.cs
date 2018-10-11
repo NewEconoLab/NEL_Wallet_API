@@ -67,7 +67,7 @@ namespace NEL_Wallet_API.Service
             JObject rr = handler.getResult();
             string code = rr["code"].ToString();
             string txid = rr["txid"].ToString();
-            if (code == "0000" || code == "3001")
+            if (code == "0000")// || code == "3001")
             {
                 // 若入链成功，则更新状态
                 // if (checkTxHasInBlock(txid))
