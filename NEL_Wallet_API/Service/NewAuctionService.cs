@@ -16,6 +16,7 @@ namespace NEL_Wallet_API.Service
 
         public JArray getdomainAuctionInfo(string domain)
         {
+            domain = domain.ToLower();
             string findstr = new JObject() { { "fulldomain", domain } }.ToString();
             string sortstr = new JObject() { { "startTime.blockindex", -1 } }.ToString();
             string fieldstr = new JObject() { { "auctionState",1} }.ToString();
@@ -47,6 +48,7 @@ namespace NEL_Wallet_API.Service
         // 移动端调用：获取竞拍状态
         public JArray getAuctionState(string domain)
         {
+            domain = domain.ToLower();
             string findstr = new JObject() { { "fulldomain", domain } }.ToString();
             string sortstr = new JObject() { { "startTime.blockindex", -1} }.ToString();
             JArray res = mh.GetDataPages(mongodbConnStr, mongodbDatabase, auctionStateCol, sortstr, 1,1, findstr);
@@ -59,6 +61,7 @@ namespace NEL_Wallet_API.Service
         // 移动端调用：获取域名信息
         public JArray getDomainInfo(string domain)
         {
+            domain = domain.ToLower();
             string domainSub = null;
             string parenthash = null;
             if(domain.StartsWith(".") || !domain.Contains("."))
@@ -85,6 +88,7 @@ namespace NEL_Wallet_API.Service
         }
         public JArray getAcutionInfoCount(string address, string root=".neo")
         {
+            root = root.ToLower();
             JObject stateFilter = MongoFieldHelper.toFilter(new string[] { AuctionState.STATE_START, AuctionState.STATE_CONFIRM, AuctionState.STATE_RANDOM, AuctionState.STATE_END }, "auctionState");
             JObject addressFilter = new JObject() { { "$or", new JArray() { new JObject() { { "addwholist.address", address } }, new JObject() { { "startAddress", address } }, new JObject() { { "endAddress", address } } } } };
             JObject rootFilter = MongoFieldHelper.likeFilter("fulldomain", root);
@@ -96,6 +100,7 @@ namespace NEL_Wallet_API.Service
         }
         public JArray getAuctionInfoByAddress(string address, int pageNum = 1, int pageSize = 10, string root=".neo")
         {
+            root = root.ToLower();
             JObject stateFilter = MongoFieldHelper.toFilter(new string[] { AuctionState.STATE_START, AuctionState.STATE_CONFIRM, AuctionState.STATE_RANDOM, AuctionState.STATE_END }, "auctionState");
             JObject addressFilter = new JObject() { {"$or", new JArray() { new JObject() { { "addwholist.address", address } }, new JObject() { { "startAddress", address } }, new JObject() { { "endAddress", address } } } } };
             //JObject rootFilter = MongoFieldHelper.likeFilter("fulldomain", root);

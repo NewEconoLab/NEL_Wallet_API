@@ -16,6 +16,7 @@ namespace NEL_Wallet_API.Service
 
         public JArray getDomainByAddress(string owner, string root = ".test")
         {
+            root = root.ToLower();
             string parenthash = DomainHelper.nameHash(root.Substring(1)).ToString();
             JObject queryFilter = new JObject() { { "owner", owner },{ "parenthash", parenthash } };
             JObject queryField = MongoFieldHelper.toReturn(new string[] { "domain", "resolver" , "TTL", "data" }) ;
@@ -42,6 +43,7 @@ namespace NEL_Wallet_API.Service
 
         public JArray getResolvedAddress(string fulldomain)
         {
+            fulldomain = fulldomain.ToLower();
             int split = fulldomain.IndexOf(".");
             string domain = fulldomain.Substring(0, split);
             string root = fulldomain.Substring(split+1);
