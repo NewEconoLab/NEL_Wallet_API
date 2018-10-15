@@ -15,7 +15,9 @@ namespace NEL_Wallet_API.lib
         public string block_mongodbConnStr_testnet = string.Empty;
         public string block_mongodbDatabase_testnet = string.Empty;
         public string analy_mongodbConnStr_testnet = string.Empty;
+        public string analy_mongodbConnStrTestnet = string.Empty;
         public string analy_mongodbDatabase_testnet = string.Empty;
+        public string analy_mongodbDatabaseTestnet = string.Empty;
         public string notify_mongodbConnStr_testnet = string.Empty;
         public string notify_mongodbDatabase_testnet = string.Empty;
         public string neoCliJsonRPCUrl_testnet = string.Empty;
@@ -78,6 +80,8 @@ namespace NEL_Wallet_API.lib
             block_mongodbDatabase_testnet = config["block_mongodbDatabase_testnet"];
             analy_mongodbConnStr_testnet = config["analy_mongodbConnStr_testnet"];
             analy_mongodbDatabase_testnet = config["analy_mongodbDatabase_testnet"];
+            analy_mongodbConnStrTestnet = config["analy_mongodbConnStrTestnet"];
+            analy_mongodbDatabaseTestnet = config["analy_mongodbDatabaseTestnet"];
             notify_mongodbConnStr_testnet = config["notify_mongodbConnStr_testnet"];
             notify_mongodbDatabase_testnet = config["notify_mongodbDatabase_testnet"];
             neoCliJsonRPCUrl_testnet = config["neoCliJsonRPCUrl_testnet"];

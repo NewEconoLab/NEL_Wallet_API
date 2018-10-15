@@ -84,6 +84,8 @@ namespace NEL_Wallet_API.Controllers
                         mh = mh,
                         mongodbConnStr = mh.analy_mongodbConnStr_testnet,
                         mongodbDatabase = mh.analy_mongodbDatabase_testnet,
+                        mongodbConnStr_new = mh.analy_mongodbConnStrTestnet,
+                        mongodbDatabase_new = mh.analy_mongodbDatabaseTestnet
                     };
                     claimService = new ClaimGasService
                     {
@@ -336,6 +338,9 @@ namespace NEL_Wallet_API.Controllers
                     // 根据地址查询交易列表
                     case "gettransbyaddress":
                         result = commonService.getTransByAddress(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
+                        break;
+                    case "gettransbyaddressNew":
+                        result = commonService.getTransByAddress_new(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
                         break;
                 }
                 if (result.Count == 0)
