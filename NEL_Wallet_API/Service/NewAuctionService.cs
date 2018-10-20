@@ -19,14 +19,21 @@ namespace NEL_Wallet_API.Service
             domain = domain.ToLower();
             string findstr = new JObject() { { "fulldomain", domain } }.ToString();
             string sortstr = new JObject() { { "startTime.blockindex", -1 } }.ToString();
-            string fieldstr = new JObject() { { "auctionState",1} }.ToString();
-            JArray res = mh.GetDataPagesWithField(mongodbConnStr, mongodbDatabase, auctionStateCol, fieldstr, 1, 1, sortstr, findstr);
-            if(res == null ||res.Count() == 0)
+            //string fieldstr = new JObject() { { "auctionState",1} }.ToString();
+            //JArray res = mh.GetDataPagesWithField(mongodbConnStr, mongodbDatabase, auctionStateCol, fieldstr, 1, 1, sortstr, findstr);
+            JArray res = mh.GetDataPages(mongodbConnStr, mongodbDatabase, auctionStateCol, sortstr, 1, 1, findstr);
+            if (res == null || res.Count() == 0)
             {
-                return new JArray() { new JObject() { { "auctionState", AuctionState.STATE_NoUsed } } };
+                return new JArray();
             }
-            
-            return new JArray() { res[0] };
+
+            return new JArray() { res.Select(p => {
+                  JObject jo = (JObject)p;
+                string maxPrice = NumberDecimalHelper.formatDecimal(p["maxPrice"].ToString());
+                jo.Remove("maxPrice");
+                jo.Add("maxPrice", maxPrice);
+                return jo;
+            }).ToArray()[0] };
         }
         // 移动端调用：获取注册器竞拍账户余额
         public JArray getRegisterAddressBalance(string address, string registerhash)
