@@ -43,8 +43,8 @@ namespace NEL_Wallet_API.Controllers
                 }
                 return new JObject() {
                             {"address", bonus["addr"] },
-                            {"balance", bonus["balance"] },
-                            {"addrBonus", bonus["send"] },
+                            {"balance", NumberDecimalHelper.formatDecimal(bonus["balance"].ToString()) },
+                            {"addrBonus", NumberDecimalHelper.formatDecimal(bonus["send"].ToString()) },
                             {"height", bonus["height"] },
                 };
             }).Where(p => p != null).ToArray();
@@ -58,10 +58,10 @@ namespace NEL_Wallet_API.Controllers
             long[] heightArr = res.Select(p => long.Parse(p["height"].ToString())).Distinct().ToArray();
             string totalBonusFindstr = MongoFieldHelper.toFilter(heightArr, "height").ToString();
             JArray totalBonusRes = mh.GetData(Bonus_mongodbConnStr, Bonus_mongodbDatabase, "TotalSnapShot", totalBonusFindstr);
-            Dictionary<long, decimal> totalBonusDict = null;
+            Dictionary<long, string> totalBonusDict = null;
             if(totalBonusRes != null && totalBonusRes.Count > 0)
             {
-                totalBonusDict = totalBonusRes.ToDictionary(k => long.Parse(k["height"].ToString()), v => decimal.Parse(v["totalValue"].ToString(), NumberStyles.Float));
+                totalBonusDict = totalBonusRes.ToDictionary(k => long.Parse(k["height"].ToString()), v => NumberDecimalHelper.formatDecimal(v["totalValue"].ToString()));
             }
 
             // 区块时间
