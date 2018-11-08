@@ -38,6 +38,7 @@ namespace NEL_Wallet_API.Service
         // 移动端调用：获取注册器竞拍账户余额
         public JArray getRegisterAddressBalance(string address, string registerhash)
         {
+            registerhash = registerhash.StartsWith("0x") ? registerhash: "0x" + registerhash;
             string findstr = new JObject() { { "address", address }, { "register", registerhash } }.ToString();
             string fieldstr = new JObject() { {"balance",1 } }.ToString();
             JArray res = mh.GetDataWithField(mongodbConnStr, mongodbDatabase, cgasBalanceStateCol, fieldstr, findstr);
