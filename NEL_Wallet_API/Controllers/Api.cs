@@ -18,6 +18,7 @@ namespace NEL_Wallet_API.Controllers
         private CommonService commonService;
         private ClaimGasService claimService;
         private UtxoService utxoService;
+        private NNSfixedSellingService nnsFixedSellingService;
 
         private ClaimGasTransaction claimTx4testnet;
         private AuctionRechargeTransaction rechargeTx4testnet;
@@ -36,6 +37,14 @@ namespace NEL_Wallet_API.Controllers
             switch (netnode)
             {
                 case "testnet":
+                    nnsFixedSellingService = new NNSfixedSellingService()
+                    {
+                        mh = mh,
+                        Notify_mongodbConnStr = mh.notify_mongodbConnStr_testnet,
+                        Notify_mongodbDatabase = mh.notify_mongodbDatabase_testnet,
+                        Block_mongodbConnStr = mh.block_mongodbConnStr_testnet,
+                        Block_mongodbDatabase = mh.block_mongodbDatabase_testnet,
+                    };
                     newAuctionService = new NewAuctionService()
                     {
                         mongodbConnStr = mh.notify_mongodbConnStr_testnet,
@@ -135,6 +144,14 @@ namespace NEL_Wallet_API.Controllers
                     new Task(() => rechargeTx4testnet.sendTxLoop()).Start();
                     break;
                 case "mainnet":
+                    nnsFixedSellingService = new NNSfixedSellingService()
+                    {
+                        mh = mh,
+                        Notify_mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
+                        Notify_mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
+                        Block_mongodbConnStr = mh.block_mongodbConnStr_mainnet,
+                        Block_mongodbDatabase = mh.block_mongodbDatabase_mainnet,
+                    };
                     newAuctionService = new NewAuctionService()
                     {
                         mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
@@ -226,6 +243,10 @@ namespace NEL_Wallet_API.Controllers
             {
                 switch (req.method)
                 {
+                    // 查询出售列表
+                    case "getHasBuyListByAddress":
+                        result = nnsFixedSellingService.getHasBuyListByAddress(req.@params[0].ToString());
+                        break;
                     // 查询域名竞拍状态
                     case "getdomainauctioninfo":
                         result = newAuctionService.getdomainAuctionInfo(req.@params[0].ToString());
