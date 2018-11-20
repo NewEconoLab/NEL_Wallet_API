@@ -53,6 +53,7 @@ namespace NEL_Wallet_API.Controllers
                         auctionStateCol = mh.auctionStateCol_testnet,
                         domainStateCol = mh.domainOwnerCol_testnet,
                         cgasBalanceStateCol = mh.cgasBalanceStateCol_testnet,
+                        NNSfixedSellingService = nnsFixedSellingService
                     };
                     AuctionRecharge auctionRechargetTestNet = new AuctionRecharge()
                     {
@@ -87,12 +88,13 @@ namespace NEL_Wallet_API.Controllers
                         notify_mongodbConnStr = mh.notify_mongodbConnStr_testnet,
                         notify_mongodbDatabase = mh.notify_mongodbDatabase_testnet,
                         domainOwnerCol = mh.domainOwnerCol_testnet,
+                        NNSfixedSellingService = nnsFixedSellingService
                     };
                     commonService = new CommonService
                     {
                         mh = mh,
-                        mongodbConnStr = mh.analy_mongodbConnStr_testnet,
-                        mongodbDatabase = mh.analy_mongodbDatabase_testnet,
+                        mongodbConnStr = mh.block_mongodbConnStr_testnet,
+                        mongodbDatabase = mh.block_mongodbDatabase_testnet,
                         mongodbConnStr_new = mh.analy_mongodbConnStrTestnet,
                         mongodbDatabase_new = mh.analy_mongodbDatabaseTestnet
                     };
@@ -160,6 +162,7 @@ namespace NEL_Wallet_API.Controllers
                         auctionStateCol = mh.auctionStateCol_mainnet,
                         domainStateCol = mh.domainOwnerCol_mainnet,
                         cgasBalanceStateCol = mh.cgasBalanceStateCol_mainnet,
+                        NNSfixedSellingService = nnsFixedSellingService
                     };
                     AuctionRecharge auctionRechargetMainNet = new AuctionRecharge()
                     {
@@ -197,8 +200,8 @@ namespace NEL_Wallet_API.Controllers
                     commonService = new CommonService
                     {
                         mh = mh,
-                        mongodbConnStr = mh.analy_mongodbConnStr_mainnet,
-                        mongodbDatabase = mh.analy_mongodbDatabase_mainnet,
+                        mongodbConnStr = mh.block_mongodbConnStr_mainnet,
+                        mongodbDatabase = mh.block_mongodbDatabase_mainnet,
                     };
                     claimService = new ClaimGasService
                     {
@@ -243,21 +246,44 @@ namespace NEL_Wallet_API.Controllers
             {
                 switch (req.method)
                 {
-                    // 查询出售列表
+                    /***
+                     * 新增转让信息和出售信息
+                     * 
+                     * 1. 首页输入框中显示"出售中"
+                     * 2. 首页填写输入框后点击查询详情，显示出售信息：domain + ttl + price
+                     * 3. 我的域名管理中新增是否为出售中的状态
+                     * 4. 我的域名管理中新增已出售域名列表
+                     * 5. 浏览器查询显示初始状态/出售中
+                     * 6. 浏览器查询显示域名owner的变化：领取域名 + 转让域名 + 出售域名
+                     * 
+                     */
+                    // 查询已出售列表
                     case "getHasBuyListByAddress":
-                        result = nnsFixedSellingService.getHasBuyListByAddress(req.@params[0].ToString());
+                        if(req.@params.Length < 4)
+                        {
+                            result = nnsFixedSellingService.getHasBuyListByAddress(req.@params[0].ToString(), req.@params[1].ToString());
+                        } else
+                        {
+                            result = nnsFixedSellingService.getHasBuyListByAddress(req.@params[0].ToString(), req.@params[1].ToString(), int.Parse(req.@params[2].ToString()), int.Parse(req.@params[3].ToString()));
+                        }
                         break;
-                    // 查询域名竞拍状态
+                    // 查询出售信息
+                    case "getNNSfixedSellingInfo":
+                        result = nnsFixedSellingService.getNNSfixedSellingInfo(req.@params[0].ToString());
+                        break;
+                    // 查询域名竞拍状态+(新增是否正在出售中状态0901)
                     case "getdomainauctioninfo":
                         result = newAuctionService.getdomainAuctionInfo(req.@params[0].ToString());
                         break;
-                    // 移动端调用接口
+                    // 移动端调用：获取注册器竞拍账户余额
                     case "getregisteraddressbalance":
                         result = newAuctionService.getRegisterAddressBalance(req.@params[0].ToString(), req.@params[1].ToString());
                         break;
+                    // 移动端调用：获取竞拍状态
                     case "getauctionstate":
                         result = newAuctionService.getAuctionState(req.@params[0].ToString());
                         break;
+                    // 移动端调用：获取域名信息
                     case "getdomaininfo":
                         result = newAuctionService.getDomainInfo(req.@params[0].ToString());
                         break;
@@ -352,7 +378,7 @@ namespace NEL_Wallet_API.Controllers
                             result = bonusService.getBonusHistByAddressNew(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
                         }
                         break;
-                    // 根据地址查询域名
+                    // 根据地址查询域名列表
                     case "getdomainbyaddress":
                         result = domainService.getDomainByAddress(req.@params[0].ToString(), req.@params[1].ToString());
                         break;

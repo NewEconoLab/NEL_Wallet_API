@@ -13,6 +13,7 @@ namespace NEL_Wallet_API.Service
         public string auctionStateCol { get; set; }
         public string cgasBalanceStateCol { get; set; }
         public string domainStateCol { get; set; }
+        public NNSfixedSellingService NNSfixedSellingService { get; set; }
 
         public JArray getdomainAuctionInfo(string domain)
         {
@@ -27,13 +28,21 @@ namespace NEL_Wallet_API.Service
                 return new JArray();
             }
 
-            return new JArray() { res.Select(p => {
-                  JObject jo = (JObject)p;
-                string maxPrice = NumberDecimalHelper.formatDecimal(p["maxPrice"].ToString());
-                jo.Remove("maxPrice");
-                jo.Add("maxPrice", maxPrice);
-                return jo;
-            }).ToArray()[0] };
+            var jo = (JObject)res[0];
+            if(jo["auctionState"].ToString() == "0401")
+            {
+
+                if(NNSfixedSellingService.hasNNfixedSelling(domain, long.Parse(res[0]["startTime"]["blockindex"].ToString())))
+                {
+                    jo.Remove("auctionState");
+                    jo.Add("auctionState", "0901");
+                }
+            }
+            string maxPrice = NumberDecimalHelper.formatDecimal(jo["maxPrice"].ToString());
+            jo.Remove("maxPrice");
+            jo.Add("maxPrice", maxPrice);
+
+            return new JArray() { jo };
         }
         // 移动端调用：获取注册器竞拍账户余额
         public JArray getRegisterAddressBalance(string address, string registerhash)

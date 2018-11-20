@@ -12,14 +12,24 @@ namespace NEL_Wallet_API.Service
         public string notify_mongodbConnStr { get; set; }
         public string notify_mongodbDatabase { get; set; }
         public string domainOwnerCol { get; set; }
+        public NNSfixedSellingService NNSfixedSellingService { get; set; }
 
+
+        private string getNNSfixedSellingState(string domain, long blocktime)
+        {
+            if(NNSfixedSellingService.hasNNfixedSelling(domain, blocktime))
+            {
+                return "0901";
+            }
+            return "";
+        }
 
         public JArray getDomainByAddress(string owner, string root = ".test")
         {
             root = root.ToLower();
             string parenthash = DomainHelper.nameHash(root.Substring(1)).ToString();
             JObject queryFilter = new JObject() { { "owner", owner },{ "parenthash", parenthash } };
-            JObject queryField = MongoFieldHelper.toReturn(new string[] { "domain", "resolver" , "TTL", "data" }) ;
+            JObject queryField = MongoFieldHelper.toReturn(new string[] { "domain", "resolver" , "TTL", "data", "blockindex" }) ;
             JArray queryRes = mh.GetDataWithField(notify_mongodbConnStr, notify_mongodbDatabase, domainOwnerCol, queryField.ToString(), queryFilter.ToString());
             if (queryRes == null || queryRes.Count == 0)
             {
@@ -36,7 +46,7 @@ namespace NEL_Wallet_API.Service
                 string domain = jo["domain"].ToString();
                 jo.Remove("domain");
                 jo.Add("domain",domain+root);
-                
+                jo.Add("state", getNNSfixedSellingState(domain+root, long.Parse(jo["blockindex"].ToString())));
                 return jo;
             }).OrderByDescending(p => long.Parse(p["ttl"].ToString())).ToArray() };
         }
