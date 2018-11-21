@@ -86,13 +86,13 @@ namespace NEL_Wallet_API.Service
         }
         public JArray getHasBuyListByAddress(string address, string root, int pageNum=1, int pageSize=10)
         {
-            /*
+            
             root = root.StartsWith(".") ? root : "."+root;
             var findJo = newOrFilter("fullDomain", root);
             findJo.Add("seller", address);
             findJo.Add("displayName", "NNSfixedSellingBuy");
             string findStr = findJo.ToString();
-            */string findStr = new JObject() { { "seller", address },{ "displayName", "NNSfixedSellingBuy" } }.ToString();
+            //string findStr = new JObject() { { "seller", address },{ "displayName", "NNSfixedSellingBuy" } }.ToString();
             string fieldStr = MongoFieldHelper.toReturn(new string[] { "fullDomain", "blockindex", "price" }).ToString();
             string sortStr = new JObject() { {"blockindex",-1 } }.ToString();
             // count
