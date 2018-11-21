@@ -31,12 +31,13 @@ namespace NEL_Wallet_API.Service
             var jo = (JObject)res[0];
             if(jo["auctionState"].ToString() == "0401")
             {
-
-                if(NNSfixedSellingService.hasNNfixedSelling(domain, long.Parse(res[0]["startTime"]["blockindex"].ToString())))
+                string owner = "";
+                if(NNSfixedSellingService.hasNNfixedSelling(domain, long.Parse(res[0]["startTime"]["blockindex"].ToString()), out owner))
                 {
                     jo.Remove("auctionState");
                     jo.Add("auctionState", "0901");
                 }
+                jo.Add("owner", owner);
             }
             string maxPrice = NumberDecimalHelper.formatDecimal(jo["maxPrice"].ToString());
             jo.Remove("maxPrice");

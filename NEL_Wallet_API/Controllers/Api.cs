@@ -196,6 +196,7 @@ namespace NEL_Wallet_API.Controllers
                         notify_mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
                         notify_mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
                         domainOwnerCol = mh.domainOwnerCol_testnet,
+                        NNSfixedSellingService = nnsFixedSellingService
                     };
                     commonService = new CommonService
                     {

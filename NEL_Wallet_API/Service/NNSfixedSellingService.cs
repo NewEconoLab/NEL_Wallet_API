@@ -18,7 +18,7 @@ namespace NEL_Wallet_API.Service
         public string NNSfixedSellingColl { get; set; } = "0x7a64879a21b80e96a8bc91e0f07adc49b8f3521e";
         public string domainCenterColl { get; set; } = "0xbd3fa97e2bc841292c1e77f9a97a1393d5208b48";
         
-        public bool hasNNfixedSelling(string domain, long blockindex)
+        public bool hasNNfixedSelling(string domain, long blockindex, out string owner)
         {
             string findStr = new JObject() { {"fullDomain", domain.ToLower() },{ "blockindex", new JObject() { {"$gte", blockindex } } } }.ToString();
             string sortStr = new JObject() { { "blockindex", -1 } }.ToString();
@@ -29,9 +29,11 @@ namespace NEL_Wallet_API.Service
                 string displayName = query[0]["displayName"].ToString();
                 if(displayName == "NNSfixedSellingLaunched")
                 {
+                    owner = query[0]["seller"].ToString();
                     return true;
                 }
             }
+            owner = "";
             return false;
         }
         public JArray getNNSfixedSellingInfo(string domain)
