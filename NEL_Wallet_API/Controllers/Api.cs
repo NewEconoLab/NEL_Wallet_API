@@ -392,6 +392,11 @@ namespace NEL_Wallet_API.Controllers
                     case "gettransbyaddress":
                         result = commonService.getTransByAddress_new(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
                         break;
+
+                    // test
+                    case "getnodetype":
+                        result = new JArray { new JObject { { "nodeType", netnode } } };
+                        break;
                 }
                 if (result.Count == 0)
                 {
