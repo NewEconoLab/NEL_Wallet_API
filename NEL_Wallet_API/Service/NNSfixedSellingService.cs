@@ -51,7 +51,7 @@ namespace NEL_Wallet_API.Service
             string ttl = query[0]["TTL"].ToString();
 
             findStr = new JObject() { {"fullDomain", domain } }.ToString();
-            fieldStr = new JObject() { {"price",1 }, { "displayName", 1 } }.ToString();
+            fieldStr = new JObject() { {"price",1 }, { "displayName", 1 },{ "seller",1 } }.ToString();
             sortStr = new JObject() { {"blockindex", -1 } }.ToString();
             query = mh.GetDataPagesWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, NNSfixedSellingColl, fieldStr, 1, 1, sortStr, findStr);
 
@@ -63,6 +63,7 @@ namespace NEL_Wallet_API.Service
                 if (query[0]["displayName"].ToString() == "NNSfixedSellingLaunched")
                 {
                     state = "0901";
+                    owner = query[0]["seller"].ToString() ;
                 }
             }
 
