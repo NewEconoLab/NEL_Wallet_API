@@ -79,8 +79,10 @@ namespace NEL_Wallet_API.Controllers
                         BonusNofityFrom = mh.bonusNotifyFrom_testnet,
                         Block_mongodbConnStr = mh.block_mongodbConnStr_testnet,
                         Block_mongodbDatabase = mh.block_mongodbDatabase_testnet,
-                        Bonus_mongodbConnStr = mh.bonusConnStr_testnet,
-                        Bonus_mongodbDatabase = mh.bonusDatabase_testnet,
+                        //Bonus_mongodbConnStr = mh.bonusConnStr_testnet,
+                        Bonus_mongodbConnStr = mh.snapshot_mongodbConnStr_testnet,
+                        //Bonus_mongodbDatabase = mh.bonusDatabase_testnet,
+                        Bonus_mongodbDatabase = mh.snapshot_mongodbDatabase_testnet,
                         CurrentBonusCol = mh.currentBonusCol_testnet,
                         BonusCol = mh.bonusCol_testnet
                     };
@@ -97,8 +99,10 @@ namespace NEL_Wallet_API.Controllers
                         mh = mh,
                         mongodbConnStr = mh.block_mongodbConnStr_testnet,
                         mongodbDatabase = mh.block_mongodbDatabase_testnet,
-                        mongodbConnStr_new = mh.analy_mongodbConnStrTestnet,
-                        mongodbDatabase_new = mh.analy_mongodbDatabaseTestnet
+                        //mongodbConnStr_new = mh.analy_mongodbConnStrTestnet,
+                        mongodbConnStr_new = mh.analy_mongodbConnStr_testnet,
+                        //mongodbDatabase_new = mh.analy_mongodbDatabaseTestnet,
+                        mongodbDatabase_new = mh.analy_mongodbDatabase_testnet,
                     };
                     claimService = new ClaimGasService
                     {
@@ -191,8 +195,10 @@ namespace NEL_Wallet_API.Controllers
                         BonusNofityFrom = mh.bonusNotifyFrom_mainnet,
                         Block_mongodbConnStr = mh.block_mongodbConnStr_mainnet,
                         Block_mongodbDatabase = mh.block_mongodbDatabase_mainnet,
-                        Bonus_mongodbConnStr = mh.bonusConnStr_mainnet,
-                        Bonus_mongodbDatabase = mh.bonusDatabase_mainnet,
+                        //Bonus_mongodbConnStr = mh.bonusConnStr_mainnet,
+                        Bonus_mongodbConnStr = mh.snapshot_mongodbConnStr_mainnet,
+                        //Bonus_mongodbDatabase = mh.bonusDatabase_mainnet,
+                        Bonus_mongodbDatabase = mh.snapshot_mongodbDatabase_mainnet,
                         CurrentBonusCol = mh.currentBonusCol_mainnet,
                         BonusCol =mh.bonusCol_mainnet
                     };
@@ -209,8 +215,10 @@ namespace NEL_Wallet_API.Controllers
                         mh = mh,
                         mongodbConnStr = mh.block_mongodbConnStr_mainnet,
                         mongodbDatabase = mh.block_mongodbDatabase_mainnet,
-                        mongodbConnStr_new = mh.analy_mongodbConnStrMainnet,
-                        mongodbDatabase_new = mh.analy_mongodbDatabaseMainnet
+                        //mongodbConnStr_new = mh.analy_mongodbConnStrMainnet,
+                        mongodbConnStr_new = mh.analy_mongodbConnStr_mainnet,
+                        //mongodbDatabase_new = mh.analy_mongodbDatabaseMainnet
+                        mongodbDatabase_new = mh.analy_mongodbDatabase_mainnet
                     };
                     claimService = new ClaimGasService
                     {
