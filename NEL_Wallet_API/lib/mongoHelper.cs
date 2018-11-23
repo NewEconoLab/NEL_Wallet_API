@@ -11,34 +11,36 @@ namespace NEL_Wallet_API.lib
 {
     public class mongoHelper
     {
-
         public string block_mongodbConnStr_testnet = string.Empty;
         public string block_mongodbDatabase_testnet = string.Empty;
         public string analy_mongodbConnStr_testnet = string.Empty;
         public string analy_mongodbDatabase_testnet = string.Empty;
-
-        public string analy_mongodbConnStrTestnet = string.Empty;
-        public string analy_mongodbDatabaseTestnet = string.Empty;
         public string notify_mongodbConnStr_testnet = string.Empty;
         public string notify_mongodbDatabase_testnet = string.Empty;
+        public string snapshot_mongodbConnStr_testnet = string.Empty;
+        public string snapshot_mongodbDatabase_testnet = string.Empty;
         public string neoCliJsonRPCUrl_testnet = string.Empty;
         public string nelJsonRPCUrl_testnet = string.Empty;
-        public string bonusConnStr_testnet = string.Empty;
-        public string bonusDatabase_testnet = string.Empty;
-
-
+        
         public string block_mongodbConnStr_mainnet = string.Empty;
         public string block_mongodbDatabase_mainnet = string.Empty;
         public string analy_mongodbConnStr_mainnet = string.Empty;
         public string analy_mongodbDatabase_mainnet = string.Empty;
-        public string analy_mongodbConnStrMainnet = string.Empty;
-        public string analy_mongodbDatabaseMainnet = string.Empty;
         public string notify_mongodbConnStr_mainnet = string.Empty;
         public string notify_mongodbDatabase_mainnet = string.Empty;
+        public string snapshot_mongodbConnStr_mainnet = string.Empty;
+        public string snapshot_mongodbDatabase_mainnet = string.Empty;
         public string neoCliJsonRPCUrl_mainnet = string.Empty;
         public string nelJsonRPCUrl_mainnet = string.Empty;
-        
-        
+
+        /*
+        public string analy_mongodbConnStrTestnet = string.Empty;
+        public string analy_mongodbDatabaseTestnet = string.Empty;
+        public string bonusConnStr_testnet = string.Empty;
+        public string bonusDatabase_testnet = string.Empty;
+        public string analy_mongodbConnStrMainnet = string.Empty;
+        public string analy_mongodbDatabaseMainnet = string.Empty;
+        */
         public string bonusNotifyCol_testnet = string.Empty;
         public string bonusNotifyFrom_testnet = string.Empty;
         public string bonusNotifyCol_mainnet = string.Empty;
@@ -89,27 +91,33 @@ namespace NEL_Wallet_API.lib
             block_mongodbDatabase_testnet = config["block_mongodbDatabase_testnet"];
             analy_mongodbConnStr_testnet = config["analy_mongodbConnStr_testnet"];
             analy_mongodbDatabase_testnet = config["analy_mongodbDatabase_testnet"];
-            analy_mongodbConnStrTestnet = config["analy_mongodbConnStrTestnet"];
-            analy_mongodbDatabaseTestnet = config["analy_mongodbDatabaseTestnet"];
-            analy_mongodbConnStrMainnet = config["analy_mongodbConnStrMainnet"];
-            analy_mongodbDatabaseMainnet = config["analy_mongodbDatabaseMainnet"];
-
             notify_mongodbConnStr_testnet = config["notify_mongodbConnStr_testnet"];
             notify_mongodbDatabase_testnet = config["notify_mongodbDatabase_testnet"];
+            snapshot_mongodbConnStr_testnet = config["snapshot_mongodbConnStr_testnet"];
+            snapshot_mongodbDatabase_testnet = config["snapshot_mongodbDatabase_testnet"];
             neoCliJsonRPCUrl_testnet = config["neoCliJsonRPCUrl_testnet"];
             nelJsonRPCUrl_testnet = config["nelJsonRPCUrl_testnet"];
-            bonusConnStr_testnet = config["bonusConnStr_testnet"];
-            bonusDatabase_testnet = config["bonusDatabase_testnet"];
-
+            
             block_mongodbConnStr_mainnet = config["block_mongodbConnStr_mainnet"];
             block_mongodbDatabase_mainnet = config["block_mongodbDatabase_mainnet"];
             analy_mongodbConnStr_mainnet = config["analy_mongodbConnStr_mainnet"];
             analy_mongodbDatabase_mainnet = config["analy_mongodbDatabase_mainnet"];
             notify_mongodbConnStr_mainnet = config["notify_mongodbConnStr_mainnet"];
             notify_mongodbDatabase_mainnet = config["notify_mongodbDatabase_mainnet"];
+            snapshot_mongodbConnStr_mainnet = config["snapshot_mongodbConnStr_mainnet"];
+            snapshot_mongodbDatabase_mainnet = config["snapshot_mongodbDatabase_mainnet"];
             neoCliJsonRPCUrl_mainnet = config["neoCliJsonRPCUrl_mainnet"];
             nelJsonRPCUrl_mainnet = config["nelJsonRPCUrl_mainnet"];
             
+            /*
+            analy_mongodbConnStrTestnet = config["analy_mongodbConnStrTestnet"];
+            analy_mongodbDatabaseTestnet = config["analy_mongodbDatabaseTestnet"];
+            analy_mongodbConnStrMainnet = config["analy_mongodbConnStrMainnet"];
+            analy_mongodbDatabaseMainnet = config["analy_mongodbDatabaseMainnet"];
+            bonusConnStr_testnet = config["bonusConnStr_testnet"];
+            bonusDatabase_testnet = config["bonusDatabase_testnet"];
+            */
+
             bonusNotifyCol_testnet = config["bonusNotifyCol_testnet"];
             bonusNotifyFrom_testnet = config["bonusNotifyFrom_testnet"];
             currentBonusCol_testnet = config["currentBonusCol_testnet"];
@@ -123,8 +131,7 @@ namespace NEL_Wallet_API.lib
 
             rechargeCollection_mainnet = config["rechargeCollection_mainnet"];
             rechargeCollection_testnet = config["rechargeCollection_testnet"];
-
-
+            
             domainOwnerCol_testnet = config["domainOwnerCol_testnet"];
             domainOwnerCol_mainnet = config["domainOwnerCol_mainnet"];
 
