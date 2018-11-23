@@ -80,7 +80,9 @@ namespace NEL_Wallet_API.Controllers
                         Block_mongodbConnStr = mh.block_mongodbConnStr_testnet,
                         Block_mongodbDatabase = mh.block_mongodbDatabase_testnet,
                         Bonus_mongodbConnStr = mh.bonusConnStr_testnet,
-                        Bonus_mongodbDatabase = mh.bonusDatabase_testnet
+                        Bonus_mongodbDatabase = mh.bonusDatabase_testnet,
+                        CurrentBonusCol = mh.currentBonusCol_testnet,
+                        BonusCol = mh.bonusCol_testnet
                     };
                     domainService = new DomainService
                     {
@@ -188,7 +190,9 @@ namespace NEL_Wallet_API.Controllers
                         BonusNofityCol = mh.bonusNotifyCol_mainnet,
                         BonusNofityFrom = mh.bonusNotifyFrom_mainnet,
                         Block_mongodbConnStr = mh.block_mongodbConnStr_mainnet,
-                        Block_mongodbDatabase = mh.block_mongodbDatabase_mainnet
+                        Block_mongodbDatabase = mh.block_mongodbDatabase_mainnet,
+                        CurrentBonusCol = mh.currentBonusCol_mainnet,
+                        BonusCol =mh.bonusCol_mainnet
                     };
                     domainService = new DomainService
                     {
@@ -361,24 +365,30 @@ namespace NEL_Wallet_API.Controllers
                         result = auctionService.getRechargeAndTransfer(req.@params[0].ToString());
                         break;
                     // 根据地址查询分红历史
-                    case "getbonushistbyaddressOld":
-                        if(req.@params.Length < 3)
+                    case "getbonushistbyaddress":
+                        if (req.@params.Length < 3)
                         {
                             result = bonusService.getBonusHistByAddress(req.@params[0].ToString());
-                        } else
+                        }
+                        else
                         {
                             result = bonusService.getBonusHistByAddress(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
                         }
                         break;
-                    case "getbonushistbyaddress":
-                        if (req.@params.Length < 3)
-                        {
-                            result = bonusService.getBonusHistByAddressNew(req.@params[0].ToString());
-                        }
+                    //申请得到分红
+                    case "applybonus":
+                        result = bonusService.applyBonus(req.@params[0].ToString());
+                        break;
+                    //得到最新的分红的信息
+                    case "getcurrentbonus":
+                        result = bonusService.getCurrentBonus(req.@params[0].ToString());
+                        break;
+                    //得到某个地址历史分到红的记录
+                    case "getbonusbyaddress":
+                        if(req.@params.Length < 3)
+                            result = bonusService.getBonusByAddress(req.@params[0].ToString());
                         else
-                        {
-                            result = bonusService.getBonusHistByAddressNew(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
-                        }
+                            result = bonusService.getBonusByAddress(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
                         break;
                     // 根据地址查询域名列表
                     case "getdomainbyaddress":

@@ -16,6 +16,10 @@ namespace NEL_Wallet_API.lib
             {
                 value = Convert.ToString(JObject.Parse(numberDecimalStr)["$numberDecimal"]);
             }
+            if (numberDecimalStr.Contains("_csharpnull"))
+            {
+                value = "0";
+            }
             if (value.Contains("E"))
             {
                 value = decimal.Parse(value, NumberStyles.Float).ToString();

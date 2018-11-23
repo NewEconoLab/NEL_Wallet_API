@@ -18,9 +18,10 @@ namespace NEL_Wallet_API.Controllers
         public string Block_mongodbDatabase { set; get; }
         public string Bonus_mongodbConnStr { set; get; }
         public string Bonus_mongodbDatabase { set; get; }
+        public string CurrentBonusCol { set; get; }
+        public string BonusCol { set; get; }
 
-
-        public JArray getBonusHistByAddressNew(string address, int pageNum = 1, int pageSize = 10)
+        public JArray getBonusHistByAddress(string address, int pageNum = 1, int pageSize = 10)
         {
             List<String> list = mh.listCollection(Bonus_mongodbConnStr, Bonus_mongodbDatabase);
             if (list == null && list.Count == 0)
@@ -37,10 +38,10 @@ namespace NEL_Wallet_API.Controllers
                     return null;
                 }
                 JObject bonus = (JObject)addrbonus[0];
-                if(bonus["txid"] == null || bonus["txid"].ToString() == "")
-                {
-                    return null;
-                }
+                //if(bonus["txid"] == null || bonus["txid"].ToString() == "")
+                //{
+                //    return null;
+                //}
                 return new JObject() {
                             {"address", bonus["addr"] },
                             {"balance", NumberDecimalHelper.formatDecimal(bonus["balance"].ToString()) },
@@ -102,41 +103,7 @@ namespace NEL_Wallet_API.Controllers
             };
 
         }
-        
-        public JArray getBonusHistByAddress(string address, int pageNum = 1, int pageSize = 10)
-        {
-            JObject queryFilter = new JObject() { { "from", BonusNofityFrom }, { "to", address } };
-            string querySort = "{\"blockindex\":-1,\"txid\":-1}";
-            JObject queryField = new JObject() { { "value", 1 }, { "blockindex", 1 } };
-            JArray queryRes = mh.GetDataPagesWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, BonusNofityCol, queryField.ToString(), pageSize, pageNum, querySort, queryFilter.ToString());
-            if (queryRes == null || queryRes.Count() == 0)
-            {
-                return new JArray() { };
-            }
 
-            //
-            long[] blockindexArr = queryRes.Select(p => long.Parse(p["blockindex"].ToString())).Distinct().ToArray();
-            Dictionary<string, long> blockTimeDict = getBlockTime(blockindexArr);
-
-            // 
-            JObject[] arr = queryRes.Select(item =>
-            {
-                JObject obj = new JObject();
-                obj.Add("value", item["value"]);
-                obj.Add("blocktime", blockTimeDict.GetValueOrDefault(item["blockindex"].ToString()));
-                return obj;
-            }).ToArray();
-
-            // 总量
-            long cnt = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, BonusNofityCol, queryFilter.ToString());
-            // 返回
-            JObject res = new JObject();
-            res.Add("list", new JArray() { arr });
-            res.Add("count", cnt);
-            return new JArray() { res };
-
-        }
-        
         private long getBlockTime(string blockHeightStrSt)
         {
             string blockHeightFilter = "{\"index\":" + long.Parse(blockHeightStrSt) + "}";
@@ -150,6 +117,71 @@ namespace NEL_Wallet_API.Controllers
             JObject returnFilter = MongoFieldHelper.toReturn(new string[] { "index", "time" });
             JArray blocktimeRes = mh.GetDataWithField(Block_mongodbConnStr, Block_mongodbDatabase, "block", returnFilter.ToString(), queryFilter.ToString());
             return blocktimeRes.ToDictionary(key => key["index"].ToString(), val => long.Parse(val["time"].ToString()));
+        }
+
+        //申请分红
+        public JArray applyBonus(string address)
+        {
+            //获取最新的分红数据表
+            string curConn = mh.GetData(Bonus_mongodbConnStr, Bonus_mongodbDatabase,CurrentBonusCol,"{}")[0]["CurrentColl"].ToString();
+            //获取此次分红的信息
+            JObject queryFilter = new JObject() { { "addr", address }};
+            JArray jAData = mh.GetData(Bonus_mongodbConnStr, Bonus_mongodbDatabase, curConn, queryFilter.ToString());
+            if (jAData.Count == 0)
+                return new JArray() { new JObject() { { "result", false } } };
+            jAData[0]["applied"] = true;
+            mh.ReplaceData(Bonus_mongodbConnStr, Bonus_mongodbDatabase, curConn, queryFilter.ToString(), jAData[0].ToString());
+            return new JArray() { new JObject() { { "result", true } } };
+        }
+
+        //获取当前分红的信息
+        public JArray getCurrentBonus(string address)
+        {
+            //获取最新的分红数据表
+            string curConn = mh.GetData(Bonus_mongodbConnStr, Bonus_mongodbDatabase, CurrentBonusCol, "{}")[0]["CurrentColl"].ToString();
+            //获取此次分红的信息
+            JObject queryFilter = new JObject() { { "addr", address } };
+            JArray jAData = mh.GetData(Bonus_mongodbConnStr, Bonus_mongodbDatabase, curConn, queryFilter.ToString());
+            JObject jObject = (JObject)jAData[0];
+            jObject["balance"] = NumberDecimalHelper.formatDecimal(jObject["balance"].ToString());
+            jObject["send"] = NumberDecimalHelper.formatDecimal(jObject["send"].ToString());
+            return new JArray() { jObject };
+        }
+
+        //获取某个地址的已得的分红记录
+        public JArray getBonusByAddress(string address, int pageNum = 1, int pageSize = 10)
+        {
+            JObject queryFilter = new JObject() { { "addr", address } };
+            JArray jArray =  mh.GetData(Bonus_mongodbConnStr, Bonus_mongodbDatabase, BonusCol, queryFilter.ToString());
+            // 区块时间
+            long[] heightArr = jArray.Select(p => long.Parse(p["height"].ToString())).Distinct().ToArray();
+            string blocktimeFindstr = MongoFieldHelper.toFilter(heightArr, "index").ToString();
+            string blocktimeFieldstr = new JObject() { { "index", 1 }, { "time", 1 } }.ToString();
+            JArray blocktimeRes = mh.GetDataWithField(Block_mongodbConnStr, Block_mongodbDatabase, "block", blocktimeFieldstr, blocktimeFindstr);
+            Dictionary<long, long> blocktimeDict = null;
+            if (blocktimeRes != null && blocktimeRes.Count > 0)
+            {
+                blocktimeDict = blocktimeRes.ToDictionary(k => long.Parse(k["index"].ToString()), v => long.Parse(v["time"].ToString()));
+            }
+            return new JArray(){ jArray.Select(p =>
+            {
+                long height = long.Parse(p["height"].ToString());
+
+
+                if (blocktimeDict != null && blocktimeDict.ContainsKey(height))
+                {
+                    p["blocktime"] = blocktimeDict.GetValueOrDefault(height);
+                }
+                else
+                {
+                    p["blocktime"] = 0;
+                }
+                p["balance"] =  NumberDecimalHelper.formatDecimal(p["balance"].ToString());
+                p["send"] =  NumberDecimalHelper.formatDecimal(p["send"].ToString());
+                JObject jo = (JObject)p;
+                jo.Remove("height");
+                return jo;
+            }).OrderByDescending(p => long.Parse(p["blocktime"].ToString())).ToArray() };
         }
     }
 }
