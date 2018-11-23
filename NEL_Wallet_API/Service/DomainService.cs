@@ -17,7 +17,7 @@ namespace NEL_Wallet_API.Service
 
         private string getNNSfixedSellingState(string domain, long blocktime)
         {
-            if(NNSfixedSellingService.hasNNfixedSelling(domain, blocktime))
+            if(NNSfixedSellingService.hasNNfixedSelling(domain, blocktime, out string ownner))
             {
                 return "0901";
             }
