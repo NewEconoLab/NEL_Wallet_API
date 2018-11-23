@@ -142,6 +142,10 @@ namespace NEL_Wallet_API.Controllers
             //获取此次分红的信息
             JObject queryFilter = new JObject() { { "addr", address } };
             JArray jAData = mh.GetData(Bonus_mongodbConnStr, Bonus_mongodbDatabase, curConn, queryFilter.ToString());
+            if (jAData == null || jAData.Count() == 0)
+            {
+                return new JArray() { };
+            }
             JObject jObject = (JObject)jAData[0];
             jObject["balance"] = NumberDecimalHelper.formatDecimal(jObject["balance"].ToString());
             jObject["send"] = NumberDecimalHelper.formatDecimal(jObject["send"].ToString());
@@ -153,6 +157,10 @@ namespace NEL_Wallet_API.Controllers
         {
             JObject queryFilter = new JObject() { { "addr", address } };
             JArray jArray =  mh.GetData(Bonus_mongodbConnStr, Bonus_mongodbDatabase, BonusCol, queryFilter.ToString());
+            if (jArray == null || jArray.Count() == 0)
+            {
+                return new JArray() { };
+            }
             // 区块时间
             long[] heightArr = jArray.Select(p => long.Parse(p["height"].ToString())).Distinct().ToArray();
             string blocktimeFindstr = MongoFieldHelper.toFilter(heightArr, "index").ToString();

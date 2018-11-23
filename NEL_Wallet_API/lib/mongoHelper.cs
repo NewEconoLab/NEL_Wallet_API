@@ -47,6 +47,8 @@ namespace NEL_Wallet_API.lib
         public string currentBonusCol_mainnet = string.Empty;
         public string bonusCol_testnet = string.Empty;
         public string bonusCol_mainnet = string.Empty;
+        public string bonusConnStr_mainnet = string.Empty;
+        public string bonusDatabase_mainnet = string.Empty;
 
         public string rechargeCollection_mainnet = string.Empty;
         public string rechargeCollection_testnet = string.Empty;
@@ -116,6 +118,8 @@ namespace NEL_Wallet_API.lib
             bonusCol_mainnet = config["bonusCol_testnet"];
             bonusNotifyCol_mainnet = config["bonusNotifyCol_mainnet"];
             bonusNotifyFrom_mainnet = config["bonusNotifyFrom_mainnet"];
+            bonusConnStr_mainnet = config["bonusConnStr_mainnet"];
+            bonusDatabase_mainnet = config["bonusDatabase_mainnet"];
 
             rechargeCollection_mainnet = config["rechargeCollection_mainnet"];
             rechargeCollection_testnet = config["rechargeCollection_testnet"];

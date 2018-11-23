@@ -191,6 +191,8 @@ namespace NEL_Wallet_API.Controllers
                         BonusNofityFrom = mh.bonusNotifyFrom_mainnet,
                         Block_mongodbConnStr = mh.block_mongodbConnStr_mainnet,
                         Block_mongodbDatabase = mh.block_mongodbDatabase_mainnet,
+                        Bonus_mongodbConnStr = mh.bonusConnStr_mainnet,
+                        Bonus_mongodbDatabase = mh.bonusDatabase_mainnet,
                         CurrentBonusCol = mh.currentBonusCol_mainnet,
                         BonusCol =mh.bonusCol_mainnet
                     };
