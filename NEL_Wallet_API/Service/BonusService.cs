@@ -156,11 +156,13 @@ namespace NEL_Wallet_API.Controllers
         public JArray getBonusByAddress(string address, int pageNum = 1, int pageSize = 10)
         {
             JObject queryFilter = new JObject() { { "addr", address } };
-            JArray jArray =  mh.GetData(Bonus_mongodbConnStr, Bonus_mongodbDatabase, BonusCol, queryFilter.ToString());
+            JArray jArray =  mh.GetDataPages(Bonus_mongodbConnStr, Bonus_mongodbDatabase, BonusCol,"{}", pageSize, pageNum, queryFilter.ToString());
             if (jArray == null || jArray.Count() == 0)
             {
                 return new JArray() { };
             }
+            //获取总数
+            var count = mh.GetDataCount(Bonus_mongodbConnStr, Bonus_mongodbDatabase, BonusCol, queryFilter.ToString());
             // 区块时间
             long[] heightArr = jArray.Select(p => long.Parse(p["height"].ToString())).Distinct().ToArray();
             string blocktimeFindstr = MongoFieldHelper.toFilter(heightArr, "index").ToString();
@@ -171,7 +173,7 @@ namespace NEL_Wallet_API.Controllers
             {
                 blocktimeDict = blocktimeRes.ToDictionary(k => long.Parse(k["index"].ToString()), v => long.Parse(v["time"].ToString()));
             }
-            return new JArray(){ jArray.Select(p =>
+            return new JArray(){new JObject(){ { "count",count},{ "list",new JArray() { jArray.Select(p =>
             {
                 long height = long.Parse(p["height"].ToString());
 
@@ -189,7 +191,7 @@ namespace NEL_Wallet_API.Controllers
                 JObject jo = (JObject)p;
                 jo.Remove("height");
                 return jo;
-            }).OrderByDescending(p => long.Parse(p["blocktime"].ToString())).ToArray() };
+            }).OrderByDescending(p => long.Parse(p["blocktime"].ToString())).ToArray() } } }};
         }
     }
 }
