@@ -263,6 +263,9 @@ namespace NEL_Wallet_API.Controllers
             {
                 switch (req.method)
                 {
+                    case "getNNCfromSellingHash":
+                        result = nnsFixedSellingService.getNNCfromSellingHash(req.@params[0].ToString());
+                        break;
                     /***
                      * 新增转让信息和出售信息
                      * 

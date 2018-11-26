@@ -18,6 +18,20 @@ namespace NEL_Wallet_API.Service
         public string NNSfixedSellingColl { get; set; } = "0x7a64879a21b80e96a8bc91e0f07adc49b8f3521e";
         public string domainCenterColl { get; set; } = "0xbd3fa97e2bc841292c1e77f9a97a1393d5208b48";
         
+
+        public JArray getNNCfromSellingHash(string address)
+        {
+            string findStr = new JObject() { {"address", address },{"register", NNSfixedSellingColl } }.ToString();
+            string fieldStr = new JObject() { {"address",1 }, { "balance", 1 } }.ToString();
+            var query = mh.GetDataWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, "nnsFixedSellingBalanceState", fieldStr, findStr);
+            if (query == null || query.Count == 0) return new JArray { };
+
+
+            return new JArray { new JObject() {
+                {"address", query[0]["address"] },
+                {"balance", NumberDecimalHelper.formatDecimal(query[0]["balance"].ToString())}
+            } };
+        }
         public bool hasNNfixedSelling(string domain, long blockindex, out string owner)
         {
             string findStr = new JObject() { {"fullDomain", domain.ToLower() },{ "blockindex", new JObject() { {"$gte", blockindex } } } }.ToString();
