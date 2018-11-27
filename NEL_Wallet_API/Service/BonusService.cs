@@ -147,7 +147,13 @@ namespace NEL_Wallet_API.Controllers
                 return new JArray() { };
             }
             JObject jObject = (JObject)jAData[0];
+            //获取高度对应的时间
+            UInt32 height = UInt32.Parse(jObject["height"].ToString());
+            string blocktimeFindstr = new JObject() { { "index", height } }.ToString();
+            JObject joBlock = (JObject)mh.GetData(Block_mongodbConnStr, Block_mongodbDatabase, "block", blocktimeFindstr)[0];
+            jObject["blocktime"] = joBlock["time"].ToString();
             jObject["balance"] = NumberDecimalHelper.formatDecimal(jObject["balance"].ToString());
+            jObject["totalSend"] = NumberDecimalHelper.formatDecimal(jObject["totalSend"].ToString());
             jObject["send"] = NumberDecimalHelper.formatDecimal(jObject["send"].ToString());
             return new JArray() { jObject };
         }
@@ -188,6 +194,7 @@ namespace NEL_Wallet_API.Controllers
                 }
                 p["balance"] =  NumberDecimalHelper.formatDecimal(p["balance"].ToString());
                 p["send"] =  NumberDecimalHelper.formatDecimal(p["send"].ToString());
+                p["totalSend"] =  NumberDecimalHelper.formatDecimal(p["totalSend"].ToString());
                 JObject jo = (JObject)p;
                 jo.Remove("height");
                 return jo;
