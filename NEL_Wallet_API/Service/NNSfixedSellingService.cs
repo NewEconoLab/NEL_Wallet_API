@@ -105,7 +105,7 @@ namespace NEL_Wallet_API.Service
         {
             
             root = root.StartsWith(".") ? root : "."+root;
-            var findJo = newOrFilter("fullDomain", root);
+            var findJo = newOrFilter("fullDomain", "\\"+root);
             findJo.Add("seller", address);
             findJo.Add("displayName", "NNSfixedSellingBuy");
             string findStr = findJo.ToString();
