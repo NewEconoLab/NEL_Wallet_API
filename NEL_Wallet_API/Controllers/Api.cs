@@ -127,7 +127,8 @@ namespace NEL_Wallet_API.Controllers
                         block_mongodbDatabase = mh.block_mongodbDatabase_testnet,
                         batchSendInterval = int.Parse(mh.batchSendInterval_testnet),
                         checkTxInterval = int.Parse(mh.checkTxInterval_testnet),
-                        checkTxCount = int.Parse(mh.checkTxCount_testnet)
+                        checkTxCount = int.Parse(mh.checkTxCount_testnet),
+                        isStartFlag = mh.isStartApplyGasFlag,
                     };
                     // 暂时放在这里，后续考虑单独整出来
                     new Task(() => claimTx4testnet.claimGasLoop()).Start();
@@ -147,7 +148,8 @@ namespace NEL_Wallet_API.Controllers
                         block_mongodbDatabase = mh.block_mongodbDatabase_testnet,
                         cgasMergeTxCol = mh.rechargeCollection_testnet,
                         neoCliJsonRPCUrl = mh.neoCliJsonRPCUrl_testnet,
-                        netType = "testnet"
+                        netType = "testnet",
+                        isStartFlag = mh.isStartRechargeFlag,
                     };
                     new Task(() => rechargeTx4testnet.sendTxLoop()).Start();
                     break;
@@ -246,7 +248,8 @@ namespace NEL_Wallet_API.Controllers
                         block_mongodbDatabase = mh.block_mongodbDatabase_mainnet,
                         cgasMergeTxCol = mh.rechargeCollection_mainnet,
                         neoCliJsonRPCUrl = mh.neoCliJsonRPCUrl_mainnet,
-                        netType = "mainnet"
+                        netType = "mainnet",
+                        isStartFlag = mh.isStartRechargeFlag,
                     };
                     new Task(() => rechargeTx4mainnet.sendTxLoop()).Start();
                     break;
