@@ -44,6 +44,8 @@ namespace NEL_Wallet_API.Controllers
                         Notify_mongodbDatabase = mh.notify_mongodbDatabase_testnet,
                         Block_mongodbConnStr = mh.block_mongodbConnStr_testnet,
                         Block_mongodbDatabase = mh.block_mongodbDatabase_testnet,
+                        NNSfixedSellingColl = mh.NNSfixedSellingColl_testnet,
+                        domainCenterColl = mh.domainCenterColl_testnet,
                     };
                     newAuctionService = new NewAuctionService()
                     {
@@ -161,6 +163,8 @@ namespace NEL_Wallet_API.Controllers
                         Notify_mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
                         Block_mongodbConnStr = mh.block_mongodbConnStr_mainnet,
                         Block_mongodbDatabase = mh.block_mongodbDatabase_mainnet,
+                        NNSfixedSellingColl = mh.NNSfixedSellingColl_mainnet,
+                        domainCenterColl = mh.domainCenterColl_mainnet,
                     };
                     newAuctionService = new NewAuctionService()
                     {
