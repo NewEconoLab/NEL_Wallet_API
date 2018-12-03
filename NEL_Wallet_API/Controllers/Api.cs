@@ -19,6 +19,7 @@ namespace NEL_Wallet_API.Controllers
         private ClaimGasService claimService;
         private UtxoService utxoService;
         private NNSfixedSellingService nnsFixedSellingService;
+        private ClaimNNCService claimNNCService;
 
         private ClaimGasTransaction claimTx4testnet;
         private AuctionRechargeTransaction rechargeTx4testnet;
@@ -37,6 +38,12 @@ namespace NEL_Wallet_API.Controllers
             switch (netnode)
             {
                 case "testnet":
+                    claimNNCService = new ClaimNNCService
+                    {
+                        mh = mh,
+                        notify_mongodbConnStr = mh.notify_mongodbConnStr_testnet,
+                        notify_mongodbDatabase = mh.notify_mongodbDatabase_testnet,
+                    };
                     nnsFixedSellingService = new NNSfixedSellingService()
                     {
                         mh = mh,
@@ -270,6 +277,17 @@ namespace NEL_Wallet_API.Controllers
             {
                 switch (req.method)
                 {
+                    /**
+                     * 新增测试nnc
+                     * 1. 申请nnc接口
+                     * 2. 查询nnc余额接口
+                     */
+                    case "hasClaimNNC":
+                        result = claimNNCService.hasClaimNNC(req.@params[0].ToString());
+                        break;
+                    case "claimNNC":
+                        result = claimNNCService.claimNNC(req.@params[0].ToString());
+                        break;
                     case "getNNCfromSellingHash":
                         result = nnsFixedSellingService.getNNCfromSellingHash(req.@params[0].ToString());
                         break;
