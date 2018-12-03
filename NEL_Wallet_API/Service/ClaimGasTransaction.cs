@@ -25,9 +25,14 @@ namespace NEL_Wallet_API.Service
         public int batchSendInterval { get; set; } = 10; /*默认10分钟*/
         public int checkTxInterval { get; set; }
         public int checkTxCount { get; set; }
+        public string isStartFlag { get; set; } = "0";
 
         public void claimGasLoop()
         {
+            if(isStartFlag != "1")
+            {
+                return;
+            }
             while (true)
             {
                 try

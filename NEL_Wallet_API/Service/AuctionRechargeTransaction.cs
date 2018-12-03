@@ -19,9 +19,15 @@ namespace NEL_Wallet_API.Service
         public int batchSendInterval { get; set; } = 3000;
         public string neoCliJsonRPCUrl { get; set; }
         public string netType { get; set; } = "testnet";
+        public string isStartFlag { get; set; } = "0";
 
         public void sendTxLoop()
         {
+            if(isStartFlag != "1")
+            {
+                printNotRun();
+                return;
+            }
             int cnt = 0;
             while(true)
             {
@@ -163,6 +169,10 @@ namespace NEL_Wallet_API.Service
         public void heartBeat()
         {
             File.AppendAllText(netType + "_auctionRechargeTx.log", DateTime.Now + " RechargeTxLoop is running" + "\r\n");
+        }
+        public void printNotRun()
+        {
+            File.AppendAllText(netType + "_auctionRechargeTx.log", DateTime.Now + " RechargeTxLoop is Not Run,flag:"+isStartFlag+ "\r\n");
         }
     }
 }

@@ -80,6 +80,14 @@ namespace NEL_Wallet_API.lib
         public string cgasBalanceStateCol_testnet = string.Empty;
         public string cgasBalanceStateCol_mainnet = string.Empty;
 
+        public string NNSfixedSellingColl_testnet = string.Empty;
+        public string NNSfixedSellingColl_mainnet = string.Empty;
+        public string domainCenterColl_testnet = string.Empty;
+        public string domainCenterColl_mainnet = string.Empty;
+
+        public string isStartRechargeFlag = string.Empty;
+        public string isStartApplyGasFlag = string.Empty;
+
         public mongoHelper() {
             var config = new ConfigurationBuilder()
                 .AddInMemoryCollection()    //将配置文件的数据加载到内存中
@@ -153,12 +161,18 @@ namespace NEL_Wallet_API.lib
 
             auctionStateCol_testnet = config["auctionStateCol_testnet"];
             auctionStateCol_mainnet = config["auctionStateCol_mainnet"];
-
             cgasUtxoCol_testnet = config["cgasUtxoCol_testnet"];
             cgasUtxoCol_mainnet = config["cgasUtxoCol_mainnet"];
-
             cgasBalanceStateCol_testnet = config["cgasBalanceStateCol_testnet"];
             cgasBalanceStateCol_mainnet = config["cgasBalanceStateCol_mainnet"];
+            
+            NNSfixedSellingColl_testnet = config["NNSfixedSellingColl_testnet"];
+            NNSfixedSellingColl_mainnet = config["NNSfixedSellingColl_mainnet"];
+            domainCenterColl_testnet = config["domainCenterColl_testnet"];
+            domainCenterColl_mainnet = config["domainCenterColl_mainnet"];
+            
+            isStartRechargeFlag = config["isStartRechargeFlag"];
+            isStartApplyGasFlag = config["isStartApplyGasFlag"];
 
         }
 
