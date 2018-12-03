@@ -123,7 +123,7 @@ namespace NEL_Wallet_API.Controllers
         public JArray applyBonus(string address)
         {
             //获取最新的分红数据表
-            string curConn = mh.GetData(Bonus_mongodbConnStr, Bonus_mongodbDatabase,CurrentBonusCol,"{}")[0]["CurrentColl"].ToString();
+            string curConn = mh.GetData(Bonus_mongodbConnStr, Bonus_mongodbDatabase,CurrentBonusCol,"{}")[0]["currentColl"].ToString();
             //获取此次分红的信息
             JObject queryFilter = new JObject() { { "addr", address }};
             JArray jAData = mh.GetData(Bonus_mongodbConnStr, Bonus_mongodbDatabase, curConn, queryFilter.ToString());
@@ -138,13 +138,28 @@ namespace NEL_Wallet_API.Controllers
         public JArray getCurrentBonus(string address)
         {
             //获取最新的分红数据表
-            string curConn = mh.GetData(Bonus_mongodbConnStr, Bonus_mongodbDatabase, CurrentBonusCol, "{}")[0]["CurrentColl"].ToString();
+            var cur = (JObject)mh.GetData(Bonus_mongodbConnStr, Bonus_mongodbDatabase, CurrentBonusCol, "{}")[0];
+            string curColl = cur["currentColl"].ToString();
             //获取此次分红的信息
             JObject queryFilter = new JObject() { { "addr", address } };
-            JArray jAData = mh.GetData(Bonus_mongodbConnStr, Bonus_mongodbDatabase, curConn, queryFilter.ToString());
+            JArray jAData = mh.GetData(Bonus_mongodbConnStr, Bonus_mongodbDatabase, curColl, queryFilter.ToString());
             if (jAData == null || jAData.Count() == 0)
             {
-                return new JArray() { };
+                JObject _jo = new JObject();
+                _jo["addr"] = address;
+                _jo["assetid"] = cur["assetid"].ToString();
+                _jo["balance"] = "0";
+                _jo["send"] = "0";
+                _jo["totalSend"] = NumberDecimalHelper.formatDecimal(cur["totalValue"].ToString());
+                _jo["txid"] = "";
+                _jo["sendAssetid"] = cur["sendAssetid"].ToString();
+                _jo["applied"] =false;
+                UInt32 _height = UInt32.Parse(cur["height"].ToString());
+                _jo["height"] = _height;
+                string _blocktimeFindstr = new JObject() { { "index", _height } }.ToString();
+                JObject _joBlock = (JObject)mh.GetData(Block_mongodbConnStr, Block_mongodbDatabase, "block", _blocktimeFindstr)[0];
+                _jo["blocktime"] = _joBlock["time"].ToString();
+                return new JArray() { _jo };
             }
             JObject jObject = (JObject)jAData[0];
             //获取高度对应的时间
