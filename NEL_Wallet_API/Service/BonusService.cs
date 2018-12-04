@@ -177,7 +177,7 @@ namespace NEL_Wallet_API.Controllers
         public JArray getBonusByAddress(string address, int pageNum = 1, int pageSize = 10)
         {
             JObject queryFilter = new JObject() { { "addr", address } };
-            JArray jArray =  mh.GetDataPages(Bonus_mongodbConnStr, Bonus_mongodbDatabase, BonusCol,"{}", pageSize, pageNum, queryFilter.ToString());
+            JArray jArray =  mh.GetDataPages(Bonus_mongodbConnStr, Bonus_mongodbDatabase, BonusCol,"{height:-1}", pageSize, pageNum, queryFilter.ToString());
             if (jArray == null || jArray.Count() == 0)
             {
                 return new JArray() { };
