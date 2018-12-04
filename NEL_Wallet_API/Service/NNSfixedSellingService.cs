@@ -32,7 +32,7 @@ namespace NEL_Wallet_API.Service
                 {"balance", NumberDecimalHelper.formatDecimal(query[0]["balance"].ToString())}
             } };
         }
-        public bool hasNNfixedSelling(string domain, long blockindex, out string owner)
+        public bool hasNNfixedSelling(string domain, long blockindex, out string owner, out string price)
         {
             string findStr = new JObject() { {"fullDomain", domain.ToLower() },{ "blockindex", new JObject() { {"$gte", blockindex } } } }.ToString();
             string sortStr = new JObject() { { "blockindex", -1 } }.ToString();
@@ -44,10 +44,12 @@ namespace NEL_Wallet_API.Service
                 if(displayName == "NNSfixedSellingLaunched")
                 {
                     owner = query[0]["seller"].ToString();
+                    price = query[0]["price"].ToString();
                     return true;
                 }
             }
             owner = "";
+            price = "0";
             return false;
         }
         public JArray getNNSfixedSellingInfo(string domain)

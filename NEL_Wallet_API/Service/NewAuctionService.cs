@@ -32,7 +32,7 @@ namespace NEL_Wallet_API.Service
             if(jo["auctionState"].ToString() == "0401")
             {
                 string owner = "";
-                if(NNSfixedSellingService.hasNNfixedSelling(domain, long.Parse(res[0]["startTime"]["blockindex"].ToString()), out owner))
+                if(NNSfixedSellingService.hasNNfixedSelling(domain, long.Parse(res[0]["startTime"]["blockindex"].ToString()), out owner, out string price))
                 {
                     jo.Remove("auctionState");
                     jo.Add("auctionState", "0901");
