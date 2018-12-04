@@ -20,6 +20,7 @@ namespace NEL_Wallet_API.Controllers
         private UtxoService utxoService;
         private NNSfixedSellingService nnsFixedSellingService;
         private ClaimNNCService claimNNCService;
+        private ClaimNNCTransaction claimNNCTransaction;
 
         private ClaimGasTransaction claimTx4testnet;
         private AuctionRechargeTransaction rechargeTx4testnet;
@@ -44,6 +45,21 @@ namespace NEL_Wallet_API.Controllers
                         notify_mongodbConnStr = mh.notify_mongodbConnStr_testnet,
                         notify_mongodbDatabase = mh.notify_mongodbDatabase_testnet,
                     };
+                    claimNNCTransaction = new ClaimNNCTransaction
+                    {
+                        mh = mh,
+                        block_mongodbConnStr = mh.block_mongodbConnStr_testnet,
+                        block_mongodbDatabase = mh.block_mongodbDatabase_testnet,
+                        notify_mongodbConnStr = mh.notify_mongodbConnStr_testnet,
+                        notify_mongodbDatabase = mh.notify_mongodbDatabase_testnet,
+                        nelJsonRpcUrl = mh.nelJsonRPCUrl_testnet,
+                        nncClaimCol = mh.nncClaimCol_testnet,
+                        id_gas = mh.id_gas,
+                        hash_nnc = mh.hash_nnc,
+                        isStartFlag = mh.isStartApplyGasFlag,
+                        accountInfo = AccountInfo.getAccountInfoFromWif(mh.prikeywif_testnet),
+                    };
+                    new Task(() => claimNNCTransaction.claimNNCLoop()).Start();
                     nnsFixedSellingService = new NNSfixedSellingService()
                     {
                         mh = mh,

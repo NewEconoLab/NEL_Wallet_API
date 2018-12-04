@@ -60,6 +60,7 @@ namespace NEL_Wallet_API.lib
         
         public string id_neo = string.Empty;
         public string id_gas = string.Empty;
+        public string hash_nnc = string.Empty;
         public string prikeywif_testnet = string.Empty;
         public string prikeywif_mainnet = string.Empty;
         public string gasClaimCol_testnet = string.Empty;
@@ -84,6 +85,9 @@ namespace NEL_Wallet_API.lib
         public string NNSfixedSellingColl_mainnet = string.Empty;
         public string domainCenterColl_testnet = string.Empty;
         public string domainCenterColl_mainnet = string.Empty;
+
+        public string nncClaimCol_testnet = string.Empty;
+        public string nncClaimCol_mainnet = string.Empty;
 
         public string isStartRechargeFlag = string.Empty;
         public string isStartApplyGasFlag = string.Empty;
@@ -145,10 +149,13 @@ namespace NEL_Wallet_API.lib
 
             id_neo = config["id_neo"];
             id_gas = config["id_gas"];
+            hash_nnc = config["hash_nnc"];
             prikeywif_testnet = config["prikeywif_testnet"];
             prikeywif_mainnet = config["prikeywif_mainnet"];
             gasClaimCol_testnet = config["gasClaimCol_testnet"];
             gasClaimCol_mainnet = config["gasClaimCol_mainnet"];
+            nncClaimCol_testnet = config["nncClaimCol_testnet"];
+            nncClaimCol_mainnet = config["nncClaimCol_mainnet"];
             maxClaimAmount_testnet = config["maxClaimAmount_testnet"];
             maxClaimAmount_mainnet = config["maxClaimAmount_mainnet"];
             batchSendInterval_testnet = config["batchSendInterval_testnet"];
@@ -170,7 +177,7 @@ namespace NEL_Wallet_API.lib
             NNSfixedSellingColl_mainnet = config["NNSfixedSellingColl_mainnet"];
             domainCenterColl_testnet = config["domainCenterColl_testnet"];
             domainCenterColl_mainnet = config["domainCenterColl_mainnet"];
-            
+
             isStartRechargeFlag = config["isStartRechargeFlag"];
             isStartApplyGasFlag = config["isStartApplyGasFlag"];
 
