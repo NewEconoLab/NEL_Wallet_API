@@ -33,6 +33,7 @@ namespace NEL_Wallet_API.Controllers
         private static Api mainApi = new Api("mainnet");
         public static Api getTestApi() { return testApi; }
         public static Api getMainApi() { return mainApi; }
+        private Monitor monitor;
 
         public Api(string node) {
             netnode = node;
@@ -281,6 +282,8 @@ namespace NEL_Wallet_API.Controllers
                     new Task(() => rechargeTx4mainnet.sendTxLoop()).Start();
                     break;
             }
+
+            initMonitor();
         }
 
         public object getRes(JsonRPCrequest req, string reqAddr)
@@ -291,6 +294,7 @@ namespace NEL_Wallet_API.Controllers
             string sortStr = string.Empty;
             try
             {
+                point(req.method);
                 switch (req.method)
                 {
                     /**
@@ -483,5 +487,20 @@ namespace NEL_Wallet_API.Controllers
             return res;
         }
 
+        private void initMonitor()
+        {
+            string startMonitorFlag = mh.startMonitorFlag;
+            if (startMonitorFlag == "1")
+            {
+                monitor = new Monitor();
+            }
+        }
+        private void point(string method)
+        {
+            if (monitor != null)
+            {
+                monitor.point(netnode, method);
+            }
+        }
     }
 }

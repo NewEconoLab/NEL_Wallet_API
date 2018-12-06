@@ -91,6 +91,7 @@ namespace NEL_Wallet_API.lib
 
         public string isStartRechargeFlag = string.Empty;
         public string isStartApplyGasFlag = string.Empty;
+        public string startMonitorFlag = string.Empty;
 
         public mongoHelper() {
             var config = new ConfigurationBuilder()
@@ -180,6 +181,7 @@ namespace NEL_Wallet_API.lib
 
             isStartRechargeFlag = config["isStartRechargeFlag"];
             isStartApplyGasFlag = config["isStartApplyGasFlag"];
+            startMonitorFlag = config["startMonitorFlag"];
 
         }
 
