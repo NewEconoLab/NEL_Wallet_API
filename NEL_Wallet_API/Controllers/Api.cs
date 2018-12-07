@@ -297,7 +297,14 @@ namespace NEL_Wallet_API.Controllers
                 point(req.method);
                 switch (req.method)
                 {
-                    /*
+                    /**
+                     * 获取域名状态(出售状态或竞拍状态)
+                     */
+                    case "getdomainstate":
+                        result = newAuctionService.getdomainstate(req.@params[0].ToString());
+                        break;
+                    /**
+                     * 获取域名出售或购买列表
                      */
                     case "getDomainSellingListByAddress":
                         if(req.@params.Length < 3)

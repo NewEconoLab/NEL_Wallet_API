@@ -1,4 +1,5 @@
-﻿using NEL_Wallet_API.lib;
+﻿using NEL_Wallet_API.Controllers;
+using NEL_Wallet_API.lib;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,70 @@ namespace NEL_Wallet_API.Service
         public string auctionStateCol { get; set; }
         public string cgasBalanceStateCol { get; set; }
         public string domainStateCol { get; set; }
+        public string domainOwnerCol { get; set; } = "domainOwnerCol";
+        public string NNSfixedSellingStateCol { get; set; } = "nnsFixedSellingState";
         public NNSfixedSellingService NNSfixedSellingService { get; set; }
+
+
+        public JArray getdomainstate(string domain)
+        {
+            /**
+             * 域名状态
+             * 1. 竞拍状态
+             * 2. 出售状态
+             * 
+             */
+            domain = domain.ToLower();
+            if (checkDomainTTL(domain))
+            {
+                // 若域名中心有此域名(有效)，先查询出售状态，后查询竞拍状态
+                if (checkDomainSelling(domain))
+                {
+                    return new JArray { new JObject() { { "state", "0901" } } };
+                }
+            }
+            // 若域名中心无此域名(有效)，只需查询竞拍状态
+            string auctionState = getdomainAuctionState(domain);
+            if(auctionState == null || auctionState.Trim().Length == 0)
+            {
+                // 表示无此域名竞拍信息，可开标
+                auctionState = "0101";
+            }
+            return new JArray { new JObject() { { "state", auctionState } } };
+        }
+        private bool checkDomainTTL(string domain)
+        {
+            long nowtime = TimeHelper.GetTimeStamp();
+            string findStr = new JObject() {
+                { "namehash",  DomainHelper.nameHashFullDomain(domain)},
+                //{ "TTL", new JObject(){ {"$gte", nowtime } } }
+            }.ToString();
+            string fieldStr = new JObject() { { "TTL", 1 } }.ToString();
+            var query = mh.GetDataWithField(mongodbConnStr, mongodbDatabase, domainOwnerCol, fieldStr, findStr);
+            if(query == null || query.Count == 0)
+            {
+                return false;
+            }
+            return nowtime <= (long)query[0]["TTL"];
+        }
+        private bool checkDomainSelling(string domain)
+        {
+            string findStr = new JObject() { {"fullDomain", domain }, { "displayName", "NNSfixedSellingLaunched" } }.ToString();
+            return mh.GetDataCount(mongodbConnStr, mongodbDatabase, NNSfixedSellingStateCol, findStr) > 0;
+        }
+        private string getdomainAuctionState(string domain)
+        {
+            string findStr = new JObject() { { "fulldomain", domain } }.ToString();
+            string sortStr = new JObject() { { "startTime.blockindex", -1 } }.ToString();
+            string fieldStr = new JObject() { {"auctionState", 1 } }.ToString();
+            JArray res = mh.GetDataPagesWithField(mongodbConnStr, mongodbDatabase, auctionStateCol, fieldStr, 1, 1, sortStr, findStr);
+            if(res == null || res.Count == 0)
+            {
+                return "";
+            }
+            return res[0]["auctionState"].ToString();
+
+        }
 
         public JArray getdomainAuctionInfo(string domain)
         {
