@@ -302,10 +302,10 @@ namespace NEL_Wallet_API.Controllers
                     case "getDomainSellingListByAddress":
                         if(req.@params.Length < 3)
                         {
-                            result = nnsFixedSellingService.getDomainSellingListByAddress(req.@params[0].ToString(), req.@params[1].ToString());
+                            result = nnsFixedSellingService.getDomainSellingListByAddress(req.@params[0].ToString(), req.@params[1].ToString(), req.@params[2].ToString());
                         } else
                         {
-                            result = nnsFixedSellingService.getDomainSellingListByAddress(req.@params[0].ToString(), req.@params[1].ToString(), int.Parse(req.@params[2].ToString()), int.Parse(req.@params[3].ToString()));
+                            result = nnsFixedSellingService.getDomainSellingListByAddress(req.@params[0].ToString(), req.@params[1].ToString(), req.@params[2].ToString(), int.Parse(req.@params[3].ToString()), int.Parse(req.@params[4].ToString()));
                         }
                         break;
                     /**

@@ -18,19 +18,24 @@ namespace NEL_Wallet_API.Service
         public string NNSfixedSellingColl { get; set; } = "0x7a64879a21b80e96a8bc91e0f07adc49b8f3521e";
         public string domainCenterColl { get; set; } = "0xbd3fa97e2bc841292c1e77f9a97a1393d5208b48";
         
-        public JArray getDomainSellingListByAddress(string address, string sellorbuy = "sell", int pageNum=1, int pageSize=10)
+        public JArray getDomainSellingListByAddress(string address, string root, string sellorbuy = "sell", int pageNum=1, int pageSize=10)
         {
-            string findStr = "";
+            root = root.ToLower();
+            root = root.StartsWith(".") ? root : "." + root;
+            var findJo = newOrFilter("fullDomain", "\\" + root);
+            findJo.Add("displayName", "NNSfixedSellingBuy");
+
             if (sellorbuy == "sell")
             {
-                findStr = new JObject() { { "displayName", "NNSfixedSellingBuy" },{"seller", address } }.ToString();
+                findJo.Add("seller", address);
             } else if(sellorbuy == "buy")
             {
-                findStr = new JObject() { { "displayName", "NNSfixedSellingBuy" }, { "addr", address } }.ToString();
+                findJo.Add("addr", address);
             } else
             {
-                findStr = new JObject() { { "displayName", "NNSfixedSellingBuy" }, { "$or", new JArray { new JObject() { { "seller", address } }, new JObject() { { "addr", address } } } } }.ToString();
+                findJo.Add("$or", new JArray { new JObject() { { "seller", address } }, new JObject() { { "addr", address } } });
             }
+            string findStr = findJo.ToString();
             long cnt = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, NNSfixedSellingColl, findStr);
             if (cnt == 0) return new JArray { };
 
