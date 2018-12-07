@@ -18,7 +18,45 @@ namespace NEL_Wallet_API.Service
         public string NNSfixedSellingColl { get; set; } = "0x7a64879a21b80e96a8bc91e0f07adc49b8f3521e";
         public string domainCenterColl { get; set; } = "0xbd3fa97e2bc841292c1e77f9a97a1393d5208b48";
         
+        public JArray getDomainSellingListByAddress(string address, string sellorbuy = "sell", int pageNum=1, int pageSize=10)
+        {
+            string findStr = "";
+            if (sellorbuy == "sell")
+            {
+                findStr = new JObject() { { "displayName", "NNSfixedSellingBuy" },{"seller", address } }.ToString();
+            } else if(sellorbuy == "buy")
+            {
+                findStr = new JObject() { { "displayName", "NNSfixedSellingBuy" }, { "addr", address } }.ToString();
+            } else
+            {
+                findStr = new JObject() { { "displayName", "NNSfixedSellingBuy" }, { "$or", new JArray { new JObject() { { "seller", address } }, new JObject() { { "addr", address } } } } }.ToString();
+            }
+            long cnt = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, NNSfixedSellingColl, findStr);
+            if (cnt == 0) return new JArray { };
 
+            string fieldStr = MongoFieldHelper.toReturn(new string[] {"blockindex", "fullDomain", "price" }).ToString();
+            string sortStr = new JObject() { {"blockindex",-1 } }.ToString();
+            var query = mh.GetDataPagesWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, NNSfixedSellingColl, fieldStr, pageSize, pageNum, sortStr, findStr);
+
+
+            var indexs = query.Select(p => (long)p["blockindex"]).Distinct().ToArray();
+            var indexDict = getBlocktime(indexs);
+
+            var res = new JArray
+            {
+                query.Select(p => {
+                    JObject jo = (JObject)p;
+                    jo.Add("time", indexDict.GetValueOrDefault((long)jo["blockindex"]));
+                    jo.Remove("blockindex");
+                    return jo;
+                }).ToArray()
+            };
+            
+            return new JArray { new JObject() {
+                {"count", cnt },
+                {"list", res }
+            } };
+        }
         public JArray getNNCfromSellingHash(string address)
         {
             string findStr = new JObject() { {"address", address },{"register", NNSfixedSellingColl } }.ToString();

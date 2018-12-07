@@ -297,6 +297,17 @@ namespace NEL_Wallet_API.Controllers
                 point(req.method);
                 switch (req.method)
                 {
+                    /*
+                     */
+                    case "getDomainSellingListByAddress":
+                        if(req.@params.Length < 3)
+                        {
+                            result = nnsFixedSellingService.getDomainSellingListByAddress(req.@params[0].ToString(), req.@params[1].ToString());
+                        } else
+                        {
+                            result = nnsFixedSellingService.getDomainSellingListByAddress(req.@params[0].ToString(), req.@params[1].ToString(), int.Parse(req.@params[2].ToString()), int.Parse(req.@params[3].ToString()));
+                        }
+                        break;
                     /**
                      * 新增测试nnc
                      * 1. 申请nnc接口
