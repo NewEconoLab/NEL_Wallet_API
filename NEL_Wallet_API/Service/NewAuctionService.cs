@@ -35,6 +35,7 @@ namespace NEL_Wallet_API.Service
                 {
                     return new JArray { new JObject() { { "state", "0901" } } };
                 }
+                return new JArray { new JObject() { { "state", "0401" } } };
             }
             // 若域名中心无此域名(有效)，只需查询竞拍状态
             string auctionState = getdomainAuctionState(domain);
