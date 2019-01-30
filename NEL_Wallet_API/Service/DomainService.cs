@@ -24,6 +24,51 @@ namespace NEL_Wallet_API.Service
             return "";
         }
 
+        public JArray getDomainByAddressNew(string owner, string root = ".test", string type="all", int pageNum = 1, int pageSize = 10)
+        {
+            root = root.ToLower();
+            string parenthash = DomainHelper.nameHash(root.Substring(1)).ToString();
+            JObject queryFilter = new JObject() { { "owner", owner }, { "parenthash", parenthash } };
+
+            // 上架中和未出售
+            if(type == "selling")
+            {
+                queryFilter.Add("type", "NNSfixedSellingLaunched");
+            }
+            if(type == "notSelling")
+            {
+                queryFilter.Add("type", new JObject() { { "$ne", "NNSfixedSellingLaunched" } });
+            }
+            string sortStr = new JObject() { {"blockindex", -1 } }.ToString();
+            JObject queryField = MongoFieldHelper.toReturn(new string[] { "domain", "resolver", "TTL", "data", "blockindex","type","price" });
+            JArray queryRes = mh.GetDataPagesWithField(notify_mongodbConnStr, notify_mongodbDatabase, domainOwnerCol, queryField.ToString(), pageSize, pageNum, sortStr, queryFilter.ToString());
+            if (queryRes == null || queryRes.Count == 0)
+            {
+                return new JArray() { };
+            }
+            var res = queryRes.Select(p =>
+            {
+                JObject jo = (JObject)p;
+                string resolverAddr = jo["data"].ToString();
+                jo.Remove("data");
+                jo.Add("resolverAddr", resolverAddr);
+                string ttl = jo["TTL"].ToString();
+                jo.Remove("TTL");
+                jo.Add("ttl", ttl);
+                string domain = jo["domain"].ToString();
+                jo.Remove("domain");
+                jo.Add("domain", domain + root);
+                jo.Add("state", jo["type"].ToString() == "NNSfixedSellingLaunched" ? "0901" : "");
+                return jo;
+            }).OrderByDescending(p => long.Parse(p["ttl"].ToString())).ToArray();
+
+            var cnt = mh.GetDataCount(notify_mongodbConnStr, notify_mongodbDatabase, domainOwnerCol, queryFilter.ToString());
+
+            return new JArray() { new JObject() {
+                {"count", cnt },
+                { "list", new JArray{res } }
+            } };
+        }
         public JArray getDomainByAddress(string owner, string root = ".test")
         {
             root = root.ToLower();

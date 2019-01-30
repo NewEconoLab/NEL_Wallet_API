@@ -469,7 +469,7 @@ namespace NEL_Wallet_API.Controllers
                         break;
                     // 根据地址查询域名列表
                     case "getdomainbyaddress":
-                        result = domainService.getDomainByAddress(req.@params[0].ToString(), req.@params[1].ToString());
+                        result = domainService.getDomainByAddressNew(req.@params[0].ToString(), req.@params[1].ToString(), req.@params[2].ToString(), int.Parse(req.@params[3].ToString()), int.Parse(req.@params[4].ToString()));
                         break;
                     // 根据地址查询交易列表
                     case "gettransbyaddressOld":
