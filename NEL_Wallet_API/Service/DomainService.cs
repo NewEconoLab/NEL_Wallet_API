@@ -24,11 +24,21 @@ namespace NEL_Wallet_API.Service
             return "";
         }
 
-        public JArray getDomainByAddressNew(string owner, string root = ".test", string type="all", int pageNum = 1, int pageSize = 10)
+        public JArray getDomainByAddressNew(string owner, string root = ".test", string type="all", int pageNum = 1, int pageSize = 10, string domainPrefix="")
         {
             root = root.ToLower();
             string parenthash = DomainHelper.nameHash(root.Substring(1)).ToString();
-            JObject queryFilter = new JObject() { { "owner", owner }, { "parenthash", parenthash } };
+            //JObject queryFilter = new JObject() { { "owner", owner }, { "parenthash", parenthash } };
+            JObject queryFilter = null;
+            if (domainPrefix != "")
+            {
+                queryFilter = MongoFieldHelper.newOrFilter("domain", domainPrefix);
+            } else
+            {
+                queryFilter = new JObject();
+            }
+            queryFilter.Add("owner", owner);
+            queryFilter.Add("parenthash", parenthash);
 
             // 上架中和未出售
             if(type == "selling")

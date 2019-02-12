@@ -44,5 +44,15 @@ namespace NEL_Wallet_API.lib
             }
             return obj;
         }
+
+        public static JObject newOrFilter(string key, string regex)
+        {
+            JObject obj = new JObject();
+            JObject subobj = new JObject();
+            subobj.Add("$regex", regex);
+            subobj.Add("$options", "i");
+            obj.Add(key, subobj);
+            return obj;
+        }
     }
 }
