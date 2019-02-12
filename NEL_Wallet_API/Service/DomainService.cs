@@ -58,6 +58,8 @@ namespace NEL_Wallet_API.Service
                 string domain = jo["domain"].ToString();
                 jo.Remove("domain");
                 jo.Add("domain", domain + root);
+                if(jo["price"] == null) { jo.Add("price", "0"); }
+                if(jo["type"] == null) { jo.Add("type", ""); }
                 jo.Add("state", jo["type"].ToString() == "NNSfixedSellingLaunched" ? "0901" : "");
                 return jo;
             }).OrderByDescending(p => long.Parse(p["ttl"].ToString())).ToArray();
