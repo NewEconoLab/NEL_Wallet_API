@@ -472,7 +472,9 @@ namespace NEL_Wallet_API.Controllers
                         break;
                     // 根据地址查询域名列表
                     case "getdomainbyaddress":
-                        if (req.@params.Length < 6)
+                        if(req.@params.Length < 5)
+                            result = domainService.getDomainByAddressNew(req.@params[0].ToString(), req.@params[1].ToString(), "", int.Parse(req.@params[2].ToString()), int.Parse(req.@params[3].ToString()));
+                        else if (req.@params.Length < 6)
                             result = domainService.getDomainByAddressNew(req.@params[0].ToString(), req.@params[1].ToString(), req.@params[2].ToString(), int.Parse(req.@params[3].ToString()), int.Parse(req.@params[4].ToString()));
                         else
                             result = domainService.getDomainByAddressNew(req.@params[0].ToString(), req.@params[1].ToString(), req.@params[2].ToString(), int.Parse(req.@params[3].ToString()), int.Parse(req.@params[4].ToString()), req.@params[5].ToString());
