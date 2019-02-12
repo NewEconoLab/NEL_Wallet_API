@@ -29,14 +29,11 @@ namespace NEL_Wallet_API.Service
             root = root.ToLower();
             string parenthash = DomainHelper.nameHash(root.Substring(1)).ToString();
             //JObject queryFilter = new JObject() { { "owner", owner }, { "parenthash", parenthash } };
-            JObject queryFilter = null;
+            JObject queryFilter = new JObject(); ;
             if (domainPrefix != "")
             {
-                queryFilter = MongoFieldHelper.newOrFilter("domain", domainPrefix);
-            } else
-            {
-                queryFilter = new JObject();
-            }
+                queryFilter = MongoFieldHelper.likeFilter("domain", domainPrefix);
+            } 
             queryFilter.Add("owner", owner);
             queryFilter.Add("parenthash", parenthash);
 

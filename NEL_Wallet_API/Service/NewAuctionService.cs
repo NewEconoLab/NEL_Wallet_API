@@ -181,17 +181,21 @@ namespace NEL_Wallet_API.Service
 
             return new JArray() { new JObject() { { "count", count } } };
         }
-        public JArray getAuctionInfoByAddress(string address, int pageNum = 1, int pageSize = 10, string root=".neo")
+        public JArray getAuctionInfoByAddress(string address, int pageNum = 1, int pageSize = 10, string root=".neo", string domainPrefix="")
         {
             root = root.ToLower();
             JObject stateFilter = MongoFieldHelper.toFilter(new string[] { AuctionState.STATE_START, AuctionState.STATE_CONFIRM, AuctionState.STATE_RANDOM, AuctionState.STATE_END }, "auctionState");
             JObject addressFilter = new JObject() { {"$or", new JArray() { new JObject() { { "addwholist.address", address } }, new JObject() { { "startAddress", address } }, new JObject() { { "endAddress", address } } } } };
-            //JObject rootFilter = MongoFieldHelper.likeFilter("fulldomain", root);
             string parenthash = DomainHelper.nameHash(root.Substring(1)).ToString();
             JObject rootFilter = new JObject() { {"parenthash", parenthash } };
-            string findStr = new JObject() { { "$and", new JArray() { stateFilter, addressFilter, rootFilter } } }.ToString();
+            JArray jaFilter = new JArray() { stateFilter, addressFilter, rootFilter };
+            if(domainPrefix != "")
+            {
+                jaFilter.Add(MongoFieldHelper.likeFilter("domain", domainPrefix));
+            }
+            //string findStr = new JObject() { { "$and", new JArray() { stateFilter, addressFilter, rootFilter } } }.ToString();
+            string findStr = new JObject() { { "$and", jaFilter } }.ToString();
             string sortStr = new JObject() { { "startTime.blockindex", -1} }.ToString();
-            //JArray res = mh.GetDataPages(mongodbConnStr, mongodbDatabase, auctionStateCol, sortStr, pageSize, pageNum, findStr);
             string fieldStr = new JObject() { { "addwholist.addpricelist", 0 } }.ToString();
             JArray res = mh.GetDataPagesWithField(mongodbConnStr, mongodbDatabase, auctionStateCol, fieldStr, pageSize, pageNum, sortStr, findStr);
             if(res == null || res.Count == 0)
