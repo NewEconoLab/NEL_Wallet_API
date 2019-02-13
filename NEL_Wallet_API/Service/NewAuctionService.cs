@@ -196,6 +196,9 @@ namespace NEL_Wallet_API.Service
             if(isMe == "1")
             {
                 jaFilter.Add(new JObject() { {"maxBuyer",  address} });
+            } else if(isMe == "0")
+            {
+                jaFilter.Add(new JObject() { { "maxBuyer", new JObject() { { "$ne", address} } } });
             }
             if(state != "" && state != "all")
             {
