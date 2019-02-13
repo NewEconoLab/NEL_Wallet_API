@@ -403,9 +403,13 @@ namespace NEL_Wallet_API.Controllers
                         } else if (req.@params.Length < 5)
                         {
                             result = newAuctionService.getAuctionInfoByAddress(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()), req.@params[3].ToString());
-                        } else
+                        }
+                        else if(req.@params.Length < 7)
                         {
                             result = newAuctionService.getAuctionInfoByAddress(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()), req.@params[3].ToString(), req.@params[4].ToString());
+                        } else
+                        {
+                            result = newAuctionService.getAuctionInfoByAddress(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()), req.@params[3].ToString(), req.@params[4].ToString(), req.@params[5].ToString(), req.@params[6].ToString());
                         }
                         break;
                     case "getauctioninfobyaucitonid":
