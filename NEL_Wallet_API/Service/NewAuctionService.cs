@@ -200,9 +200,12 @@ namespace NEL_Wallet_API.Service
             {
                 jaFilter.Add(new JObject() { { "maxBuyer", new JObject() { { "$ne", address} } } });
             }
-            if(state != "" && state != "all")
+            if (state == "0201" || state == "0301" || state == "0401")
             {
                 jaFilter.Add(new JObject() { { "auctionState", state } });
+            } else
+            {
+                jaFilter.Add(MongoFieldHelper.toFilter(new string[] { "0201", "0301", "0401" }, "auctionState"));
             }
             //string findStr = new JObject() { { "$and", new JArray() { stateFilter, addressFilter, rootFilter } } }.ToString();
             string findStr = new JObject() { { "$and", jaFilter } }.ToString();
