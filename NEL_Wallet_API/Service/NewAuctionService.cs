@@ -181,7 +181,7 @@ namespace NEL_Wallet_API.Service
 
             return new JArray() { new JObject() { { "count", count } } };
         }
-        public JArray getAuctionInfoByAddress(string address, int pageNum = 1, int pageSize = 10, string root=".neo", string domainPrefix="", string isMe="0", string state="all")
+        public JArray getAuctionInfoByAddress(string address, int pageNum = 1, int pageSize = 10, string root=".neo", string domainPrefix="", string isMe="2", string state="all")
         {
             root = root.ToLower();
             JObject stateFilter = MongoFieldHelper.toFilter(new string[] { AuctionState.STATE_START, AuctionState.STATE_CONFIRM, AuctionState.STATE_RANDOM, AuctionState.STATE_END }, "auctionState");
