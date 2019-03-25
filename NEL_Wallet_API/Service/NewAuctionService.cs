@@ -188,11 +188,13 @@ namespace NEL_Wallet_API.Service
             JObject addressFilter = new JObject() { {"$or", new JArray() { new JObject() { { "addwholist.address", address } }, new JObject() { { "startAddress", address } }, new JObject() { { "endAddress", address } } } } };
             string parenthash = DomainHelper.nameHash(root.Substring(1)).ToString();
             JObject rootFilter = new JObject() { {"parenthash", parenthash } };
-            JArray jaFilter = new JArray() { stateFilter, addressFilter, rootFilter };
+            JArray jaFilter = new JArray() {addressFilter, rootFilter };
+            //
             if(domainPrefix != "")
             {
                 jaFilter.Add(MongoFieldHelper.likeFilter("domain", domainPrefix));
             }
+            //
             if(isMe == "1")
             {
                 jaFilter.Add(new JObject() { {"maxBuyer",  address} });
@@ -200,6 +202,7 @@ namespace NEL_Wallet_API.Service
             {
                 jaFilter.Add(new JObject() { { "maxBuyer", new JObject() { { "$ne", address} } } });
             }
+            //
             if (state == "0201" || state == "0301" || state == "0401")
             {
                 jaFilter.Add(new JObject() { { "auctionState", state } });
