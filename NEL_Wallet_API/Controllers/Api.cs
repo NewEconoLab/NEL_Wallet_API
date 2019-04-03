@@ -21,6 +21,7 @@ namespace NEL_Wallet_API.Controllers
         private NNSfixedSellingService nnsFixedSellingService;
         private ClaimNNCService claimNNCService;
         private ClaimNNCTransaction claimNNCTransaction;
+        private NNSDomainCreditService nnsDomainCrediteService;
 
         private ClaimGasTransaction claimTx4testnet;
         private AuctionRechargeTransaction rechargeTx4testnet;
@@ -40,6 +41,12 @@ namespace NEL_Wallet_API.Controllers
             switch (netnode)
             {
                 case "testnet":
+                    nnsDomainCrediteService = new NNSDomainCreditService
+                    {
+                        mh = mh,
+                        mongodbConnStr = mh.notify_mongodbConnStr_testnet,
+                        mongodbDatabase = mh.notify_mongodbDatabase_testnet,
+                    };
                     claimNNCService = new ClaimNNCService
                     {
                         mh = mh,
@@ -180,6 +187,12 @@ namespace NEL_Wallet_API.Controllers
                     new Task(() => rechargeTx4testnet.sendTxLoop()).Start();
                     break;
                 case "mainnet":
+                    nnsDomainCrediteService = new NNSDomainCreditService
+                    {
+                        mh = mh,
+                        mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
+                        mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
+                    };
                     nnsFixedSellingService = new NNSfixedSellingService()
                     {
                         mh = mh,
@@ -297,6 +310,11 @@ namespace NEL_Wallet_API.Controllers
                 point(req.method);
                 switch (req.method)
                 {
+                    //
+                    case "getMappingDomain":
+                        result = nnsDomainCrediteService.getMappingDomain(req.@params[0].ToString());
+                        break;
+
                     /**
                      * 获取域名状态(出售状态或竞拍状态)
                      */
