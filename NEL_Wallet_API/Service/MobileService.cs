@@ -1,4 +1,5 @@
-﻿using NEL_Wallet_API.lib;
+﻿using NEL_Wallet_API.Controllers;
+using NEL_Wallet_API.lib;
 using Newtonsoft.Json.Linq;
 using System.Linq;
 
@@ -21,6 +22,7 @@ namespace NEL_Wallet_API.Service
                 findJo = MongoFieldHelper.likeFilter("fulldomain", domainPrefix); 
             }
             findJo.Add("owner", address);
+            findJo.Add("TTL", new JObject() { { "$lte", TimeHelper.GetTimeStamp() } });
             
             //
             string findStr = findJo.ToString();
