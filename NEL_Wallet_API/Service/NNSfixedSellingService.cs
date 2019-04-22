@@ -137,15 +137,7 @@ namespace NEL_Wallet_API.Service
                 }
             };
         }
-        public JArray getUpDownBuyInfo(string domain)
-        {
-            string findStr = new JObject() { { "fullDomain", domain.ToLower() } }.ToString();
-            string sortStr = new JObject() { { "blockindex", -1 } }.ToString();
-            string fieldStr = new JObject() { { "state", 0 } }.ToString();
-            var query = mh.GetDataPagesWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, NNSfixedSellingColl, fieldStr, 1,1, sortStr, findStr);
-
-            return query;
-        }
+        
         public JArray getHasBuyListByAddress(string address, string root, int pageNum=1, int pageSize=10)
         {
             

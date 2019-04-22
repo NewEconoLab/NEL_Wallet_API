@@ -22,6 +22,7 @@ namespace NEL_Wallet_API.Controllers
         private ClaimNNCService claimNNCService;
         private ClaimNNCTransaction claimNNCTransaction;
         private NNSDomainCreditService nnsDomainCrediteService;
+        private MobileService mobileService;
 
         private ClaimGasTransaction claimTx4testnet;
         private AuctionRechargeTransaction rechargeTx4testnet;
@@ -41,6 +42,13 @@ namespace NEL_Wallet_API.Controllers
             switch (netnode)
             {
                 case "testnet":
+                    mobileService = new MobileService
+                    {
+                        mh = mh,
+                        mongodbConnStr = mh.notify_mongodbConnStr_testnet,
+                        mongodbDatabase = mh.notify_mongodbDatabase_testnet,
+                        domainOwnerCol = mh.domainOwnerCol_testnet
+                    };
                     nnsDomainCrediteService = new NNSDomainCreditService
                     {
                         mh = mh,
@@ -187,6 +195,13 @@ namespace NEL_Wallet_API.Controllers
                     new Task(() => rechargeTx4testnet.sendTxLoop()).Start();
                     break;
                 case "mainnet":
+                    mobileService = new MobileService
+                    {
+                        mh = mh,
+                        mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
+                        mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
+                        domainOwnerCol = mh.domainOwnerCol_mainnet
+                    };
                     nnsDomainCrediteService = new NNSDomainCreditService
                     {
                         mh = mh,
@@ -310,6 +325,19 @@ namespace NEL_Wallet_API.Controllers
                 point(req.method);
                 switch (req.method)
                 {
+                    // 移动端调用: 根据地址查询域名列表(包括已绑定和未绑定)
+                    case "getDomainListByAddress":
+                        if (req.@params.Length < 3)
+                        {
+                            result = mobileService.getDomainListByAddress(req.@params[0].ToString());
+                        } else if (req.@params.Length < 4)
+                        {
+                            result = mobileService.getDomainListByAddress(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
+                        } else
+                        {
+                            result = mobileService.getDomainListByAddress(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()), req.@params[3].ToString());
+                        }
+                        break;
                     //
                     case "getMappingDomain":
                         result = nnsDomainCrediteService.getMappingDomain(req.@params[0].ToString());
