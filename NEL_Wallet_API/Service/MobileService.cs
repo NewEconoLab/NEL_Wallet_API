@@ -22,7 +22,7 @@ namespace NEL_Wallet_API.Service
                 findJo = MongoFieldHelper.likeFilter("fulldomain", domainPrefix); 
             }
             findJo.Add("owner", address);
-            findJo.Add("TTL", new JObject() { { "$lte", TimeHelper.GetTimeStamp() } });
+            findJo.Add("TTL", new JObject() { { "$gt", TimeHelper.GetTimeStamp() } });
             
             //
             string findStr = findJo.ToString();
