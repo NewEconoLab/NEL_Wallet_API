@@ -86,6 +86,11 @@ namespace NEL_Wallet_API.lib
         public string domainCenterColl_testnet = string.Empty;
         public string domainCenterColl_mainnet = string.Empty;
 
+        public string dexBalanceStateCol_testnet = string.Empty;
+        public string dexBalanceStateCol_mainnet = string.Empty;
+        public string dexContractHash_testnet = string.Empty;
+        public string dexContractHash_mainnet = string.Empty;
+
         public string nncClaimCol_testnet = string.Empty;
         public string nncClaimCol_mainnet = string.Empty;
 
@@ -178,6 +183,12 @@ namespace NEL_Wallet_API.lib
             NNSfixedSellingColl_mainnet = config["NNSfixedSellingColl_mainnet"];
             domainCenterColl_testnet = config["domainCenterColl_testnet"];
             domainCenterColl_mainnet = config["domainCenterColl_mainnet"];
+
+
+            dexBalanceStateCol_testnet = config["dexBalanceStateCol_testnet"];
+            dexBalanceStateCol_mainnet = config["dexBalanceStateCol_mainnet"];
+            dexContractHash_testnet = config["dexContractHash_testnet"];
+            dexContractHash_mainnet = config["dexContractHash_mainnet"];
 
             isStartRechargeFlag = config["isStartRechargeFlag"];
             isStartApplyGasFlag = config["isStartApplyGasFlag"];

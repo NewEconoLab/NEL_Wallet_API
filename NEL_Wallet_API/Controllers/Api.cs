@@ -23,6 +23,7 @@ namespace NEL_Wallet_API.Controllers
         private ClaimNNCTransaction claimNNCTransaction;
         private NNSDomainCreditService nnsDomainCrediteService;
         private MobileService mobileService;
+        private DexService dexService;
 
         private ClaimGasTransaction claimTx4testnet;
         private AuctionRechargeTransaction rechargeTx4testnet;
@@ -42,6 +43,14 @@ namespace NEL_Wallet_API.Controllers
             switch (netnode)
             {
                 case "testnet":
+                    dexService = new DexService
+                    {
+                        mh = mh,
+                        Notify_mongodbConnStr = mh.notify_mongodbConnStr_testnet,
+                        Notify_mongodbDatabase = mh.notify_mongodbDatabase_testnet,
+                        dexBalanceStateCol = mh.dexBalanceStateCol_testnet,
+                        dexContractHash = mh.dexContractHash_testnet
+                    };
                     mobileService = new MobileService
                     {
                         mh = mh,
@@ -195,6 +204,14 @@ namespace NEL_Wallet_API.Controllers
                     new Task(() => rechargeTx4testnet.sendTxLoop()).Start();
                     break;
                 case "mainnet":
+                    dexService = new DexService
+                    {
+                        mh = mh,
+                        Notify_mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
+                        Notify_mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
+                        dexBalanceStateCol = mh.dexBalanceStateCol_mainnet,
+                        dexContractHash = mh.dexContractHash_mainnet
+                    };
                     mobileService = new MobileService
                     {
                         mh = mh,
@@ -325,6 +342,10 @@ namespace NEL_Wallet_API.Controllers
                 point(req.method);
                 switch (req.method)
                 {
+                    //
+                    case "getBalanceFromDex":
+                        result = dexService.getBalanceFromDex(req.@params[0].ToString());
+                        break;
                     // 移动端调用: 根据地址查询域名列表(包括已绑定和未绑定)
                     case "getDomainListByAddress":
                         if (req.@params.Length < 3)
