@@ -362,13 +362,13 @@ namespace NEL_Wallet_API.Controllers
                         result = dexService.getDexDomainSellDetail("test3.test");
                         break;
                     case "getDexDomainDealHistList":
-                        result = dexService.getDexDomainDealHistList();
+                        result = dexService.getDexDomainDealHistList(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()), req.@params[3].ToString(), req.@params[4].ToString());
                         break;
                     case "getDexDomainBuyList":
-                        result = dexService.getDexDomainBuyList("AeYiwwjiy2nKXoGLDafoTXc1tGvfkTYQcM1");
+                        result = dexService.getDexDomainBuyList(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()), req.@params[3].ToString(), req.@params[4].ToString());
                         break;
                     case "getDexDomainSellList":
-                        result = dexService.getDexDomainSellList("AeYiwwjiy2nKXoGLDafoTXc1tGvfkTYQcM1");
+                        result = dexService.getDexDomainSellList(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()), req.@params[3].ToString(), req.@params[4].ToString());
                         break;
                     case "getBalanceFromDex":
                         result = dexService.getBalanceFromDex(req.@params[0].ToString());

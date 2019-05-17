@@ -46,7 +46,7 @@ namespace NEL_Wallet_API.Service
             } };
         }
 
-        public JArray getDexDomainSellList(string address, int pageNum=1, int pageSize=10, string sortType="", string assetFilterType="", string starFilterType="")
+        public JArray getDexDomainSellList(string address, int pageNum=1, int pageSize=10, string sortType= ""/*newtime.priceH.priceL.starCouunt.mortgate*/, string assetFilterType="", string starFilterType="")
         {
             string findStr = getFindStr(assetFilterType, starFilterType);
             string sortStr = getSortStr(sortType);
@@ -76,7 +76,7 @@ namespace NEL_Wallet_API.Service
                 { "list", new JArray{ res } }
             } };
         }
-        public JArray getDexDomainBuyList(string address, int pageNum = 1, int pageSize = 10, string sortType = "", string assetFilterType = "", string starFilterType = "")
+        public JArray getDexDomainBuyList(string address, int pageNum = 1, int pageSize = 10, string sortType = ""/*newtime.priceH.priceL.starCouunt*/, string assetFilterType = "", string starFilterType = "")
         {
             string findStr = getFindStr(assetFilterType, starFilterType);
             string sortStr = getSortStr(sortType);
@@ -105,7 +105,7 @@ namespace NEL_Wallet_API.Service
                 { "list", new JArray{ res } }
             } };
         }
-        public JArray getDexDomainDealHistList(int pageNum = 1, int pageSize = 10, string sortType = "", string assetFilterType = "", string starFilterType = "")
+        public JArray getDexDomainDealHistList(string address, int pageNum = 1, int pageSize = 10, string sortType = "", string assetFilterType = "", string starFilterType = "")
         {
             string findStr = getFindStr(assetFilterType, starFilterType);
             string sortStr = getSortStr(sortType);
@@ -408,8 +408,8 @@ namespace NEL_Wallet_API.Service
         public static string AssetFilter_CGAS = "CGAS";
         public static string AssetFilter_NNC = "NNC";
         // 关注晒选
-        public static string StarFilter_All = "all";
-        public static string StarFilter_Mine = "mine";
-        public static string StarFilter_Other = "other";
+        public static string StarFilter_All = "ALL";
+        public static string StarFilter_Mine = "Mine";
+        public static string StarFilter_Other = "Other";
     }
 }
