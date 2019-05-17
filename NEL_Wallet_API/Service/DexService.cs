@@ -46,10 +46,10 @@ namespace NEL_Wallet_API.Service
             } };
         }
 
-        public JArray getDexDomainSellList(string address, int pageNum=1, int pageSize=10, string sortType= ""/*newtime.priceH.priceL.starCouunt.mortgate*/, string assetFilterType="", string starFilterType="")
+        public JArray getDexDomainSellList(string address, int pageNum=1, int pageSize=10, string sortType= ""/*newtime(startTimeStamp).priceH(nowPrice).priceL.starCouunt.mortgate*/, string assetFilterType=""/*all/cgas/nnc*/, string starFilterType=""/*all/mine/other*/)
         {
             string findStr = getFindStr(assetFilterType, starFilterType);
-            string sortStr = getSortStr(sortType);
+            string sortStr = getSortStr(sortType, "sell");
             string fieldStr = new JObject { {"fullDomain", 1 }, { "owner", 1 }, { "ttl", 1 }, { "starCount", 1 }, { "assetName", 1 }, { "nowPrice", 1 }, { "saleRate", 1 }, { "sellType", 1 }, { "_id",0} }.ToString();
             var count = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, findStr);
             if (count == 0) return new JArray { };
@@ -76,7 +76,7 @@ namespace NEL_Wallet_API.Service
                 { "list", new JArray{ res } }
             } };
         }
-        public JArray getDexDomainBuyList(string address, int pageNum = 1, int pageSize = 10, string sortType = ""/*newtime.priceH.priceL.starCouunt*/, string assetFilterType = "", string starFilterType = "")
+        public JArray getDexDomainBuyList(string address, int pageNum = 1, int pageSize = 10, string sortType = ""/*newtime(maxTime).priceH(maxPrice).priceL.starCouunt*/, string assetFilterType = ""/*all/cgas/nnc*/, string starFilterType = ""/*all/mine/other*/)
         {
             string findStr = getFindStr(assetFilterType, starFilterType);
             string sortStr = getSortStr(sortType);
@@ -105,10 +105,10 @@ namespace NEL_Wallet_API.Service
                 { "list", new JArray{ res } }
             } };
         }
-        public JArray getDexDomainDealHistList(string address, int pageNum = 1, int pageSize = 10, string sortType = "", string assetFilterType = "", string starFilterType = "")
+        public JArray getDexDomainDealHistList(string address, int pageNum = 1, int pageSize = 10, string sortType = ""/*newtime(blocktime).priceH(price).priceL*/)
         {
-            string findStr = getFindStr(assetFilterType, starFilterType);
-            string sortStr = getSortStr(sortType);
+            string findStr = "{}";
+            string sortStr = getSortStr(sortType, "deal");
             string fieldStr = new JObject { { "fullDomain", 1 }, { "price", 1 }, { "assetName", 1 }, { "_id", 0 } }.ToString();
             var count = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainDealHistStateCol, findStr);
             if (count == 0) return new JArray { };
@@ -145,7 +145,7 @@ namespace NEL_Wallet_API.Service
 
             return findJo.ToString();
         }
-        private string getSortStr(string sortType)
+        private string getSortStr(string sortType, string sellOrBuyOrDeal)
         {
             if (sortType == "") return "{}";
             switch(sortType)
@@ -157,13 +157,45 @@ namespace NEL_Wallet_API.Service
                     return new JObject { { "mortgagePayments", 1 } }.ToString();
                 case SortFilterType.Sort_LaunchTime:
                 case SortFilterType.Sort_LaunchTime_New:
+                    if (sellOrBuyOrDeal == "buy")
+                    {
+                        return new JObject { { "maxTime", -1 } }.ToString();
+                    }
+                    if (sellOrBuyOrDeal == "deal")
+                    {
+                        return new JObject { { "blocktime", -1 } }.ToString();
+                    }
                     return new JObject { { "startTimeStamp", -1 } }.ToString();
                 case SortFilterType.Sort_LaunchTime_Old:
+                    if (sellOrBuyOrDeal == "buy")
+                    {
+                        return new JObject { { "maxTime", 1 } }.ToString();
+                    }
+                    if (sellOrBuyOrDeal == "deal")
+                    {
+                        return new JObject { { "blocktime", 1 } }.ToString();
+                    }
                     return new JObject { { "startTimeStamp", 1 } }.ToString();
                 case SortFilterType.Sort_Price:
                 case SortFilterType.Sort_Price_High:
+                    if (sellOrBuyOrDeal == "buy")
+                    {
+                        return new JObject { { "maxPrice", -1 } }.ToString();
+                    }
+                    if (sellOrBuyOrDeal == "deal")
+                    {
+                        return new JObject { { "price", -1 } }.ToString();
+                    }
                     return new JObject { { "nowPrice", -1 } }.ToString();
                 case SortFilterType.Sort_Price_Low:
+                    if (sellOrBuyOrDeal == "buy")
+                    {
+                        return new JObject { { "maxPrice", 1 } }.ToString();
+                    }
+                    if (sellOrBuyOrDeal == "deal")
+                    {
+                        return new JObject { { "price", 1 } }.ToString();
+                    }
                     return new JObject { { "nowPrice", 1 } }.ToString();
                 case SortFilterType.Sort_StarCount:
                 case SortFilterType.Sort_StarCount_High:
