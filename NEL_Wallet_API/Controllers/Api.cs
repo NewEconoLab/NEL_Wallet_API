@@ -48,8 +48,11 @@ namespace NEL_Wallet_API.Controllers
                         mh = mh,
                         Notify_mongodbConnStr = mh.notify_mongodbConnStr_testnet,
                         Notify_mongodbDatabase = mh.notify_mongodbDatabase_testnet,
+                        dexContractHash = mh.dexContractHash_testnet,
                         dexBalanceStateCol = mh.dexBalanceStateCol_testnet,
-                        dexContractHash = mh.dexContractHash_testnet
+                        dexDomainSellStateCol = mh.dexDomainSellStateCol_testnet,
+                        dexDomainBuyStateCol = mh.dexDomainBuyStateCol_testnet,
+                        dexDomainDealHistStateCol = mh.dexDomainDealHistStateCol_testnet
                     };
                     mobileService = new MobileService
                     {
@@ -209,8 +212,11 @@ namespace NEL_Wallet_API.Controllers
                         mh = mh,
                         Notify_mongodbConnStr = mh.notify_mongodbConnStr_mainnet,
                         Notify_mongodbDatabase = mh.notify_mongodbDatabase_mainnet,
+                        dexContractHash = mh.dexContractHash_mainnet,
                         dexBalanceStateCol = mh.dexBalanceStateCol_mainnet,
-                        dexContractHash = mh.dexContractHash_mainnet
+                        dexDomainSellStateCol = mh.dexDomainSellStateCol_mainnet,
+                        dexDomainBuyStateCol = mh.dexDomainBuyStateCol_mainnet,
+                        dexDomainDealHistStateCol = mh.dexDomainDealHistStateCol_mainnet
                     };
                     mobileService = new MobileService
                     {
@@ -342,7 +348,28 @@ namespace NEL_Wallet_API.Controllers
                 point(req.method);
                 switch (req.method)
                 {
-                    //
+                    // dex
+                    case "getDexDomainBuyOther":
+                        result = dexService.getDexDomainBuyOther("test4.test", "AeYiwwjiy2nKXoGLDafoTXc1tGvfkTYQcM");
+                        break;
+                    case "getDexDomainBuyDetail":
+                        result = dexService.getDexDomainBuyDetail("test4.test", "AeYiwwjiy2nKXoGLDafoTXc1tGvfkTYQcM");
+                        break;
+                    case "getDexDomainSellOther":
+                        result = dexService.getDexDomainSellOther("test3.test");
+                        break;
+                    case "getDexDomainSellDetail":
+                        result = dexService.getDexDomainSellDetail("test3.test");
+                        break;
+                    case "getDexDomainDealHistList":
+                        result = dexService.getDexDomainDealHistList();
+                        break;
+                    case "getDexDomainBuyList":
+                        result = dexService.getDexDomainBuyList("AeYiwwjiy2nKXoGLDafoTXc1tGvfkTYQcM1");
+                        break;
+                    case "getDexDomainSellList":
+                        result = dexService.getDexDomainSellList("AeYiwwjiy2nKXoGLDafoTXc1tGvfkTYQcM1");
+                        break;
                     case "getBalanceFromDex":
                         result = dexService.getBalanceFromDex(req.@params[0].ToString());
                         break;

@@ -1,5 +1,9 @@
-﻿using NEL_Wallet_API.lib;
+﻿using NEL_Wallet_API.Controllers;
+using NEL_Wallet_API.lib;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace NEL_Wallet_API.Service
 {
@@ -9,18 +13,403 @@ namespace NEL_Wallet_API.Service
         public string Notify_mongodbConnStr { get; set; }
         public string Notify_mongodbDatabase { get; set; }
         public string dexBalanceStateCol { get; set; }
+        public string dexDomainSellStateCol { get; set; }
+        public string dexDomainBuyStateCol { get; set; }
+        public string dexDomainDealHistStateCol { get; set; }
         public string dexContractHash { get; set; }
+        public long newlyDataTimeRange { get; set; } = 3 * 24 * 60 * 60; // 3天内
+        public long nowTime => TimeHelper.GetTimeStamp();
 
-        public JArray getBalanceFromDex(string address)
+        public JArray getBalanceFromDex(string address, string assetHash="")
         {
-            decimal balance = 0;
-            string findStr = new JObject() { {"address", address }, { "contractHash", dexContractHash } }.ToString();
+            JObject findJo = new JObject() { {"address", address } };
+            if(assetHash != "")
+            {
+                findJo.Add("assetHash", assetHash);
+            }
+            string findStr = findJo.ToString();
+
             var queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexBalanceStateCol, findStr);
+            if (queryRes == null || queryRes.Count == 0) return new JArray { };
+
+            var res = queryRes.Select(p =>
+            {
+                return new JObject {
+                    {"assetHash", p["assetHash"] },
+                    {"assetName", p["assetName"] },
+                    {"balance", NumberDecimalHelper.formatDecimalDouble(p["balance"].ToString()) }
+                };
+            }).ToArray();
+            return new JArray { new JObject {
+                {"count",res.Count() },
+                { "list", new JArray{ res } }
+            } };
+        }
+
+        public JArray getDexDomainSellList(string address, int pageNum=1, int pageSize=10, string sortType="", string assetFilterType="", string starFilterType="")
+        {
+            string findStr = getFindStr(assetFilterType, starFilterType);
+            string sortStr = getSortStr(sortType);
+            string fieldStr = new JObject { {"fullDomain", 1 }, { "owner", 1 }, { "ttl", 1 }, { "starCount", 1 }, { "assetName", 1 }, { "nowPrice", 1 }, { "saleRate", 1 }, { "sellType", 1 }, { "_id",0} }.ToString();
+            var count = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, findStr);
+            if (count == 0) return new JArray { };
+            
+            var queryRes = mh.GetDataPagesWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, fieldStr, pageSize, pageNum, sortStr, findStr);
+            var res = queryRes.Select(p =>
+            {
+                var jo = (JObject)p;
+                var tmp = NumberDecimalHelper.formatDecimal(jo["nowPrice"].ToString());
+                jo.Remove("nowPrice") ;
+                jo.Add("nowPrice", tmp);
+                tmp = NumberDecimalHelper.formatDecimal(jo["saleRate"].ToString());
+                jo.Remove("saleRate");
+                jo.Add("saleRate", tmp);
+
+                jo.Add("isMine", jo["owner"].ToString() == address);
+                jo.Remove("owner");
+                jo.Add("isStar", false);
+                jo.Remove("starCount");
+                return jo;
+            }).ToArray();
+            return new JArray { new JObject {
+                { "count", count},
+                { "list", new JArray{ res } }
+            } };
+        }
+        public JArray getDexDomainBuyList(string address, int pageNum = 1, int pageSize = 10, string sortType = "", string assetFilterType = "", string starFilterType = "")
+        {
+            string findStr = getFindStr(assetFilterType, starFilterType);
+            string sortStr = getSortStr(sortType);
+            string fieldStr = new JObject { { "fullDomain", 1 }, { "owner", 1 }, { "starCount", 1 }, { "maxAssetName", 1 }, { "maxPrice", 1 }, { "maxTime", 1 }, { "_id", 0 } }.ToString();
+            var count = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr);
+            if (count == 0) return new JArray { };
+
+            var queryRes = mh.GetDataPagesWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, fieldStr, pageSize, pageNum, sortStr, findStr);
+            var res = queryRes.Select(p =>
+            {
+                var jo = (JObject)p;
+                var tmp = NumberDecimalHelper.formatDecimal(jo["maxPrice"].ToString());
+                jo.Remove("maxPrice");
+                jo.Add("maxPrice", tmp);
+                jo.Add("isNewly", nowTime < long.Parse(jo["maxTime"].ToString()) + newlyDataTimeRange);
+                jo.Remove("maxTime");
+                jo.Add("canSell", jo["owner"].ToString() == address);
+                jo.Remove("owner");
+                jo.Add("isStar", false);
+                jo.Remove("starCount");
+                
+                return jo;
+            }).ToArray();
+            return new JArray { new JObject {
+                { "count", count},
+                { "list", new JArray{ res } }
+            } };
+        }
+        public JArray getDexDomainDealHistList(int pageNum = 1, int pageSize = 10, string sortType = "", string assetFilterType = "", string starFilterType = "")
+        {
+            string findStr = getFindStr(assetFilterType, starFilterType);
+            string sortStr = getSortStr(sortType);
+            string fieldStr = new JObject { { "fullDomain", 1 }, { "price", 1 }, { "assetName", 1 }, { "_id", 0 } }.ToString();
+            var count = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainDealHistStateCol, findStr);
+            if (count == 0) return new JArray { };
+
+            var queryRes = mh.GetDataPagesWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainDealHistStateCol, fieldStr, pageSize, pageNum, sortStr, findStr);
+            var res = queryRes.Select(p =>
+            {
+                var jo = (JObject)p;
+                var tmp = NumberDecimalHelper.formatDecimal(jo["price"].ToString());
+                jo.Remove("price");
+                jo.Add("price", tmp);
+                return jo;
+            }).ToArray();
+            return new JArray { new JObject {
+                { "count", count},
+                { "list", new JArray{ res } }
+            } };
+        }
+
+        private string getFindStr(string assetFilterType, string starFilterType)
+        {
+            if (assetFilterType == "" && starFilterType == "") return "{}";
+
+            assetFilterType = assetFilterType.ToUpper();
+            JObject findJo = new JObject();
+            if(assetFilterType == SortFilterType.AssetFilter_CGAS || assetFilterType == SortFilterType.AssetFilter_NNC)
+            {
+                findJo.Add("assetName", assetFilterType);
+            }
+            if(starFilterType == SortFilterType.StarFilter_Mine)
+            {
+                // TODO
+            }
+
+            return findJo.ToString();
+        }
+        private string getSortStr(string sortType)
+        {
+            if (sortType == "") return "{}";
+            switch(sortType)
+            {
+                case SortFilterType.Sort_MortgagePayments:
+                case SortFilterType.Sort_MortgagePayments_High:
+                    return new JObject { { "mortgagePayments", -1 } }.ToString();
+                case SortFilterType.Sort_MortgagePayments_Low:
+                    return new JObject { { "mortgagePayments", 1 } }.ToString();
+                case SortFilterType.Sort_LaunchTime:
+                case SortFilterType.Sort_LaunchTime_New:
+                    return new JObject { { "startTimeStamp", -1 } }.ToString();
+                case SortFilterType.Sort_LaunchTime_Old:
+                    return new JObject { { "startTimeStamp", 1 } }.ToString();
+                case SortFilterType.Sort_Price:
+                case SortFilterType.Sort_Price_High:
+                    return new JObject { { "nowPrice", -1 } }.ToString();
+                case SortFilterType.Sort_Price_Low:
+                    return new JObject { { "nowPrice", 1 } }.ToString();
+                case SortFilterType.Sort_StarCount:
+                case SortFilterType.Sort_StarCount_High:
+                    return new JObject { { "starCount", -1 } }.ToString();
+                case SortFilterType.Sort_StarCount_Low:
+                    return new JObject { { "starCount", 1 } }.ToString();
+            }
+            return "{}";
+        }
+
+        public JArray getDexDomainSellDetail(string fullDomain)
+        {
+            string findStr = new JObject { { "fullDomain", fullDomain } }.ToString();
+            string fieldStr = new JObject { { "fullDomain",1},{ "ttl", 1}, { "nowPrice", 1 }, { "saleRate", 1 }, { "seller", 1 }, { "startTimeStamp", 1 }, { "_id", 0 } }.ToString();
+            var queryRes = mh.GetDataWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, fieldStr, findStr);
+            if (queryRes == null || queryRes.Count == 0) return new JArray { };
+
+            var res = new JArray
+            {
+                queryRes.Select(p => {
+                    var jo = (JObject)p;
+                    var tmp = jo["nowPrice"].ToString();
+                    jo.Remove("nowPrice");
+                    jo.Add("nowPrice", NumberDecimalHelper.formatDecimal(tmp));
+                    tmp = jo["saleRate"].ToString();
+                    jo.Remove("saleRate");
+                    jo.Add("saleRate", NumberDecimalHelper.formatDecimal(tmp));
+                    return jo;
+                })
+            };
+
+            return res;
+        }
+        public JArray getDexDomainSellOther(string fullDomain, int pageNum=1, int pageSize=10)
+        {
+            string findStr = new JObject { { "fullDomain", fullDomain } }.ToString();
+            var queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr);
+            if (queryRes == null || queryRes.Count == 0) return new JArray { };
+
+            var res = ((JArray)queryRes[0]["buyerList"]).Select(p =>
+            {
+                var jo = (JObject)p;
+                var address = jo["buyer"].ToString();
+                jo.Remove("buyer");
+                jo.Add("address", address);
+                var price = NumberDecimalHelper.formatDecimal(jo["price"].ToString());
+                jo.Remove("price");
+                jo.Add("price", price);
+                jo.Add("type", MarketType.Buy);
+                return jo;
+            }).ToArray();
+
+            var count = res.Count();
+            
+            return new JArray { new JObject {
+                {"count", res.Count()},
+                { "list", new JArray { res.Skip((pageNum - 1) * pageSize).Take(pageSize) } }
+            } };
+        }
+        public JArray getDexDomainBuyDetail(string fullDomain, string buyer)
+        {
+            string findStr = new JObject { { "fullDomain", fullDomain } }.ToString();
+            var queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr);
+            if (queryRes == null || queryRes.Count == 0) return new JArray { };
+
+            var buyInfo = queryRes[0];
+            var buyerInfo = ((JArray)queryRes[0]["buyerList"]).Where(p => p["buyer"].ToString() == buyer).First();
+            var otherInfo = ((JArray)queryRes[0]["buyerList"]).Where(p => p["buyer"].ToString() != buyer).ToArray();
+
+
+            var res = new JArray
+            {
+                new JObject{
+                    {"fullDomain",  fullDomain},
+                    { "ttl", buyInfo["ttl"]},
+                    { "buyer", buyerInfo["buyer"]},
+                    { "price", NumberDecimalHelper.formatDecimal(buyerInfo["price"].ToString())},
+                    { "time", buyerInfo["time"]}
+                }
+            };
+
+
+            return res;
+        }
+        public JArray getDexDomainBuyOther(string fullDomain, string buyer, int pageNum=1, int pageSize=10)
+        {
+            var count = 0;
+            List<JObject> list = new List<JObject>();
+            // sellinfo
+            string findStr = new JObject { { "fullDomain", fullDomain } }.ToString();
+            var queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, findStr);
+            if (queryRes != null && queryRes.Count > 0)
+            {
+                pageSize -= 1;
+                count += 1;
+                list.Add(new JObject
+                {
+                    {"assetHash", queryRes[0]["assetHash"] },
+                    {"assetName", queryRes[0]["assetName"] },
+                    {"address", queryRes[0]["seller"] },
+                    {"price", NumberDecimalHelper.formatDecimal(queryRes[0]["startPrice"].ToString()) },
+                    {"time", queryRes[0]["sellTime"] },
+                    {"type", MarketType.Sell }
+                });
+            }
+            // buyinfo
+            findStr = new JObject { { "fullDomain", fullDomain } }.ToString();
+            queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr);
+            if (queryRes != null && queryRes.Count > 0)
+            {
+                var otherInfo = ((JArray)queryRes[0]["buyerList"]).Where(p => p["buyer"].ToString() != buyer).ToArray();
+                var res = otherInfo.Skip((pageNum - 1) * pageSize).Take(pageSize).Select(p =>
+                {
+                    var jo = (JObject)p;
+                    var address = jo["buyer"].ToString();
+                    jo.Remove("buyer");
+                    jo.Add("address", address);
+
+                    var price = NumberDecimalHelper.formatDecimal(jo["price"].ToString());
+                    jo.Remove("price");
+                    jo.Add("price", price);
+                    jo.Add("type", MarketType.Buy);
+                    return jo;
+                }).ToArray();
+                if (res != null && res.Count() > 0) list.AddRange(res);
+            }
+
+            if (list.Count() == 0) return new JArray { };
+
+            return new JArray
+            {
+                new JObject{
+                    { "count", count},
+                    { "list", new JArray{ list } }
+                }
+            };
+        }
+
+        public JArray getDexDomainOrder(string address, string dealType, int pageNum=1, int pageSize=10)
+        {
+            // sellType + fullDomain + nowPrice + assetName + saleRate + isDeal
+            // 出售
+            string findStr = new JObject { { "seller", address} }.ToString();
+            var sellCount = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, findStr);
+
+            List<JObject> list = new List<JObject>();
+            var queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, findStr, "{}", pageSize*(pageNum-1), pageSize);
             if(queryRes != null && queryRes.Count > 0)
             {
-                balance = NumberDecimalHelper.formatDecimalDouble(queryRes[0]["balance"].ToString());
+                var res = queryRes.Select(p =>
+                {
+                    var jo = new JObject();
+                    jo.Add("orderType", MarketType.Sell);
+                    jo.Add("fullDomain", p["fullDomain"]);
+                    jo.Add("nowPrice", NumberDecimalHelper.formatDecimal(p["nowPrice"].ToString()));
+                    jo.Add("saleRate", NumberDecimalHelper.formatDecimal(p["saleRate"].ToString()));
+                    jo.Add("assetName", p["assetName"].ToString());
+                    jo.Add("isDeal", false);
+                    return jo;
+                }).ToArray();
+                list.AddRange(res);
             }
-            return new JArray { new JObject { { "balance", balance } } };
+            
+            // 求购
+            findStr = new JObject { { "buyerList.buyer", address } }.ToString();
+            var buyCount = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr);
+
+            if (pageSize == list.Count() || buyCount == 0) 
+            {
+                return new JArray { new JObject {
+                    { "count", sellCount+buyCount },
+                    { "list", new JArray{ list } }
+                } };
+            }
+
+            var newPageNum = pageNum - (int)sellCount / pageSize;
+            var newLimit = pageSize -= list.Count();
+            queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr, "{}", (newPageNum-1)*pageSize, newLimit);
+            if (queryRes != null && queryRes.Count > 0)
+            {
+
+            }
+
+
+            // 成交
+            findStr = new JObject { {"$or", new JArray { new JObject { {"seller", address } }, new JObject { { "buyer", address } } } } }.ToString();
+            var dealCount = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr);
+
+
+            return null;
         }
+    }
+
+    class MarketType
+    {
+        public static string Sell = "Selling";
+        public static string Buy = "Buying";
+    }
+    class SortType
+    {
+        public static string MortgagePayments = "MortgagePayments"; 
+        public static string MortgagePayments_High = "MortgagePayments_High"; 
+        public static string MortgagePayments_Low = "MortgagePayments_Low";
+        public static string LaunchTime = "LaunchTime_New";// "LaunchTime"; // 默认上架最新
+        public static string LaunchTime_New = "LaunchTime_New"; 
+        public static string LaunchTime_Old = "LaunchTime_Old";
+        public static string Price = "Price"; //
+        public static string Price_High = "Price_High"; 
+        public static string Price_Low = "Price_Low"; 
+        public static string StarCount = "StarCount_High"; // "Star"; //默认关注最多
+        public static string StarCount_High = "StarCount_High"; 
+        public static string StarCount_Low = "StarCount_Low"; 
+    }
+    class FilterType
+    {
+        public static string Asset_All = "all";
+        public static string Asset_CGAS = "cgas";
+        public static string Asset_NNC = "nnc";
+
+        public static string Star_All = "all";
+        public static string Star_Mine = "mine";
+        public static string Star_Other = "other";
+    }
+
+    class SortFilterType
+    {
+        // 排序
+        public const string Sort_MortgagePayments = "MortgagePayments";
+        public const string Sort_MortgagePayments_High = "MortgagePayments_High";
+        public const string Sort_MortgagePayments_Low = "MortgagePayments_Low";
+        public const string Sort_LaunchTime = "LaunchTime";// "LaunchTime"; // 默认上架最新
+        public const string Sort_LaunchTime_New = "LaunchTime_New";
+        public const string Sort_LaunchTime_Old = "LaunchTime_Old";
+        public const string Sort_Price = "Price"; //
+        public const string Sort_Price_High = "Price_High";
+        public const string Sort_Price_Low = "Price_Low";
+        public const string Sort_StarCount = "StarCount"; // "Star"; //默认关注最多
+        public const string Sort_StarCount_High = "StarCount_High";
+        public const string Sort_StarCount_Low = "StarCount_Low";
+        // 资产晒选
+        public static string AssetFilter_All = "ALL";
+        public static string AssetFilter_CGAS = "CGAS";
+        public static string AssetFilter_NNC = "NNC";
+        // 关注晒选
+        public static string StarFilter_All = "all";
+        public static string StarFilter_Mine = "mine";
+        public static string StarFilter_Other = "other";
     }
 }

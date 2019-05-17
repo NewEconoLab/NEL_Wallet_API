@@ -86,10 +86,17 @@ namespace NEL_Wallet_API.lib
         public string domainCenterColl_testnet = string.Empty;
         public string domainCenterColl_mainnet = string.Empty;
 
-        public string dexBalanceStateCol_testnet = string.Empty;
-        public string dexBalanceStateCol_mainnet = string.Empty;
         public string dexContractHash_testnet = string.Empty;
         public string dexContractHash_mainnet = string.Empty;
+        public string dexBalanceStateCol_testnet = string.Empty;
+        public string dexBalanceStateCol_mainnet = string.Empty;
+        public string dexDomainSellStateCol_testnet = string.Empty;
+        public string dexDomainSellStateCol_mainnet = string.Empty;
+        public string dexDomainBuyStateCol_testnet = string.Empty;
+        public string dexDomainBuyStateCol_mainnet = string.Empty;
+        public string dexDomainDealHistStateCol_testnet = string.Empty;
+        public string dexDomainDealHistStateCol_mainnet = string.Empty;
+        
 
         public string nncClaimCol_testnet = string.Empty;
         public string nncClaimCol_mainnet = string.Empty;
@@ -185,10 +192,16 @@ namespace NEL_Wallet_API.lib
             domainCenterColl_mainnet = config["domainCenterColl_mainnet"];
 
 
-            dexBalanceStateCol_testnet = config["dexBalanceStateCol_testnet"];
-            dexBalanceStateCol_mainnet = config["dexBalanceStateCol_mainnet"];
             dexContractHash_testnet = config["dexContractHash_testnet"];
             dexContractHash_mainnet = config["dexContractHash_mainnet"];
+            dexBalanceStateCol_testnet = config["dexBalanceStateCol_testnet"];
+            dexBalanceStateCol_mainnet = config["dexBalanceStateCol_mainnet"];
+            dexDomainSellStateCol_testnet = config["dexDomainSellStateCol_testnet"];
+            dexDomainSellStateCol_mainnet = config["dexDomainSellStateCol_mainnet"];
+            dexDomainBuyStateCol_testnet = config["dexDomainBuyStateCol_testnet"];
+            dexDomainBuyStateCol_mainnet = config["dexDomainBuyStateCol_mainnet"];
+            dexDomainDealHistStateCol_testnet = config["dexDomainDealHistStateCol_testnet"];
+            dexDomainDealHistStateCol_mainnet = config["dexDomainDealHistStateCol_mainnet"];
 
             isStartRechargeFlag = config["isStartRechargeFlag"];
             isStartApplyGasFlag = config["isStartApplyGasFlag"];
@@ -296,7 +309,31 @@ namespace NEL_Wallet_API.lib
 
             return txCount;
         }
-        
+
+        public JArray GetData(string mongodbConnStr, string mongodbDatabase, string coll, string findBson, string sortBson = "{}", int skip = 0, int limit = 0, string fieldBson = "{'_id':0}")
+        {
+            var client = new MongoClient(mongodbConnStr);
+            var database = client.GetDatabase(mongodbDatabase);
+            var collection = database.GetCollection<BsonDocument>(coll);
+
+            List<BsonDocument> query = null;
+            if (limit == 0)
+            {
+                query = collection.Find(BsonDocument.Parse(findBson)).Project(BsonDocument.Parse(fieldBson)).ToList();
+            } else
+            {
+                query = collection.Find(BsonDocument.Parse(findBson)).Project(BsonDocument.Parse(fieldBson)).Sort(BsonDocument.Parse(sortBson)).Skip(skip).Limit(limit).ToList();
+            }
+            client = null;
+
+            if (query.Count > 0)
+            {
+                return JArray.Parse(query.ToJson(new JsonWriterSettings { OutputMode = JsonOutputMode.Strict }));
+            }
+            else { return new JArray(); }
+        }
+
+
         public string InsertOneData(string mongodbConnStr, string mongodbDatabase, string coll,string insertBson)
         {
             var client = new MongoClient(mongodbConnStr);
