@@ -79,7 +79,7 @@ namespace NEL_Wallet_API.Service
         public JArray getDexDomainBuyList(string address, int pageNum = 1, int pageSize = 10, string sortType = ""/*newtime(maxTime).priceH(maxPrice).priceL.starCouunt*/, string assetFilterType = ""/*all/cgas/nnc*/, string starFilterType = ""/*all/mine/other*/)
         {
             string findStr = getFindStr(assetFilterType, starFilterType);
-            string sortStr = getSortStr(sortType);
+            string sortStr = getSortStr(sortType, "buy");
             string fieldStr = new JObject { { "fullDomain", 1 }, { "owner", 1 }, { "starCount", 1 }, { "maxAssetName", 1 }, { "maxPrice", 1 }, { "maxTime", 1 }, { "_id", 0 } }.ToString();
             var count = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr);
             if (count == 0) return new JArray { };
