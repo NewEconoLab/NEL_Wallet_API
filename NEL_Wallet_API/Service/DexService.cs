@@ -209,7 +209,7 @@ namespace NEL_Wallet_API.Service
         public JArray getDexDomainSellDetail(string fullDomain)
         {
             string findStr = new JObject { { "fullDomain", fullDomain } }.ToString();
-            string fieldStr = new JObject { { "fullDomain",1},{ "ttl", 1}, { "nowPrice", 1 }, { "saleRate", 1 }, { "seller", 1 }, { "startTimeStamp", 1 }, { "_id", 0 } }.ToString();
+            string fieldStr = new JObject { { "fullDomain",1},{"sellType",1 }, { "ttl", 1}, { "nowPrice", 1 }, { "saleRate", 1 }, { "seller", 1 }, { "startTimeStamp", 1 }, { "_id", 0 } }.ToString();
             var queryRes = mh.GetDataWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, fieldStr, findStr);
             if (queryRes == null || queryRes.Count == 0) return new JArray { };
 
