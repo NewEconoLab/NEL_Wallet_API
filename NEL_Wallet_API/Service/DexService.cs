@@ -1,7 +1,6 @@
 ﻿using NEL_Wallet_API.Controllers;
 using NEL_Wallet_API.lib;
 using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -105,9 +104,9 @@ namespace NEL_Wallet_API.Service
                 { "list", new JArray{ res } }
             } };
         }
-        public JArray getDexDomainDealHistList(string address, int pageNum = 1, int pageSize = 10, string sortType = ""/*newtime(blocktime).priceH(price).priceL*/)
+        public JArray getDexDomainDealHistList(string address, int pageNum = 1, int pageSize = 10, string sortType = ""/*newtime(blocktime).priceH(price).priceL*/, string assetFilterType="")
         {
-            string findStr = "{}";
+            string findStr = getFindStr(assetFilterType, "");
             string sortStr = getSortStr(sortType, "deal");
             string fieldStr = new JObject { { "fullDomain", 1 }, { "price", 1 }, { "assetName", 1 }, { "_id", 0 } }.ToString();
             var count = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainDealHistStateCol, findStr);
@@ -334,8 +333,38 @@ namespace NEL_Wallet_API.Service
             };
         }
 
-        public JArray getDexDomainOrder(string address, string dealType, int pageNum=1, int pageSize=10)
+        public JArray getDexDomainOrderDeal(string address, int pageNum=1, int pageSize=10)
         {
+            // 成交
+            var findStr = new JObject { { "$or", new JArray { new JObject { { "seller", address } }, new JObject { { "buyer", address } } } } }.ToString();
+            var dealCount = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainDealHistStateCol, findStr);
+            if (dealCount == 0) return new JArray { };
+
+            var queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainDealHistStateCol, findStr, "{}", pageSize * (pageNum - 1), pageSize);
+            var res = queryRes.Select(p =>
+            {
+                var jo = new JObject();
+                //jo.Add("orderType", MarketType.Deal);
+                jo.Add("orderType", p["displayName"].ToString() == "NNSsell" ? MarketType.Sell:MarketType.Buy);
+                jo.Add("fullDomain", p["fullDomain"]);
+                jo.Add("nowPrice", NumberDecimalHelper.formatDecimal(p["price"].ToString()));
+                jo.Add("saleRate", 0);
+                jo.Add("assetName", p["assetName"]);
+                jo.Add("isDeal", true);
+                return jo;
+            });
+
+            return new JArray { new JObject {
+                { "count", dealCount },
+                { "list", new JArray{res } }
+            } };
+        }
+        public JArray getDexDomainOrder(string address, string dealType/*0/1, 0表示未成交，1表示已成交*/, int pageNum=1, int pageSize=10)
+        {
+            if(dealType == "1")
+            {
+                return getDexDomainOrderDeal(address, pageNum, pageSize);
+            }
             // sellType + fullDomain + nowPrice + assetName + saleRate + isDeal
             // 出售
             string findStr = new JObject { { "seller", address} }.ToString();
@@ -362,7 +391,7 @@ namespace NEL_Wallet_API.Service
             // 求购
             findStr = new JObject { { "buyerList.buyer", address } }.ToString();
             var buyCount = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr);
-
+            if (sellCount + buyCount == 0) return new JArray { };
             if (pageSize == list.Count() || buyCount == 0) 
             {
                 return new JArray { new JObject {
@@ -376,16 +405,53 @@ namespace NEL_Wallet_API.Service
             queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr, "{}", (newPageNum-1)*pageSize, newLimit);
             if (queryRes != null && queryRes.Count > 0)
             {
+                var res = queryRes.Select(p =>
+                {
+                    var cc = ((JArray)p["buyerList"]).Where(pq => pq["buyer"].ToString() == address).First();
 
+                    var jo = new JObject();
+                    jo.Add("orderType", MarketType.Buy);
+                    jo.Add("fullDomain", p["fullDomain"]);
+                    jo.Add("nowPrice", NumberDecimalHelper.formatDecimal(cc["price"].ToString()));
+                    jo.Add("saleRate", 0);
+                    jo.Add("assetName", cc["assetName"].ToString());
+                    jo.Add("isDeal", false);
+                    return jo;
+                }).ToArray();
+                list.AddRange(res);
             }
+            return new JArray { new JObject {
+                    { "count", sellCount+buyCount },
+                    { "list", new JArray{ list } }
+                } };
+        }
 
+        public JArray getDexDomainList(string address, int pageNum=1, int pageSize=10)
+        {
+            // fulldomain + ttl + data + isUsing + isSelling + isBind + isTTL
+            string findStr = new JObject { { "owner", address} }.ToString();
+            var queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, "domainOwnerCol", findStr, "{}", pageSize * (pageNum - 1), pageSize);
+            if (queryRes == null || queryRes.Count() == 0) return new JArray { };
 
-            // 成交
-            findStr = new JObject { {"$or", new JArray { new JObject { {"seller", address } }, new JObject { { "buyer", address } } } } }.ToString();
-            var dealCount = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr);
+            var res = queryRes.Select(p =>
+            {
+                var jo = new JObject();
+                jo.Add("fulldomain", p["fulldomain"]);
+                jo.Add("ttl", p["TTL"]);
+                jo.Add("data", p["data"]);
+                jo.Add("isUsing", p["data"].ToString() != "");
+                jo.Add("isSelling", p["dexType"] != null && p["dexType"].ToString() == "");
+                jo.Add("isBind", p["bindFlag"] != null && p["bindFlag"].ToString() == "1");
+                jo.Add("isTTL", long.Parse(p["TTL"].ToString()) < TimeHelper.GetTimeStamp());
+                return jo;
+            }).ToArray();
 
-
-            return null;
+            var count = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, "domainOwnerCol", findStr);
+            
+            return new JArray { new JObject {
+                {"count", count },
+                {"list", new JArray{ res } }
+            } };
         }
     }
 
@@ -393,6 +459,7 @@ namespace NEL_Wallet_API.Service
     {
         public static string Sell = "Selling";
         public static string Buy = "Buying";
+        public static string Deal = "Dealing";
     }
     class SortType
     {
