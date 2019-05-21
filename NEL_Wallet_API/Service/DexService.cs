@@ -79,7 +79,7 @@ namespace NEL_Wallet_API.Service
         {
             string findStr = getFindStr(assetFilterType, starFilterType);
             string sortStr = getSortStr(sortType, "buy");
-            string fieldStr = new JObject { { "fullDomain", 1 }, { "owner", 1 }, { "starCount", 1 }, { "maxAssetName", 1 }, { "maxPrice", 1 }, { "maxTime", 1 }, { "_id", 0 } }.ToString();
+            string fieldStr = new JObject { { "fullDomain", 1 }, {"buyer",1 },{ "assetName", 1 }, { "price", 1 }, { "time", 1 }, { "owner", 1 }, { "starCount", 1 }, { "_id", 0 } }.ToString();
             var count = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr);
             if (count == 0) return new JArray { };
 
@@ -87,11 +87,11 @@ namespace NEL_Wallet_API.Service
             var res = queryRes.Select(p =>
             {
                 var jo = (JObject)p;
-                var tmp = NumberDecimalHelper.formatDecimal(jo["maxPrice"].ToString());
-                jo.Remove("maxPrice");
-                jo.Add("maxPrice", tmp);
-                jo.Add("isNewly", nowTime < long.Parse(jo["maxTime"].ToString()) + newlyDataTimeRange);
-                jo.Remove("maxTime");
+                var tmp = NumberDecimalHelper.formatDecimal(jo["price"].ToString());
+                jo.Remove("price");
+                jo.Add("price", tmp);
+                jo.Add("isNewly", nowTime < long.Parse(jo["time"].ToString()) + newlyDataTimeRange);
+                jo.Remove("time");
                 jo.Add("canSell", jo["owner"].ToString() == address);
                 jo.Remove("owner");
                 jo.Add("isStar", false);
