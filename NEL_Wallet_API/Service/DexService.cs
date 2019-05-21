@@ -350,6 +350,7 @@ namespace NEL_Wallet_API.Service
                 var jo = new JObject();
                 //jo.Add("orderType", MarketType.Deal);
                 jo.Add("orderType", p["displayName"].ToString() == "NNSsell" ? MarketType.Sell:MarketType.Buy);
+                jo.Add("sellType", -1);
                 jo.Add("fullDomain", p["fullDomain"]);
                 jo.Add("nowPrice", NumberDecimalHelper.formatDecimal(p["price"].ToString()));
                 jo.Add("saleRate", "0");
@@ -382,6 +383,7 @@ namespace NEL_Wallet_API.Service
                 {
                     var jo = new JObject();
                     jo.Add("orderType", MarketType.Sell);
+                    jo.Add("sellType", p["sellType"]);
                     jo.Add("fullDomain", p["fullDomain"]);
                     jo.Add("nowPrice", NumberDecimalHelper.formatDecimal(p["nowPrice"].ToString()));
                     jo.Add("saleRate", NumberDecimalHelper.formatDecimal(p["saleRate"].ToString()));
@@ -415,6 +417,7 @@ namespace NEL_Wallet_API.Service
 
                     var jo = new JObject();
                     jo.Add("orderType", MarketType.Buy);
+                    jo.Add("sellType", -1);
                     jo.Add("fullDomain", p["fullDomain"]);
                     jo.Add("nowPrice", NumberDecimalHelper.formatDecimal(cc["price"].ToString()));
                     jo.Add("saleRate", "0");
