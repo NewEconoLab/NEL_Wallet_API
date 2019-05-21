@@ -236,18 +236,18 @@ namespace NEL_Wallet_API.Service
             string findStr = new JObject { { "fullDomain", fullDomain } }.ToString();
             var queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr);
             if (queryRes == null || queryRes.Count == 0) return new JArray { };
-
-            var res = ((JArray)queryRes[0]["buyerList"]).Select(p =>
+            
+            var res = queryRes.Select(p =>
             {
-                var jo = (JObject)p;
-                var address = jo["buyer"].ToString();
-                jo.Remove("buyer");
-                jo.Add("address", address);
-                var price = NumberDecimalHelper.formatDecimal(jo["price"].ToString());
-                jo.Remove("price");
-                jo.Add("price", price);
-                jo.Add("type", MarketType.Buy);
-                return jo;
+                return new JObject {
+                    {"assetHash",p["assetHash"] },
+                    {"assetName",p["assetName"] },
+                    {"address",p["buyer"] },
+                    {"price",NumberDecimalHelper.formatDecimal(p["price"].ToString()) },
+                    {"time", p["time"] },
+                    {"orderType", MarketType.Buy },
+                    {"sellType", -1 },
+                };
             }).ToArray();
 
             var count = res.Count();
