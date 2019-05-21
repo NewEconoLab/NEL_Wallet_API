@@ -208,7 +208,7 @@ namespace NEL_Wallet_API.Service
         public JArray getDexDomainSellDetail(string fullDomain)
         {
             string findStr = new JObject { { "fullDomain", fullDomain } }.ToString();
-            string fieldStr = new JObject { { "fullDomain",1},{"sellType",1 }, { "ttl", 1}, {"assetName",1 }, { "nowPrice", 1 }, { "saleRate", 1 }, { "endPrice", 1 }, { "seller", 1 }, { "startTimeStamp", 1 }, { "_id", 0 } }.ToString();
+            string fieldStr = new JObject { { "fullDomain",1},{"sellType",1 }, { "ttl", 1}, {"assetName",1 }, { "nowPrice", 1 }, { "salePrice", 1 }, { "endPrice", 1 }, { "seller", 1 }, { "startTimeStamp", 1 }, { "_id", 0 } }.ToString();
             var queryRes = mh.GetDataWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, fieldStr, findStr);
             if (queryRes == null || queryRes.Count == 0) return new JArray { };
 
@@ -219,9 +219,9 @@ namespace NEL_Wallet_API.Service
                     var tmp = jo["nowPrice"].ToString();
                     jo.Remove("nowPrice");
                     jo.Add("nowPrice", NumberDecimalHelper.formatDecimal(tmp));
-                    tmp = jo["saleRate"].ToString();
-                    jo.Remove("saleRate");
-                    jo.Add("saleRate", NumberDecimalHelper.formatDecimal(tmp));
+                    tmp = jo["salePrice"].ToString();
+                    jo.Remove("salePrice");
+                    jo.Add("salePrice", NumberDecimalHelper.formatDecimal(tmp));
                     tmp = jo["endPrice"].ToString();
                     jo.Remove("endPrice");
                     jo.Add("endPrice", NumberDecimalHelper.formatDecimal(tmp));
