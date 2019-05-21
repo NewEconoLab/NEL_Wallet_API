@@ -208,7 +208,7 @@ namespace NEL_Wallet_API.Service
         public JArray getDexDomainSellDetail(string fullDomain)
         {
             string findStr = new JObject { { "fullDomain", fullDomain } }.ToString();
-            string fieldStr = new JObject { { "fullDomain",1},{"sellType",1 }, { "ttl", 1}, { "nowPrice", 1 }, { "saleRate", 1 }, { "seller", 1 }, { "startTimeStamp", 1 }, { "_id", 0 } }.ToString();
+            string fieldStr = new JObject { { "fullDomain",1},{"sellType",1 }, { "ttl", 1}, {"assetName",1 }, { "nowPrice", 1 }, { "saleRate", 1 }, { "endPrice", 1 }, { "seller", 1 }, { "startTimeStamp", 1 }, { "_id", 0 } }.ToString();
             var queryRes = mh.GetDataWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, fieldStr, findStr);
             if (queryRes == null || queryRes.Count == 0) return new JArray { };
 
@@ -222,6 +222,9 @@ namespace NEL_Wallet_API.Service
                     tmp = jo["saleRate"].ToString();
                     jo.Remove("saleRate");
                     jo.Add("saleRate", NumberDecimalHelper.formatDecimal(tmp));
+                    tmp = jo["endPrice"].ToString();
+                    jo.Remove("endPrice");
+                    jo.Add("endPrice", NumberDecimalHelper.formatDecimal(tmp));
                     return jo;
                 })
             };
@@ -271,6 +274,7 @@ namespace NEL_Wallet_API.Service
                     {"fullDomain",  fullDomain},
                     { "ttl", buyInfo["ttl"]},
                     { "buyer", buyerInfo["buyer"]},
+                    { "assetName", buyerInfo["assetName"].ToString()},
                     { "price", NumberDecimalHelper.formatDecimal(buyerInfo["price"].ToString())},
                     { "time", buyerInfo["time"]}
                 }
@@ -348,7 +352,7 @@ namespace NEL_Wallet_API.Service
                 jo.Add("orderType", p["displayName"].ToString() == "NNSsell" ? MarketType.Sell:MarketType.Buy);
                 jo.Add("fullDomain", p["fullDomain"]);
                 jo.Add("nowPrice", NumberDecimalHelper.formatDecimal(p["price"].ToString()));
-                jo.Add("saleRate", 0);
+                jo.Add("saleRate", "0");
                 jo.Add("assetName", p["assetName"]);
                 jo.Add("isDeal", true);
                 return jo;
@@ -413,7 +417,7 @@ namespace NEL_Wallet_API.Service
                     jo.Add("orderType", MarketType.Buy);
                     jo.Add("fullDomain", p["fullDomain"]);
                     jo.Add("nowPrice", NumberDecimalHelper.formatDecimal(cc["price"].ToString()));
-                    jo.Add("saleRate", 0);
+                    jo.Add("saleRate", "0");
                     jo.Add("assetName", cc["assetName"].ToString());
                     jo.Add("isDeal", false);
                     return jo;
