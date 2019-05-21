@@ -259,24 +259,20 @@ namespace NEL_Wallet_API.Service
         }
         public JArray getDexDomainBuyDetail(string fullDomain, string buyer)
         {
-            string findStr = new JObject { { "fullDomain", fullDomain } }.ToString();
+            string findStr = new JObject { { "fullDomain", fullDomain },{ "buyer", buyer} }.ToString();
             var queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr);
             if (queryRes == null || queryRes.Count == 0) return new JArray { };
 
-            var buyInfo = queryRes[0];
-            var buyerInfo = ((JArray)queryRes[0]["buyerList"]).Where(p => p["buyer"].ToString() == buyer).First();
-            var otherInfo = ((JArray)queryRes[0]["buyerList"]).Where(p => p["buyer"].ToString() != buyer).ToArray();
-
-
+            var info = queryRes[0];
             var res = new JArray
             {
                 new JObject{
-                    {"fullDomain",  fullDomain},
-                    { "ttl", buyInfo["ttl"]},
-                    { "buyer", buyerInfo["buyer"]},
-                    { "assetName", buyerInfo["assetName"].ToString()},
-                    { "price", NumberDecimalHelper.formatDecimal(buyerInfo["price"].ToString())},
-                    { "time", buyerInfo["time"]}
+                    { "fullDomain",  fullDomain},
+                    { "buyer", buyer},
+                    { "assetName", info["assetName"].ToString()},
+                    { "price", NumberDecimalHelper.formatDecimal(info["price"].ToString())},
+                    { "time", info["time"]},
+                    { "ttl", info["ttl"]},
                 }
             };
 
@@ -301,26 +297,26 @@ namespace NEL_Wallet_API.Service
                     {"address", queryRes[0]["seller"] },
                     {"price", NumberDecimalHelper.formatDecimal(queryRes[0]["startPrice"].ToString()) },
                     {"time", queryRes[0]["sellTime"] },
-                    {"type", MarketType.Sell }
+                    {"orderType", MarketType.Sell },
+                    {"sellType", queryRes[0]["sellType"] }
                 });
             }
             // buyinfo
-            findStr = new JObject { { "fullDomain", fullDomain } }.ToString();
-            queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr);
+            findStr = new JObject { { "fullDomain", fullDomain },{ "buyer", new JObject { {"$ne", buyer } } } }.ToString();
+            queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr, "{}", pageSize*(pageNum-1), pageSize);
             if (queryRes != null && queryRes.Count > 0)
             {
-                var otherInfo = ((JArray)queryRes[0]["buyerList"]).Where(p => p["buyer"].ToString() != buyer).ToArray();
-                var res = otherInfo.Skip((pageNum - 1) * pageSize).Take(pageSize).Select(p =>
+                var res = queryRes.Select(p =>
                 {
                     var jo = (JObject)p;
                     var address = jo["buyer"].ToString();
                     jo.Remove("buyer");
                     jo.Add("address", address);
-
                     var price = NumberDecimalHelper.formatDecimal(jo["price"].ToString());
                     jo.Remove("price");
                     jo.Add("price", price);
-                    jo.Add("type", MarketType.Buy);
+                    jo.Add("orderType", MarketType.Buy);
+                    jo.Add("sellType", -1);
                     return jo;
                 }).ToArray();
                 if (res != null && res.Count() > 0) list.AddRange(res);
