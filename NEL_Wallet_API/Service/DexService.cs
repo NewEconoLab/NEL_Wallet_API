@@ -515,7 +515,7 @@ namespace NEL_Wallet_API.Service
             return new JArray { new JObject { { "domain", domain }, { "isOwn", isOwn }, { "isLaunch", isLaunch } } };
         }
 
-        public JArray searchDexDomainInfo(string domainPrefix)
+        public JArray searchDexDomainInfo(string domain)
         {
             /**
              * 可以竞拍: domain + state
@@ -523,10 +523,10 @@ namespace NEL_Wallet_API.Service
              * 未出售  : domain + state
              * 出售中  : domain + state + price
              */
-            string fulldomain = domainPrefix;
+            string fulldomain = domain;
             string state = null;
             string price = null;
-            string findStr = new JObject { { "fulldomain", domainPrefix }, { "TTL", new JObject { { "$gt", TimeHelper.GetTimeStamp() } } } }.ToString();
+            string findStr = new JObject { { "fulldomain", domain }, { "TTL", new JObject { { "$gt", TimeHelper.GetTimeStamp() } } } }.ToString();
             var queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, domainOwnerCol, findStr);
             if(queryRes != null && queryRes.Count > 0)
             {
@@ -561,6 +561,38 @@ namespace NEL_Wallet_API.Service
             return new JArray { new JObject { {"fulldomain", fulldomain },{ "state", state}, {"price", price } } };
         }
 
+        public JArray searchDexDomainLikeInfo(string domainPrefix, int pageNum=1, int pageSize=10)
+        {
+            var findJo = MongoFieldHelper.likeFilter("fullDomain", domainPrefix);
+            findJo.Add("ttl", new JObject { { "$gte", TimeHelper.GetTimeStamp() } });
+            string findStr = findJo.ToString();
+            string fieldStr = new JObject { { "fullDomain", 1 }, { "starCount", 1 }, { "assetName", 1 }, { "nowPrice", 1 }, { "saleRate", 1 }, { "sellType", 1 }, { "_id", 0 } }.ToString();
+            var count = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, findStr);
+            if (count == 0) return new JArray { };
+
+            string sortStr = new JObject { { "fullDomain",1} }.ToString();
+            var queryRes = mh.GetDataPagesWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, fieldStr, pageSize, pageNum, sortStr, findStr);
+            var res = queryRes.Select(p =>
+            {
+                var jo = (JObject)p;
+                var tmp = NumberDecimalHelper.formatDecimal(jo["nowPrice"].ToString());
+                jo.Remove("nowPrice");
+                jo.Add("nowPrice", tmp);
+                tmp = NumberDecimalHelper.formatDecimal(jo["saleRate"].ToString());
+                jo.Remove("saleRate");
+                jo.Add("saleRate", tmp);
+                
+                jo.Add("isStar", false);
+                jo.Remove("starCount");
+                return jo;
+            }).ToArray();
+            return new JArray { new JObject {
+                { "count", count},
+                { "list", new JArray{ res } }
+            } };
+
+            return null;
+        }
         
         public JArray starDexDomain(string address,  string domain, string starFlag="0"/*1表示开始关注;0表示取消关注*/)
         {

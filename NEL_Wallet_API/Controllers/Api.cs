@@ -352,6 +352,9 @@ namespace NEL_Wallet_API.Controllers
                     case "starDexDomain":
                         result = dexService.starDexDomain(req.@params[0].ToString(), req.@params[1].ToString(), req.@params[2].ToString());
                         break;
+                    case "searchDexDomainLikeInfo":
+                        result = dexService.searchDexDomainLikeInfo(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
+                        break;
                     case "searchDexDomainInfo":
                         result = dexService.searchDexDomainInfo(req.@params[0].ToString());
                         break;
