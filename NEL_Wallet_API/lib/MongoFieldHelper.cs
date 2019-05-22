@@ -5,6 +5,35 @@ namespace NEL_Wallet_API.lib
 {
     public class MongoFieldHelper
     {
+        public static JObject newRegexFilter(string val, string field="")
+        {
+            if(field != "")
+            {
+                return new JObject { { field, new JObject() { { "$regex", val }, { "$options", "i" } } } };
+            }
+            return new JObject() { { "$regex", val }, { "$options", "i" } };
+        }
+        public static JObject newExistEqFilter(string val, string field = "")
+        {
+            if(field != "")
+            {
+                return new JObject { { field, new JObject { { "$exists", true }, { "$eq", val } } } };
+            }
+            return new JObject { { "$exists", true }, { "$eq", val } };
+        }
+        public static JObject newNoExistEqFilter(string val, string field, bool addOr=true)
+        {
+            return new JObject { { "$or", newNoExistEqFilter(val, field) } };
+        }
+        public static JArray newNoExistEqFilter(string val, string field)
+        {
+            return new JArray
+            {
+                new JObject{{field, new JObject { { "$exists", false } } } },
+                new JObject{{field, new JObject { { "$exists", true }, { "$ne", val } } } }
+            };
+        }
+    
         public static JObject likeFilter(string key, string regex)
         {
             return new JObject() { { key, new JObject() { { "$regex", regex }, { "$options", "i" } } } };

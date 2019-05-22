@@ -349,8 +349,17 @@ namespace NEL_Wallet_API.Controllers
                 switch (req.method)
                 {
                     // dex
+                    case "starDexDomain":
+                        result = dexService.starDexDomain(req.@params[0].ToString(), req.@params[1].ToString(), req.@params[2].ToString());
+                        break;
+                    case "searchDexDomainInfo":
+                        result = dexService.searchDexDomainInfo(req.@params[0].ToString());
+                        break;
                     case "getDexDomainList":
-                        result = dexService.getDexDomainList(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
+                        result = dexService.getDexDomainList(req.@params[0].ToString(), req.@params[1].ToString(), req.@params[2].ToString(), req.@params[3].ToString(), int.Parse(req.@params[4].ToString()), int.Parse(req.@params[5].ToString()));
+                        break;
+                    case "getDexDomainInfo":
+                        result = dexService.getDexDomainInfo(req.@params[0].ToString(), req.@params[1].ToString());
                         break;
                     case "getDexDomainOrder":
                         result = dexService.getDexDomainOrder(req.@params[0].ToString(), req.@params[1].ToString(), int.Parse(req.@params[2].ToString()), int.Parse(req.@params[3].ToString()));
