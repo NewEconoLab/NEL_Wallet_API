@@ -391,7 +391,7 @@ namespace NEL_Wallet_API.Service
             }
             
             // 求购
-            findStr = new JObject { { "buyerList.buyer", address } }.ToString();
+            findStr = new JObject { { "buyer", address } }.ToString();
             var buyCount = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr);
             if (sellCount + buyCount == 0) return new JArray { };
             if (pageSize == list.Count() || buyCount == 0) 
@@ -409,15 +409,13 @@ namespace NEL_Wallet_API.Service
             {
                 var res = queryRes.Select(p =>
                 {
-                    var cc = ((JArray)p["buyerList"]).Where(pq => pq["buyer"].ToString() == address).First();
-
                     var jo = new JObject();
                     jo.Add("orderType", MarketType.Buy);
                     jo.Add("sellType", -1);
                     jo.Add("fullDomain", p["fullDomain"]);
-                    jo.Add("nowPrice", NumberDecimalHelper.formatDecimal(cc["price"].ToString()));
+                    jo.Add("nowPrice", NumberDecimalHelper.formatDecimal(p["price"].ToString()));
                     jo.Add("saleRate", "0");
-                    jo.Add("assetName", cc["assetName"].ToString());
+                    jo.Add("assetName", p["assetName"].ToString());
                     jo.Add("isDeal", false);
                     return jo;
                 }).ToArray();
