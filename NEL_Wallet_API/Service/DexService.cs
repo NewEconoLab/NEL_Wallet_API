@@ -53,7 +53,7 @@ namespace NEL_Wallet_API.Service
         {
             //
             List<string> list = new List<string>();
-            list.Add(new JObject { { "$match", new JObject { { "address", address } } } }.ToString());
+            list.Add(new JObject { { "$match", new JObject { { "address", address }, { "state", "1" } } } }.ToString());
             list.Add(new JObject{{"$lookup", new JObject {
                     { "from", dexDomainSellStateCol},
                     { "localField", "fullDomain" },
@@ -128,7 +128,7 @@ namespace NEL_Wallet_API.Service
         {
             //
             List<string> list = new List<string>();
-            list.Add(new JObject { { "$match", new JObject { { "address", address } } } }.ToString());
+            list.Add(new JObject { { "$match", new JObject { { "address", address }, { "state", "1" } } } }.ToString());
             list.Add(new JObject{{"$lookup", new JObject {
                     { "from", dexDomainBuyStateCol},
                     { "localField", "fullDomain" },
@@ -726,6 +726,8 @@ namespace NEL_Wallet_API.Service
             } };
         }
         
+
+        // 
         public JArray starDexDomain(string address,  string domain, string starFlag="0"/*1表示开始关注;0表示取消关注*/)
         {
             string findStr = new JObject { { "address", address},{ "fullDomain", domain} }.ToString();
@@ -752,7 +754,32 @@ namespace NEL_Wallet_API.Service
             }
             return new JArray { new JObject { { "res", true }} };
         }
-    }
+        public JArray getStarDomainCount(string domain)
+        {
+            string findStr = new JObject { {"fullDomain", domain }, { "state", "1" } }.ToString();
+            var count = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexStarStateCol, findStr);
+            return new JArray { new JObject { { "count", count } } };
+        }
+        public JArray getStarDomainList(string address, int pageNum = 1, int pageSize = 10)
+        {
+            string findStr = new JObject { { "address", address }, { "state", "1" } }.ToString();
+            var count = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexStarStateCol, findStr);
+            if (count == 0) return new JArray { };
+
+            string fieldStr = new JObject { { "fullDomain", 1 }, { "_id", 0 } }.ToString();
+            string sortStr = new JObject { { "fullDomain", 1 } }.ToString();
+            var queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexStarStateCol, findStr, sortStr, pageSize * (pageNum - 1), pageSize, fieldStr);
+            return new JArray { new JObject {
+                {"count", count },
+                {"list", queryRes },
+            } };
+        }
+        public JArray hasStarDomain(string address, string domain)
+        {
+            string findStr = new JObject { { "address", address }, { "fullDomain", domain },{ "state", "1"} }.ToString();
+            bool flag = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexStarStateCol, findStr) > 0;
+            return new JArray { new JObject { { "isStar", flag } } };
+        }
 
     class StarState
     {

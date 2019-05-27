@@ -349,6 +349,15 @@ namespace NEL_Wallet_API.Controllers
                 switch (req.method)
                 {
                     // dex
+                    case "hasStarDomain":
+                        result = dexService.hasStarDomain(req.@params[0].ToString(), req.@params[1].ToString());
+                        break;
+                    case "getStarDomainList":
+                        result = dexService.getStarDomainList(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()));
+                        break;
+                    case "getStarDomainCount":
+                        result = dexService.getStarDomainCount(req.@params[0].ToString());
+                        break;
                     case "starDexDomain":
                         result = dexService.starDexDomain(req.@params[0].ToString(), req.@params[1].ToString(), req.@params[2].ToString());
                         break;
