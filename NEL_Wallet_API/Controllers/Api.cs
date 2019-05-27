@@ -358,6 +358,9 @@ namespace NEL_Wallet_API.Controllers
                     case "searchDexDomainInfo":
                         result = dexService.searchDexDomainInfo(req.@params[0].ToString());
                         break;
+                    case "getOrderRange":
+                        result = dexService.getOrderRange(decimal.Parse(req.@params[0].ToString()));
+                        break;
                     case "getDexDomainList":
                         result = dexService.getDexDomainList(req.@params[0].ToString(), req.@params[1].ToString(), req.@params[2].ToString(), req.@params[3].ToString(), int.Parse(req.@params[4].ToString()), int.Parse(req.@params[5].ToString()));
                         break;

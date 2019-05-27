@@ -550,7 +550,14 @@ namespace NEL_Wallet_API.Service
             } };
         }
 
-        
+        // 查询订单排行
+        public JArray getOrderRange(decimal nncAmount)
+        {
+            string findStr = new JObject { { "mortgagePayments", new JObject { { "$gte", nncAmount} } } }.ToString();
+            var count = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, findStr);
+
+            return new JArray { new JObject { {"orderRange", count + 1 } } };
+        }
 
         public JArray searchDexDomainInfo(string domain)
         {
