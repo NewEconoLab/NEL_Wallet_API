@@ -21,7 +21,7 @@ namespace NEL_Wallet_API.lib
         public string snapshot_mongodbDatabase_testnet = string.Empty;
         public string neoCliJsonRPCUrl_testnet = string.Empty;
         public string nelJsonRPCUrl_testnet = string.Empty;
-        
+
         public string block_mongodbConnStr_mainnet = string.Empty;
         public string block_mongodbDatabase_mainnet = string.Empty;
         public string analy_mongodbConnStr_mainnet = string.Empty;
@@ -57,7 +57,7 @@ namespace NEL_Wallet_API.lib
 
         public string domainOwnerCol_testnet = string.Empty;
         public string domainOwnerCol_mainnet = string.Empty;
-        
+
         public string id_neo = string.Empty;
         public string id_gas = string.Empty;
         public string hash_nnc = string.Empty;
@@ -96,7 +96,7 @@ namespace NEL_Wallet_API.lib
         public string dexDomainBuyStateCol_mainnet = string.Empty;
         public string dexDomainDealHistStateCol_testnet = string.Empty;
         public string dexDomainDealHistStateCol_mainnet = string.Empty;
-        
+
 
         public string nncClaimCol_testnet = string.Empty;
         public string nncClaimCol_mainnet = string.Empty;
@@ -122,7 +122,7 @@ namespace NEL_Wallet_API.lib
             snapshot_mongodbDatabase_testnet = config["snapshot_mongodbDatabase_testnet"];
             neoCliJsonRPCUrl_testnet = config["neoCliJsonRPCUrl_testnet"];
             nelJsonRPCUrl_testnet = config["nelJsonRPCUrl_testnet"];
-            
+
             block_mongodbConnStr_mainnet = config["block_mongodbConnStr_mainnet"];
             block_mongodbDatabase_mainnet = config["block_mongodbDatabase_mainnet"];
             analy_mongodbConnStr_mainnet = config["analy_mongodbConnStr_mainnet"];
@@ -133,7 +133,7 @@ namespace NEL_Wallet_API.lib
             snapshot_mongodbDatabase_mainnet = config["snapshot_mongodbDatabase_mainnet"];
             neoCliJsonRPCUrl_mainnet = config["neoCliJsonRPCUrl_mainnet"];
             nelJsonRPCUrl_mainnet = config["nelJsonRPCUrl_mainnet"];
-            
+
             /*
             analy_mongodbConnStrTestnet = config["analy_mongodbConnStrTestnet"];
             analy_mongodbDatabaseTestnet = config["analy_mongodbDatabaseTestnet"];
@@ -156,7 +156,7 @@ namespace NEL_Wallet_API.lib
 
             rechargeCollection_mainnet = config["rechargeCollection_mainnet"];
             rechargeCollection_testnet = config["rechargeCollection_testnet"];
-            
+
             domainOwnerCol_testnet = config["domainOwnerCol_testnet"];
             domainOwnerCol_mainnet = config["domainOwnerCol_mainnet"];
 
@@ -185,7 +185,7 @@ namespace NEL_Wallet_API.lib
             cgasUtxoCol_mainnet = config["cgasUtxoCol_mainnet"];
             cgasBalanceStateCol_testnet = config["cgasBalanceStateCol_testnet"];
             cgasBalanceStateCol_mainnet = config["cgasBalanceStateCol_mainnet"];
-            
+
             NNSfixedSellingColl_testnet = config["NNSfixedSellingColl_testnet"];
             NNSfixedSellingColl_mainnet = config["NNSfixedSellingColl_mainnet"];
             domainCenterColl_testnet = config["domainCenterColl_testnet"];
@@ -209,7 +209,7 @@ namespace NEL_Wallet_API.lib
 
         }
 
-        public JArray GetData(string mongodbConnStr,string mongodbDatabase, string coll, string findBson)
+        public JArray GetData(string mongodbConnStr, string mongodbDatabase, string coll, string findBson)
         {
             var client = new MongoClient(mongodbConnStr);
             var database = client.GetDatabase(mongodbDatabase);
@@ -228,16 +228,16 @@ namespace NEL_Wallet_API.lib
                 }
                 return JA;
             }
-            else { return new JArray(); }      
+            else { return new JArray(); }
         }
 
-        public JArray GetDataPages(string mongodbConnStr, string mongodbDatabase, string coll,string sortStr, int pageSize, int pageNum, string findBson = "{}")
+        public JArray GetDataPages(string mongodbConnStr, string mongodbDatabase, string coll, string sortStr, int pageSize, int pageNum, string findBson = "{}")
         {
             var client = new MongoClient(mongodbConnStr);
             var database = client.GetDatabase(mongodbDatabase);
             var collection = database.GetCollection<BsonDocument>(coll);
 
-            List<BsonDocument> query = collection.Find(BsonDocument.Parse(findBson)).Sort(sortStr).Skip(pageSize * (pageNum-1)).Limit(pageSize).ToList();
+            List<BsonDocument> query = collection.Find(BsonDocument.Parse(findBson)).Sort(sortStr).Skip(pageSize * (pageNum - 1)).Limit(pageSize).ToList();
             client = null;
 
             if (query.Count > 0)
@@ -297,7 +297,7 @@ namespace NEL_Wallet_API.lib
             else { return new JArray(); }
         }
 
-        public long GetDataCount(string mongodbConnStr, string mongodbDatabase, string coll, string findBson="{}")
+        public long GetDataCount(string mongodbConnStr, string mongodbDatabase, string coll, string findBson = "{}")
         {
             var client = new MongoClient(mongodbConnStr);
             var database = client.GetDatabase(mongodbDatabase);
@@ -310,31 +310,7 @@ namespace NEL_Wallet_API.lib
             return txCount;
         }
 
-        public JArray GetData(string mongodbConnStr, string mongodbDatabase, string coll, string findBson, string sortBson = "{}", int skip = 0, int limit = 0, string fieldBson = "{'_id':0}")
-        {
-            var client = new MongoClient(mongodbConnStr);
-            var database = client.GetDatabase(mongodbDatabase);
-            var collection = database.GetCollection<BsonDocument>(coll);
-
-            List<BsonDocument> query = null;
-            if (limit == 0)
-            {
-                query = collection.Find(BsonDocument.Parse(findBson)).Project(BsonDocument.Parse(fieldBson)).ToList();
-            } else
-            {
-                query = collection.Find(BsonDocument.Parse(findBson)).Project(BsonDocument.Parse(fieldBson)).Sort(BsonDocument.Parse(sortBson)).Skip(skip).Limit(limit).ToList();
-            }
-            client = null;
-
-            if (query.Count > 0)
-            {
-                return JArray.Parse(query.ToJson(new JsonWriterSettings { OutputMode = JsonOutputMode.Strict }));
-            }
-            else { return new JArray(); }
-        }
-
-
-        public string InsertOneData(string mongodbConnStr, string mongodbDatabase, string coll,string insertBson)
+        public string InsertOneData(string mongodbConnStr, string mongodbDatabase, string coll, string insertBson)
         {
             var client = new MongoClient(mongodbConnStr);
             var database = client.GetDatabase(mongodbDatabase);
@@ -356,7 +332,7 @@ namespace NEL_Wallet_API.lib
             }
 
         }
-        
+
         public string DeleteData(string mongodbConnStr, string mongodbDatabase, string coll, string deleteBson)
         {
             var client = new MongoClient(mongodbConnStr);
@@ -378,7 +354,7 @@ namespace NEL_Wallet_API.lib
                 return e.ToString();
             }
         }
-        
+
         public string ReplaceData(string mongodbConnStr, string mongodbDatabase, string collName, string whereFliter, string replaceFliter)
         {
             var client = new MongoClient(mongodbConnStr);
@@ -448,7 +424,7 @@ namespace NEL_Wallet_API.lib
             }
             catch (Exception e)
             {
-                Console.Write(""+e);
+                Console.Write("" + e);
             }
             //collection.UpdateOne(BsonDocument.Parse(Jcondition), BsonDocument.Parse(Jdata));
 
@@ -463,6 +439,53 @@ namespace NEL_Wallet_API.lib
             client = null;
 
             return list;
+        }
+
+        public JArray GetData(string mongodbConnStr, string mongodbDatabase, string coll, string findBson, string sortBson = "{}", int skip = 0, int limit = 0, string fieldBson = "{'_id':0}")
+        {
+            var client = new MongoClient(mongodbConnStr);
+            var database = client.GetDatabase(mongodbDatabase);
+            var collection = database.GetCollection<BsonDocument>(coll);
+
+            List<BsonDocument> query = null;
+            if (limit == 0)
+            {
+                query = collection.Find(BsonDocument.Parse(findBson)).Project(BsonDocument.Parse(fieldBson)).ToList();
+            }
+            else
+            {
+                query = collection.Find(BsonDocument.Parse(findBson)).Project(BsonDocument.Parse(fieldBson)).Sort(BsonDocument.Parse(sortBson)).Skip(skip).Limit(limit).ToList();
+            }
+            client = null;
+
+            if (query.Count > 0)
+            {
+                return JArray.Parse(query.ToJson(new JsonWriterSettings { OutputMode = JsonOutputMode.Strict }));
+            }
+            else { return new JArray(); }
+        }
+        
+        public JArray Aggregate(string mongodbConnStr, string mongodbDatabase, string coll, IEnumerable<string> collection)
+        {
+            IList<IPipelineStageDefinition> stages = new List<IPipelineStageDefinition>();
+            foreach(var item in collection)
+            {
+                stages.Add(new JsonPipelineStageDefinition<BsonDocument, BsonDocument>(item));
+            }
+            PipelineDefinition<BsonDocument, BsonDocument> pipeline = new PipelineStagePipelineDefinition<BsonDocument, BsonDocument>(stages);
+            var queryRes = Aggregate(mongodbConnStr, mongodbDatabase, coll, pipeline);
+            return null;
+        }
+
+        public List<BsonDocument> Aggregate(string mongodbConnStr, string mongodbDatabase, string coll, PipelineDefinition<BsonDocument, BsonDocument> pipeline)
+        {
+            var client = new MongoClient(mongodbConnStr);
+            var database = client.GetDatabase(mongodbDatabase);
+            var collection = database.GetCollection<BsonDocument>(coll);
+            var query = collection.Aggregate(pipeline).ToList();
+
+            client = null;
+            return query;
         }
 
     }
