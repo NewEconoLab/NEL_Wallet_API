@@ -11,6 +11,7 @@ namespace NEL_Wallet_API.Service
         public mongoHelper mh { get; set; }
         public string Notify_mongodbConnStr { get; set; }
         public string Notify_mongodbDatabase { get; set; }
+        public string dexEmailStateCol { get; set; } = "dexEmailState";
         public string dexStarStateCol { get; set; } = "dexStarState";
         public string domainOwnerCol { get; set; } = "domainOwnerCol";
         public string auctionStateCol { get; set; } = "auctionState";
@@ -22,10 +23,10 @@ namespace NEL_Wallet_API.Service
         public long newlyDataTimeRange { get; set; } = 3 * 24 * 60 * 60; // 3天内
         public long nowTime => TimeHelper.GetTimeStamp();
 
-        public JArray getBalanceFromDex(string address, string assetHash="")
+        public JArray getBalanceFromDex(string address, string assetHash = "")
         {
-            JObject findJo = new JObject() { {"address", address } };
-            if(assetHash != "")
+            JObject findJo = new JObject() { { "address", address } };
+            if (assetHash != "")
             {
                 findJo.Add("assetHash", assetHash);
             }
@@ -84,30 +85,30 @@ namespace NEL_Wallet_API.Service
                     {"isStar", true },
                 };
             }).ToArray();
-            
+
             return new JArray { new JObject{
                     {"count", count },
                     {"list", new JArray{ res } }
             }};
         }
-        public JArray getDexDomainSellList(string address, int pageNum=1, int pageSize=10, string sortType= ""/*newtime(startTimeStamp).priceH(nowPrice).priceL.starCount.mortgate*/, string assetFilterType=""/*all/cgas/nnc*/, string starFilterType=""/*all/mine/other*/)
+        public JArray getDexDomainSellList(string address, int pageNum = 1, int pageSize = 10, string sortType = ""/*newtime(startTimeStamp).priceH(nowPrice).priceL.starCount.mortgate*/, string assetFilterType = ""/*all/cgas/nnc*/, string starFilterType = ""/*all/mine/other*/)
         {
-            if(address != "" && starFilterType == SortFilterType.StarFilter_Mine)
+            if (address != "" && starFilterType == SortFilterType.StarFilter_Mine)
             {
                 return getDexDomainSellListStar(address, pageNum, pageSize, sortType, assetFilterType, starFilterType);
             }
             string findStr = getFindStr(assetFilterType, starFilterType, true);
             string sortStr = getSortStr(sortType, "sell").ToString();
-            string fieldStr = new JObject { {"fullDomain", 1 }, { "owner", 1 }, { "ttl", 1 }, { "starCount", 1 }, { "assetName", 1 }, { "nowPrice", 1 }, { "saleRate", 1 }, { "sellType", 1 }, { "_id",0} }.ToString();
+            string fieldStr = new JObject { { "fullDomain", 1 }, { "owner", 1 }, { "ttl", 1 }, { "starCount", 1 }, { "assetName", 1 }, { "nowPrice", 1 }, { "saleRate", 1 }, { "sellType", 1 }, { "_id", 0 } }.ToString();
             var count = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, findStr);
             if (count == 0) return new JArray { };
-            
+
             var queryRes = mh.GetDataPagesWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, fieldStr, pageSize, pageNum, sortStr, findStr);
             var res = queryRes.Select(p =>
             {
                 var jo = (JObject)p;
                 var tmp = NumberDecimalHelper.formatDecimal(jo["nowPrice"].ToString());
-                jo.Remove("nowPrice") ;
+                jo.Remove("nowPrice");
                 jo.Add("nowPrice", tmp);
                 tmp = NumberDecimalHelper.formatDecimal(jo["saleRate"].ToString());
                 jo.Remove("saleRate");
@@ -143,7 +144,7 @@ namespace NEL_Wallet_API.Service
             var count = mh.AggregateCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexStarStateCol, list);
             if (count == 0) return new JArray { };
             list.Add(new JObject { { "$sort", getSortStr(sortType, "buy", "dex.") } }.ToString());
-            list.Add(new JObject { { "$skip", pageSize*(pageNum-1) } }.ToString());
+            list.Add(new JObject { { "$skip", pageSize * (pageNum - 1) } }.ToString());
             list.Add(new JObject { { "$limit", pageSize } }.ToString());
             var queryRes = mh.Aggregate(Notify_mongodbConnStr, Notify_mongodbDatabase, dexStarStateCol, list);
             var res = queryRes.SelectMany(p => (JArray)p["dex"]).Select(p =>
@@ -172,7 +173,7 @@ namespace NEL_Wallet_API.Service
             }
             string findStr = getFindStr(assetFilterType, starFilterType);
             string sortStr = getSortStr(sortType, "buy").ToString();
-            string fieldStr = new JObject { { "fullDomain", 1 }, {"buyer",1 },{ "assetName", 1 }, { "price", 1 }, { "time", 1 }, { "owner", 1 }, { "starCount", 1 }, { "_id", 0 } }.ToString();
+            string fieldStr = new JObject { { "fullDomain", 1 }, { "buyer", 1 }, { "assetName", 1 }, { "price", 1 }, { "time", 1 }, { "owner", 1 }, { "starCount", 1 }, { "_id", 0 } }.ToString();
             var count = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr);
             if (count == 0) return new JArray { };
 
@@ -189,7 +190,7 @@ namespace NEL_Wallet_API.Service
                 jo.Remove("owner");
                 jo.Add("isStar", false);
                 jo.Remove("starCount");
-                
+
                 return jo;
             }).ToArray();
             return new JArray { new JObject {
@@ -197,7 +198,7 @@ namespace NEL_Wallet_API.Service
                 { "list", new JArray{ res } }
             } };
         }
-        public JArray getDexDomainDealHistList(string address, int pageNum = 1, int pageSize = 10, string sortType = ""/*newtime(blocktime).priceH(price).priceL*/, string assetFilterType="")
+        public JArray getDexDomainDealHistList(string address, int pageNum = 1, int pageSize = 10, string sortType = ""/*newtime(blocktime).priceH(price).priceL*/, string assetFilterType = "")
         {
             string findStr = getFindStr(assetFilterType, "");
             string sortStr = getSortStr(sortType, "deal").ToString();
@@ -220,7 +221,7 @@ namespace NEL_Wallet_API.Service
             } };
         }
 
-        private string getFindStr(string assetFilterType, string starFilterType, bool NotExpired=false)
+        private string getFindStr(string assetFilterType, string starFilterType, bool NotExpired = false)
         {
 
             if (starFilterType == SortFilterType.StarFilter_Mine)
@@ -230,31 +231,31 @@ namespace NEL_Wallet_API.Service
 
             if (assetFilterType == "" && starFilterType == "")
             {
-                if(NotExpired)
+                if (NotExpired)
                 {
-                    return new JObject { {"ttl", new JObject { {"$gte", TimeHelper.GetTimeStamp() } } } }.ToString();
+                    return new JObject { { "ttl", new JObject { { "$gte", TimeHelper.GetTimeStamp() } } } }.ToString();
                 }
                 return "{}";
             }
 
             assetFilterType = assetFilterType.ToUpper();
             JObject findJo = new JObject();
-            if(assetFilterType == SortFilterType.AssetFilter_CGAS || assetFilterType == SortFilterType.AssetFilter_NNC)
+            if (assetFilterType == SortFilterType.AssetFilter_CGAS || assetFilterType == SortFilterType.AssetFilter_NNC)
             {
                 findJo.Add("assetName", assetFilterType);
             }
 
-            if(NotExpired)
+            if (NotExpired)
             {
-                findJo.Add("ttl", new JObject { { "$gte", TimeHelper.GetTimeStamp()} });
+                findJo.Add("ttl", new JObject { { "$gte", TimeHelper.GetTimeStamp() } });
             }
 
             return findJo.ToString();
         }
-        private JObject getSortStr(string sortType, string sellOrBuyOrDeal, string starSuffix="")
+        private JObject getSortStr(string sortType, string sellOrBuyOrDeal, string starSuffix = "")
         {
             if (sortType == "") return new JObject { };
-            switch(sortType)
+            switch (sortType)
             {
                 case SortFilterType.Sort_MortgagePayments:
                 case SortFilterType.Sort_MortgagePayments_High:
@@ -315,7 +316,7 @@ namespace NEL_Wallet_API.Service
         public JArray getDexDomainSellDetail(string fullDomain)
         {
             string findStr = new JObject { { "fullDomain", fullDomain } }.ToString();
-            string fieldStr = new JObject { { "fullDomain",1},{"sellType",1 }, { "ttl", 1}, {"assetName",1 }, { "nowPrice", 1 }, { "salePrice", 1 }, { "endPrice", 1 }, { "seller", 1 }, { "startTimeStamp", 1 }, { "_id", 0 } }.ToString();
+            string fieldStr = new JObject { { "fullDomain", 1 }, { "sellType", 1 }, { "ttl", 1 }, { "assetName", 1 }, { "nowPrice", 1 }, { "salePrice", 1 }, { "endPrice", 1 }, { "seller", 1 }, { "startTimeStamp", 1 }, { "_id", 0 } }.ToString();
             var queryRes = mh.GetDataWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, fieldStr, findStr);
             if (queryRes == null || queryRes.Count == 0) return new JArray { };
 
@@ -338,12 +339,12 @@ namespace NEL_Wallet_API.Service
 
             return res;
         }
-        public JArray getDexDomainSellOther(string fullDomain, int pageNum=1, int pageSize=10)
+        public JArray getDexDomainSellOther(string fullDomain, int pageNum = 1, int pageSize = 10)
         {
             string findStr = new JObject { { "fullDomain", fullDomain } }.ToString();
             var queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr);
             if (queryRes == null || queryRes.Count == 0) return new JArray { };
-            
+
             var res = queryRes.Select(p =>
             {
                 return new JObject {
@@ -358,7 +359,7 @@ namespace NEL_Wallet_API.Service
             }).ToArray();
 
             var count = res.Count();
-            
+
             return new JArray { new JObject {
                 {"count", res.Count()},
                 { "list", new JArray { res.Skip((pageNum - 1) * pageSize).Take(pageSize) } }
@@ -366,7 +367,7 @@ namespace NEL_Wallet_API.Service
         }
         public JArray getDexDomainBuyDetail(string fullDomain, string buyer)
         {
-            string findStr = new JObject { { "fullDomain", fullDomain },{ "buyer", buyer} }.ToString();
+            string findStr = new JObject { { "fullDomain", fullDomain }, { "buyer", buyer } }.ToString();
             var queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr);
             if (queryRes == null || queryRes.Count == 0) return new JArray { };
 
@@ -386,7 +387,7 @@ namespace NEL_Wallet_API.Service
 
             return res;
         }
-        public JArray getDexDomainBuyOther(string fullDomain, string buyer, int pageNum=1, int pageSize=10)
+        public JArray getDexDomainBuyOther(string fullDomain, string buyer, int pageNum = 1, int pageSize = 10)
         {
             var count = 0;
             List<JObject> list = new List<JObject>();
@@ -409,8 +410,8 @@ namespace NEL_Wallet_API.Service
                 });
             }
             // buyinfo
-            findStr = new JObject { { "fullDomain", fullDomain },{ "buyer", new JObject { {"$ne", buyer } } } }.ToString();
-            queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr, "{}", pageSize*(pageNum-1), pageSize);
+            findStr = new JObject { { "fullDomain", fullDomain }, { "buyer", new JObject { { "$ne", buyer } } } }.ToString();
+            queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr, "{}", pageSize * (pageNum - 1), pageSize);
             if (queryRes != null && queryRes.Count > 0)
             {
                 var res = queryRes.Select(p =>
@@ -440,7 +441,7 @@ namespace NEL_Wallet_API.Service
             };
         }
 
-        public JArray getDexDomainOrderDeal(string address, int pageNum=1, int pageSize=10)
+        public JArray getDexDomainOrderDeal(string address, int pageNum = 1, int pageSize = 10)
         {
             // 成交
             var findStr = new JObject { { "$or", new JArray { new JObject { { "seller", address } }, new JObject { { "buyer", address } } } } }.ToString();
@@ -452,7 +453,7 @@ namespace NEL_Wallet_API.Service
             {
                 var jo = new JObject();
                 //jo.Add("orderType", MarketType.Deal);
-                jo.Add("orderType", p["displayName"].ToString() == "NNSsell" ? MarketType.Sell:MarketType.Buy);
+                jo.Add("orderType", p["displayName"].ToString() == "NNSsell" ? MarketType.Sell : MarketType.Buy);
                 jo.Add("sellType", -1);
                 jo.Add("fullDomain", p["fullDomain"]);
                 jo.Add("nowPrice", NumberDecimalHelper.formatDecimal(p["price"].ToString()));
@@ -467,20 +468,20 @@ namespace NEL_Wallet_API.Service
                 { "list", new JArray{res } }
             } };
         }
-        public JArray getDexDomainOrder(string address, string dealType/*0/1, 0表示未成交，1表示已成交*/, int pageNum=1, int pageSize=10)
+        public JArray getDexDomainOrder(string address, string dealType/*0/1, 0表示未成交，1表示已成交*/, int pageNum = 1, int pageSize = 10)
         {
-            if(dealType == "1")
+            if (dealType == "1")
             {
                 return getDexDomainOrderDeal(address, pageNum, pageSize);
             }
             // sellType + fullDomain + nowPrice + assetName + saleRate + isDeal
             // 出售
-            string findStr = new JObject { { "seller", address} }.ToString();
+            string findStr = new JObject { { "seller", address } }.ToString();
             var sellCount = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, findStr);
 
             List<JObject> list = new List<JObject>();
-            var queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, findStr, "{}", pageSize*(pageNum-1), pageSize);
-            if(queryRes != null && queryRes.Count > 0)
+            var queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, findStr, "{}", pageSize * (pageNum - 1), pageSize);
+            if (queryRes != null && queryRes.Count > 0)
             {
                 var res = queryRes.Select(p =>
                 {
@@ -496,12 +497,12 @@ namespace NEL_Wallet_API.Service
                 }).ToArray();
                 list.AddRange(res);
             }
-            
+
             // 求购
             findStr = new JObject { { "buyer", address } }.ToString();
             var buyCount = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr);
             if (sellCount + buyCount == 0) return new JArray { };
-            if (pageSize == list.Count() || buyCount == 0) 
+            if (pageSize == list.Count() || buyCount == 0)
             {
                 return new JArray { new JObject {
                     { "count", sellCount+buyCount },
@@ -511,7 +512,7 @@ namespace NEL_Wallet_API.Service
 
             var newPageNum = pageNum - (int)sellCount / pageSize;
             var newLimit = pageSize -= list.Count();
-            queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr, "{}", (newPageNum-1)*pageSize, newLimit);
+            queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr, "{}", (newPageNum - 1) * pageSize, newLimit);
             if (queryRes != null && queryRes.Count > 0)
             {
                 var res = queryRes.Select(p =>
@@ -549,9 +550,9 @@ namespace NEL_Wallet_API.Service
 
             return new JArray { new JObject { { "domain", domain }, { "isOwn", isOwn }, { "isLaunch", isLaunch } } };
         }
-        
+
         // 发起挂单时，我的域名列表(去掉过期的、去掉出售中的、去掉已绑定的)
-        public JArray getDexDomainCanUseList(string address, string domainPrefix="", int pageNum=1, int pageSize=10)
+        public JArray getDexDomainCanUseList(string address, string domainPrefix = "", int pageNum = 1, int pageSize = 10)
         {
             var findJo = new JObject { { "owner", address } };
             if (domainPrefix != "")
@@ -559,16 +560,16 @@ namespace NEL_Wallet_API.Service
                 findJo.Add("fulldomain", MongoFieldHelper.newRegexFilter(domainPrefix));
             }
             findJo.Add("TTL", new JObject { { "$gt", TimeHelper.GetTimeStamp() } });
-            findJo.Add("$or", MongoFieldHelper.newNoExistEqFilter("bindFlag", "1"));
-            
+            findJo.Add("$or", MongoFieldHelper.newNoExistEqFilter("1", "bindflag"));
+
             string findStr = findJo.ToString();
             var count = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, domainOwnerCol, findStr);
             if (count == 0) return new JArray { };
 
-            string fieldStr = new JObject { { "fulldomain",1},{"TTL",1 },{ "_id",0} }.ToString();
-            string sortStr = new JObject { { "fulldomain", 1} }.ToString();
-            var queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, domainOwnerCol, findStr, sortStr, pageSize*(pageNum-1), pageSize, fieldStr);
-            
+            string fieldStr = new JObject { { "fulldomain", 1 }, { "TTL", 1 }, { "_id", 0 } }.ToString();
+            string sortStr = new JObject { { "fulldomain", 1 } }.ToString();
+            var queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, domainOwnerCol, findStr, sortStr, pageSize * (pageNum - 1), pageSize, fieldStr);
+
             return new JArray { new JObject {
                 {"count",count },
                 {"list", queryRes}
@@ -576,44 +577,50 @@ namespace NEL_Wallet_API.Service
         }
 
         // 查询我的域名(排序方式:字母顺序/到期时间, 筛选：全部/出售中/未出售/已映射/未映射)
-        public JArray getDexDomainList(string address, string domainPrefix="", string queryFilter="", string sortFilter= "", int pageNum=1, int pageSize=10)
+        public JArray getDexDomainList(string address, string domainPrefix = "", string queryFilter = "", string sortFilter = "", int pageNum = 1, int pageSize = 10)
         {
             // fulldomain + ttl + data + isUsing + isSelling + isBind + isTTL
             var findJo = new JObject { { "owner", address } };
-            if(domainPrefix != "")
+            if (domainPrefix != "")
             {
                 findJo.Add("fulldomain", MongoFieldHelper.newRegexFilter(domainPrefix));
             }
-            if(queryFilter == SortFilterType.SellFilter_Yes)
+            if (queryFilter == SortFilterType.SellFilter_Yes)
             {
                 findJo.Add("dexLaunchFlag", MongoFieldHelper.newExistEqFilter("1"));
-            } else if(queryFilter == SortFilterType.SellFilter_Not)
+            }
+            else if (queryFilter == SortFilterType.SellFilter_Not)
             {
                 findJo.Add("$or", MongoFieldHelper.newNoExistEqFilter("1", "dexLaunchFlag"));
-            } else if(queryFilter == SortFilterType.mapFilter_Yes)
+            }
+            else if (queryFilter == SortFilterType.mapFilter_Yes)
             {
-                findJo.Add("data", new JObject { { "$ne", ""} });
-            } else if(queryFilter == SortFilterType.mapFilter_Not)
+                findJo.Add("data", new JObject { { "$ne", "" } });
+            }
+            else if (queryFilter == SortFilterType.mapFilter_Not)
             {
                 findJo.Add("data", "");
-            } else if(queryFilter == SortFilterType.bindFilter_Yes)
+            }
+            else if (queryFilter == SortFilterType.bindFilter_Yes)
             {
-                findJo.Add("bindFlag", MongoFieldHelper.newExistEqFilter("1"));
-            } else if(queryFilter == SortFilterType.bindFilter_Not)
+                findJo.Add("bindflag", MongoFieldHelper.newExistEqFilter("1"));
+            }
+            else if (queryFilter == SortFilterType.bindFilter_Not)
             {
-                findJo.Add("$or", MongoFieldHelper.newNoExistEqFilter("1", "bindFlag"));
+                findJo.Add("$or", MongoFieldHelper.newNoExistEqFilter("1", "bindflag"));
             }
             findJo.Add("TTL", new JObject { { "$gt", TimeHelper.GetTimeStamp() } });
 
             var sortJo = new JObject();
-            if(sortFilter == "" || sortFilter == SortFilterType.Sort_fullDomain)
+            if (sortFilter == "" || sortFilter == SortFilterType.Sort_fullDomain)
             {
-                sortJo.Add("fulldomain",1);
-            } else if(sortFilter == SortFilterType.Sort_ttl)
+                sortJo.Add("fulldomain", 1);
+            }
+            else if (sortFilter == SortFilterType.Sort_ttl)
             {
                 sortJo.Add("TTL", -1);
             }
-            
+
             var findStr = findJo.ToString();
             var sortStr = sortJo.ToString();
             var queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, domainOwnerCol, findStr, sortStr, pageSize * (pageNum - 1), pageSize);
@@ -627,13 +634,13 @@ namespace NEL_Wallet_API.Service
                 jo.Add("data", p["data"]);
                 jo.Add("isUsing", p["data"].ToString() != "");
                 jo.Add("isSelling", p["dexLaunchFlag"] != null && p["dexLaunchFlag"].ToString() == "1");
-                jo.Add("isBind", p["bindFlag"] != null && p["bindFlag"].ToString() == "1");
+                jo.Add("isBind", p["bindflag"] != null && p["bindflag"].ToString() == "1");
                 jo.Add("isTTL", long.Parse(p["TTL"].ToString()) < TimeHelper.GetTimeStamp());
                 return jo;
             }).ToArray();
 
             var count = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, domainOwnerCol, findStr);
-            
+
             return new JArray { new JObject {
                 {"count", count },
                 {"list", new JArray{ res } }
@@ -643,10 +650,10 @@ namespace NEL_Wallet_API.Service
         // 查询订单排行
         public JArray getOrderRange(decimal nncAmount)
         {
-            string findStr = new JObject { { "mortgagePayments", new JObject { { "$gte", nncAmount} } } }.ToString();
+            string findStr = new JObject { { "mortgagePayments", new JObject { { "$gte", nncAmount } } } }.ToString();
             var count = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, findStr);
 
-            return new JArray { new JObject { {"orderRange", count + 1 } } };
+            return new JArray { new JObject { { "orderRange", count + 1 } } };
         }
 
         public JArray searchDexDomainInfo(string domain)
@@ -662,40 +669,43 @@ namespace NEL_Wallet_API.Service
             string price = null;
             string findStr = new JObject { { "fulldomain", domain }, { "TTL", new JObject { { "$gt", TimeHelper.GetTimeStamp() } } } }.ToString();
             var queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, domainOwnerCol, findStr);
-            if(queryRes != null && queryRes.Count > 0)
+            if (queryRes != null && queryRes.Count > 0)
             {
                 fulldomain = queryRes[0]["fulldomain"].ToString();
                 bool isLaunch = queryRes[0]["dexLaunchFlag"] != null && queryRes[0]["dexLaunchFlag"].ToString() == "1";
-                if(isLaunch)
+                if (isLaunch)
                 {
                     state = DomainState.YesSelling;
                     price = queryRes[0]["dexLaunchPrice"].ToString();
-                } else
+                }
+                else
                 {
                     state = DomainState.NotSelling;
                     price = "0";
                 }
-            } else
+            }
+            else
             {
                 var findJo = MongoFieldHelper.toFilter(new string[] { AuctionState.STATE_CONFIRM, AuctionState.STATE_RANDOM }, "auctionState");
                 findStr = findJo.ToString();
-                string fieldStr = new JObject { { "maxPrice", 1} }.ToString();
+                string fieldStr = new JObject { { "maxPrice", 1 } }.ToString();
                 queryRes = mh.GetDataWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, auctionStateCol, fieldStr, findStr);
-                if(queryRes != null && queryRes.Count > 0)
+                if (queryRes != null && queryRes.Count > 0)
                 {
                     state = DomainState.Auctioning;
                     price = NumberDecimalHelper.formatDecimal(queryRes[0]["maxPrice"].ToString());
-                } else
+                }
+                else
                 {
                     state = DomainState.CanAuction;
                     price = "0";
                 }
             }
 
-            return new JArray { new JObject { {"fulldomain", fulldomain },{ "state", state}, {"price", price } } };
+            return new JArray { new JObject { { "fulldomain", fulldomain }, { "state", state }, { "price", price } } };
         }
 
-        public JArray searchDexDomainLikeInfo(string domainPrefix, int pageNum=1, int pageSize=10)
+        public JArray searchDexDomainLikeInfo(string domainPrefix, int pageNum = 1, int pageSize = 10)
         {
             var findJo = MongoFieldHelper.likeFilter("fullDomain", domainPrefix);
             findJo.Add("ttl", new JObject { { "$gte", TimeHelper.GetTimeStamp() } });
@@ -704,7 +714,7 @@ namespace NEL_Wallet_API.Service
             var count = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, findStr);
             if (count == 0) return new JArray { };
 
-            string sortStr = new JObject { { "fullDomain",1} }.ToString();
+            string sortStr = new JObject { { "fullDomain", 1 } }.ToString();
             var queryRes = mh.GetDataPagesWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, fieldStr, pageSize, pageNum, sortStr, findStr);
             var res = queryRes.Select(p =>
             {
@@ -715,7 +725,7 @@ namespace NEL_Wallet_API.Service
                 tmp = NumberDecimalHelper.formatDecimal(jo["saleRate"].ToString());
                 jo.Remove("saleRate");
                 jo.Add("saleRate", tmp);
-                
+
                 jo.Add("isStar", false);
                 jo.Remove("starCount");
                 return jo;
@@ -725,24 +735,25 @@ namespace NEL_Wallet_API.Service
                 { "list", new JArray{ res } }
             } };
         }
-        
+
 
         // 
-        public JArray starDexDomain(string address,  string domain, string starFlag="0"/*1表示开始关注;0表示取消关注*/)
+        public JArray starDexDomain(string address, string domain, string starFlag = "0"/*1表示开始关注;0表示取消关注*/)
         {
-            string findStr = new JObject { { "address", address},{ "fullDomain", domain} }.ToString();
+            string findStr = new JObject { { "address", address }, { "fullDomain", domain } }.ToString();
             var queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexStarStateCol, findStr);
-            
-            
-            if((queryRes == null || queryRes.Count == 0))
+
+
+            if ((queryRes == null || queryRes.Count == 0))
             {
-                if(starFlag == "1")
+                if (starFlag == "1")
                 {
                     // 开始关注&Null
                     var info = new JObject { { "address", address }, { "fullDomain", domain }, { "state", StarState.YesStar }, { "time", TimeHelper.GetTimeStamp() } }.ToString();
                     mh.InsertOneData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexStarStateCol, info);
                 }
-            } else
+            }
+            else
             {
                 // 开始关注&NotNull/取消关注
                 string state = starFlag == "0" ? StarState.NotStar : StarState.YesStar;
@@ -752,11 +763,11 @@ namespace NEL_Wallet_API.Service
                     mh.UpdateData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexStarStateCol, updateStr, findStr);
                 }
             }
-            return new JArray { new JObject { { "res", true }} };
+            return new JArray { new JObject { { "res", true } } };
         }
         public JArray getStarDomainCount(string domain)
         {
-            string findStr = new JObject { {"fullDomain", domain }, { "state", "1" } }.ToString();
+            string findStr = new JObject { { "fullDomain", domain }, { "state", "1" } }.ToString();
             var count = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexStarStateCol, findStr);
             return new JArray { new JObject { { "count", count } } };
         }
@@ -776,10 +787,133 @@ namespace NEL_Wallet_API.Service
         }
         public JArray hasStarDomain(string address, string domain)
         {
-            string findStr = new JObject { { "address", address }, { "fullDomain", domain },{ "state", "1"} }.ToString();
+            string findStr = new JObject { { "address", address }, { "fullDomain", domain }, { "state", "1" } }.ToString();
             bool flag = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexStarStateCol, findStr) > 0;
             return new JArray { new JObject { { "isStar", flag } } };
         }
+
+
+        //
+        public JArray getEmailState(string address)
+        {
+            string findStr = new JObject { { "address", address } }.ToString();
+            string fieldStr = new JObject { { "email", 1 }, { "activeState", 1 }, { "verifyState", 1 }, { "_id", 1 } }.ToString();
+            var queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexEmailStateCol, findStr);
+            return queryRes;
+        }
+        public JArray bindEmail(string address, string email)
+        {
+            string findStr = new JObject { { "address", address } }.ToString();
+            var queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexEmailStateCol, findStr); ;
+            
+            JObject info = null;
+            if (queryRes == null || queryRes.Count == 0)
+            {
+                info = new JObject {
+                    {"address", address },
+                    {"email", email },
+                    {"activeState", ActiveState.YES },
+                    {"verifyState", VerifyState.WaitSend },
+                    {"time", TimeHelper.GetTimeStamp() },
+                    {"verifyUid", "" }
+                };
+                mh.InsertOneData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexEmailStateCol, info.ToString());
+            } else
+            {
+                info = (JObject)queryRes[0];
+                bool change = false;
+                if(info["email"].ToString() != email)
+                {
+                    info.Remove("email");
+                    info.Add("email", email);
+                    change = true;
+                }
+                if(info["activeState"].ToString() == ActiveState.NOT)
+                {
+                    info.Remove("activeState");
+                    info.Add("activeState", ActiveState.YES);
+                    change = true;
+                }
+                if(!change && info["verifyState"].ToString() == VerifyState.YES)
+                {
+                    // address/email相等，且已激活，且已验证，则无需处理
+                } else
+                {
+                    if (info["verifyState"].ToString() != VerifyState.WaitSend)
+                    {
+                        info.Remove("verifyState");
+                        info.Add("verifyState", VerifyState.WaitSend);
+                        change = true;
+                    }
+                }
+                mh.ReplaceData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexEmailStateCol, findStr, info.ToString());
+            }
+            return new JArray { new JObject { { "res", true} } };
+        }
+
+        public JArray clearEmail(string address)
+        {
+            string findStr = new JObject { { "address", address } }.ToString();
+            var queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexEmailStateCol, findStr);
+            if (queryRes != null && queryRes.Count > 0)
+            {
+                var info = (JObject)queryRes[0];
+                if ( info["email"].ToString() != ""
+                    || info["activeState"].ToString() != ActiveState.NOT
+                    || info["verifyState"].ToString() != VerifyState.NOT
+                    || info["verifyUid"].ToString() != ""
+                    )
+                {
+                    info["email"] = "";
+                    info["activeState"] = ActiveState.NOT;
+                    info["verifyState"] = VerifyState.NOT;
+                    info["verifyUid"] = "";
+                    info["time"] = TimeHelper.GetTimeStamp();
+                    mh.ReplaceData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexEmailStateCol, findStr, info.ToString());
+                }   
+            }
+            return new JArray { new JObject { { "res", true } } };
+        }
+        public JArray verifyEmail(string address, string email, string verifyUid)
+        {
+            string findStr = new JObject { { "address", address},{ "email", email}}.ToString();
+            var queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexEmailStateCol, findStr);
+
+
+            if (queryRes == null || queryRes.Count == 0)
+            {
+                // 无效验证码
+            }
+            var info = (JObject)queryRes[0];
+            if(info["activeState"].ToString() == ActiveState.NOT)
+            {
+                // 邮箱通知功能未激活
+            }
+            if(info["verifyState"].ToString() == VerifyState.NOT)
+            {
+                // 
+            }
+            if(info["verifyUid"].ToString() != verifyUid)
+            {
+                // 无效验证码
+            }
+            
+            return null;
+        }
+    }
+
+    class ActiveState
+    {
+        public const string YES = "1";
+        public const string NOT = "0";
+    }
+    class VerifyState
+    {
+        public const string WaitSend = "2";
+        public const string HaveSend = "3";
+        public const string YES = "1";
+        public const string NOT = "0";
+    }
 
     class StarState
     {
