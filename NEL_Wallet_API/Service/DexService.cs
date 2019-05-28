@@ -560,7 +560,14 @@ namespace NEL_Wallet_API.Service
                 findJo.Add("fulldomain", MongoFieldHelper.newRegexFilter(domainPrefix));
             }
             findJo.Add("TTL", new JObject { { "$gt", TimeHelper.GetTimeStamp() } });
-            findJo.Add("$or", MongoFieldHelper.newNoExistEqFilter("1", "bindflag"));
+            
+            //findJo.Add("$or", MongoFieldHelper.newNoExistEqFilter("1", "bindflag"));
+            JArray ja = new JArray { };
+            ja.Add(MongoFieldHelper.newNoExistEqFilter("1", "bindflag", true));
+            ja.Add(MongoFieldHelper.newNoExistEqFilter("1", "dexLaunchFlag", true));
+            findJo.Add("$and", ja);
+
+
 
             string findStr = findJo.ToString();
             var count = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, domainOwnerCol, findStr);
