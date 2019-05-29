@@ -741,6 +741,16 @@ namespace NEL_Wallet_API.Service
             string sortStr = new JObject { { "fullDomain", 1 } }.ToString();
             string fieldStr = new JObject { { "fullDomain", 1 }, { "seller", 1 }, { "assetName", 1 }, { "nowPrice", 1 }, { "saleRate", 1 }, { "sellType", 1 }, { "_id", 0 } }.ToString();
             var queryRes = mh.GetDataNewPages(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, findStr, sortStr, pageSize * (pageNum - 1), pageSize, fieldStr);
+
+            // 查询关注信息
+            bool hasStar = false;
+            Dictionary<string, bool> fullDomainStarDict = null;
+            var fullDomainArr = queryRes.Select(p => p["fullDomain"].ToString()).ToArray();
+            if (fullDomainArr != null && fullDomainArr.Count() > 0)
+            {
+                fullDomainStarDict = GetFullDomainStarDict(address, fullDomainArr, out hasStar);
+            }
+
             var res = queryRes.Select(p =>
             {
                 var jo = (JObject)p;
@@ -750,7 +760,7 @@ namespace NEL_Wallet_API.Service
                 tmp = NumberDecimalHelper.formatDecimal(jo["saleRate"].ToString());
                 jo.Remove("saleRate");
                 jo.Add("saleRate", tmp);
-                jo.Add("isStar", false);
+                jo.Add("isStar", hasStar ? fullDomainStarDict.GetValueOrDefault(p["fullDomain"].ToString(), false): false);
                 jo.Add("isMine", jo["seller"].ToString() == address);
                 jo.Remove("seller");
                 return jo;
@@ -762,6 +772,25 @@ namespace NEL_Wallet_API.Service
             } };
         }
 
+        private Dictionary<string, bool> GetFullDomainStarDict(string address, string[] fullDomainArr, out bool hasStar)
+        {
+            var findJA = fullDomainArr.Select(p => new JObject { { "address", address }, { "fullDomain", p }, { "state", StarState.YesStar } }).ToArray();
+            string findStr = new JObject { { "$or", new JArray { findJA } } }.ToString();
+            var queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexStarStateCol, findStr);
+            if(queryRes != null && queryRes.Count > 0)
+            {
+                hasStar = true;
+                return fullDomainArr.ToDictionary(k => k, v =>
+                {
+                    return queryRes.Any(p => p["fullDomain"].ToString() == v);
+                });
+            }
+            else
+            {
+                hasStar = false;
+                return null;
+            }
+        }
 
         // 
         public JArray starDexDomain(string address, string domain, string starFlag = "0"/*1表示开始关注;0表示取消关注*/)
