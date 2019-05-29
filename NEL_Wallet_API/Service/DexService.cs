@@ -21,6 +21,7 @@ namespace NEL_Wallet_API.Service
         public string dexDomainDealHistStateCol { get; set; }
         public string dexContractHash { get; set; }
         public long newlyDataTimeRange { get; set; } = 3 * 24 * 60 * 60; // 3天内
+        private long RepeatOpTimeLimitSeconds = 60; // 60s内不能重复操作
         public long nowTime => TimeHelper.GetTimeStamp();
 
         public JArray getBalanceFromDex(string address, string assetHash = "")
@@ -104,6 +105,14 @@ namespace NEL_Wallet_API.Service
             if (count == 0) return new JArray { };
 
             var queryRes = mh.GetDataNewPages(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, findStr, sortStr, pageSize*(pageNum-1), pageSize, fieldStr);
+            // 关注信息处理
+            bool hasStar = false;
+            Dictionary<string, bool> fullDomainStarDict = null;
+            var fullDomainArr = queryRes.Select(p => p["fullDomain"].ToString()).ToArray();
+            if (fullDomainArr != null && fullDomainArr.Count() > 0)
+            {
+                fullDomainStarDict = GetFullDomainStarDict(address, fullDomainArr, out hasStar);
+            }
             var res = queryRes.Select(p =>
             {
                 var jo = (JObject)p;
@@ -116,7 +125,7 @@ namespace NEL_Wallet_API.Service
 
                 jo.Add("isMine", jo["owner"].ToString() == address);
                 jo.Remove("owner");
-                jo.Add("isStar", false);
+                jo.Add("isStar", hasStar ? fullDomainStarDict.GetValueOrDefault(p["fullDomain"].ToString(), false) : false);
                 jo.Remove("starCount");
                 return jo;
             }).ToArray();
@@ -173,11 +182,19 @@ namespace NEL_Wallet_API.Service
             }
             string findStr = getFindStr(assetFilterType, starFilterType);
             string sortStr = getSortStr(sortType, "buy").ToString();
-            string fieldStr = new JObject { { "fullDomain", 1 }, { "buyer", 1 }, { "assetName", 1 }, { "price", 1 }, { "time", 1 }, { "owner", 1 }, { "starCount", 1 }, { "_id", 0 } }.ToString();
+            string fieldStr = new JObject { { "fullDomain", 1 }, { "buyer", 1 }, { "assetName", 1 }, { "price", 1 }, { "time", 1 }, { "owner", 1 }, { "_id", 0 } }.ToString();
             var count = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr);
             if (count == 0) return new JArray { };
 
             var queryRes = mh.GetDataNewPages(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr, sortStr, pageSize*(pageNum-1), pageSize, fieldStr);
+            // 关注信息处理
+            bool hasStar = false;
+            Dictionary<string, bool> fullDomainStarDict = null;
+            var fullDomainArr = queryRes.Select(p => p["fullDomain"].ToString()).ToArray();
+            if (fullDomainArr != null && fullDomainArr.Count() > 0)
+            {
+                fullDomainStarDict = GetFullDomainStarDict(address, fullDomainArr, out hasStar);
+            }
             var res = queryRes.Select(p =>
             {
                 var jo = (JObject)p;
@@ -188,9 +205,7 @@ namespace NEL_Wallet_API.Service
                 jo.Remove("time");
                 jo.Add("canSell", jo["owner"].ToString() == address);
                 jo.Remove("owner");
-                jo.Add("isStar", false);
-                jo.Remove("starCount");
-
+                jo.Add("isStar", hasStar ? fullDomainStarDict.GetValueOrDefault(p["fullDomain"].ToString(), false) : false);
                 return jo;
             }).ToArray();
             return new JArray { new JObject {
@@ -323,7 +338,7 @@ namespace NEL_Wallet_API.Service
             }
             string findStr = findJo.ToString();
             string sortStr = new JObject { { "ttl", -1 } }.ToString();
-            string fieldStr = new JObject { { "fullDomain", 1 }, { "sellType", 1 }, { "ttl", 1 }, { "assetName", 1 }, { "nowPrice", 1 }, { "salePrice", 1 }, { "endPrice", 1 }, { "seller", 1 }, { "startTimeStamp", 1 }, { "_id", 0 } }.ToString();
+            string fieldStr = new JObject { { "auctionid", 1 }, { "fullDomain", 1 }, { "sellType", 1 }, { "ttl", 1 }, { "assetName", 1 }, { "nowPrice", 1 }, { "salePrice", 1 }, { "endPrice", 1 }, { "seller", 1 }, { "startTimeStamp", 1 }, { "_id", 0 } }.ToString();
             var queryRes = mh.GetDataNewPages(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, findStr, sortStr, 0,1,fieldStr);
             if (queryRes == null || queryRes.Count == 0) return new JArray { };
 
@@ -332,6 +347,7 @@ namespace NEL_Wallet_API.Service
             {
                 new JObject
                 {
+                    { "auctionid", info["auctionid"]},
                     { "fullDomain", info["fullDomain"]},
                     { "sellType", info["sellType"]},
                     { "assetName", info["assetName"]},
@@ -742,7 +758,7 @@ namespace NEL_Wallet_API.Service
             string fieldStr = new JObject { { "fullDomain", 1 }, { "seller", 1 }, { "assetName", 1 }, { "nowPrice", 1 }, { "saleRate", 1 }, { "sellType", 1 }, { "_id", 0 } }.ToString();
             var queryRes = mh.GetDataNewPages(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, findStr, sortStr, pageSize * (pageNum - 1), pageSize, fieldStr);
 
-            // 查询关注信息
+            // 关注信息处理
             bool hasStar = false;
             Dictionary<string, bool> fullDomainStarDict = null;
             var fullDomainArr = queryRes.Select(p => p["fullDomain"].ToString()).ToArray();
@@ -845,8 +861,8 @@ namespace NEL_Wallet_API.Service
             bool flag = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexStarStateCol, findStr) > 0;
             return new JArray { new JObject { { "isStar", flag } } };
         }
+
         
-        //
         public JArray getEmailState(string address)
         {
             string findStr = new JObject { { "address", address } }.ToString();
@@ -897,7 +913,7 @@ namespace NEL_Wallet_API.Service
                         // 邮箱没变，且已激活，且已验证，则无需处理
                         return new JArray { new JObject { { "res", EmailBindState.CannotRepeatBindEmail } } };
                     }
-                    if (long.Parse(info["time"].ToString()) + 60 > TimeHelper.GetTimeStamp())
+                    if (long.Parse(info["time"].ToString()) + RepeatOpTimeLimitSeconds > TimeHelper.GetTimeStamp())
                     {
                         // 60秒内不能重复操作
                         return new JArray { new JObject { { "res", EmailBindState.CannotRepeatVerifyEmail } } };
