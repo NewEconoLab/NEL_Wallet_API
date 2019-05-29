@@ -816,8 +816,7 @@ namespace NEL_Wallet_API.Service
             bool flag = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexStarStateCol, findStr) > 0;
             return new JArray { new JObject { { "isStar", flag } } };
         }
-
-
+        
         //
         public JArray getEmailState(string address)
         {
@@ -859,23 +858,25 @@ namespace NEL_Wallet_API.Service
                     info.Add("activeState", ActiveState.YES);
                     change = true;
                 }
-                if(!change && info["verifyState"].ToString() == VerifyState.YES)
-                {
-                    // address/email相等，且已激活，且已验证，则无需处理
-                } else
-                {
-                    if (info["verifyState"].ToString() != VerifyState.WaitSend)
+                if(!change) { 
+                    if(info["verifyState"].ToString() == VerifyState.YES)
                     {
-                        info.Remove("verifyState");
-                        info.Add("verifyState", VerifyState.WaitSend);
-                        change = true;
+                        // 邮箱没变，且已激活，且已验证，则无需处理
+                        return new JArray { new JObject { { "res", EmailBindState.CannotRepeatBindEmail } } };
+                    }
+                    if (long.Parse(info["time"].ToString()) + 60 > TimeHelper.GetTimeStamp())
+                    {
+                        // 60秒内不能重复操作
+                        return new JArray { new JObject { { "res", EmailBindState.CannotRepeatVerifyEmail } } };
                     }
                 }
+                info["verifyState"] = VerifyState.WaitSend;
+                info["verifyUid"] = "";
+                info["time"] = TimeHelper.GetTimeStamp();
                 mh.ReplaceData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexEmailStateCol, findStr, info.ToString());
             }
-            return new JArray { new JObject { { "res", true} } };
+            return new JArray { new JObject { { "res", EmailBindState.Succ } } };
         }
-
         public JArray clearEmail(string address)
         {
             string findStr = new JObject { { "address", address } }.ToString();
@@ -901,30 +902,51 @@ namespace NEL_Wallet_API.Service
         }
         public JArray verifyEmail(string address, string email, string verifyUid)
         {
-            string findStr = new JObject { { "address", address},{ "email", email}}.ToString();
+            string findStr = new JObject { { "address", address}}.ToString();
             var queryRes = mh.GetDataNew(Notify_mongodbConnStr, Notify_mongodbDatabase, dexEmailStateCol, findStr);
-
-
             if (queryRes == null || queryRes.Count == 0)
             {
-                // 无效验证码
+                // 未绑定的地址
+                return new JArray { new JObject { { "res", EmailVerifyState.InvalidAddress} } };
             }
+            
             var info = (JObject)queryRes[0];
+            if(info["email"].ToString() != email)
+            {
+                // 无效邮箱
+                return new JArray { new JObject { { "res", EmailVerifyState.InvalidEmail } } };
+            }
             if(info["activeState"].ToString() == ActiveState.NOT)
             {
                 // 邮箱通知功能未激活
+                return new JArray { new JObject { { "res", EmailVerifyState.NotActiveNotifyFunction } } };
             }
-            if(info["verifyState"].ToString() == VerifyState.NOT)
-            {
-                // 
-            }
-            if(info["verifyUid"].ToString() != verifyUid)
+            if(info["verifyState"].ToString() != VerifyState.HaveSend || info["verifyUid"].ToString() != verifyUid)
             {
                 // 无效验证码
+                return new JArray { new JObject { { "res", EmailVerifyState.InvalidVerifyUid } } };
             }
-            
-            return null;
+            string updateStr = new JObject { { "$set", new JObject { { "verifyState", VerifyState.YES } } } }.ToString();
+            mh.UpdateData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexEmailStateCol, updateStr, findStr);
+
+            return new JArray { new JObject { { "res", EmailVerifyState.Succ } } };
         }
+    }
+    class EmailBindState
+    {
+        // 绑定返回码
+        public const string Succ = "0000"; 
+        public const string CannotRepeatBindEmail = "0101"; //"已验证通过邮箱不能重复绑定";
+        public const string CannotRepeatVerifyEmail = "0102"; //"60秒内不能重复操作";
+    }
+    class EmailVerifyState
+    {
+        // 验证返回码
+        public const string Succ = "0000";
+        public const string InvalidAddress = "0111"; //"无效地址";
+        public const string InvalidEmail = "0112"; //"无效有效";
+        public const string NotActiveNotifyFunction = "0113"; //"通知功能未激活";
+        public const string InvalidVerifyUid = "0114"; //"无效验证码";
     }
 
     class ActiveState
