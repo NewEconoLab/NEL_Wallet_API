@@ -392,7 +392,7 @@ namespace NEL_Wallet_API.Controllers
                         result = dexService.getDexDomainSellOther(req.@params[0].ToString());
                         break;
                     case "getDexDomainSellDetail":
-                        result = dexService.getDexDomainSellDetail(req.@params[0].ToString());
+                        result = dexService.getDexDomainSellDetail(req.@params[0].ToString(), req.@params[1].ToString());
                         break;
                     case "getDexDomainDealHistList":
                         result = dexService.getDexDomainDealHistList(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()), req.@params[3].ToString(), req.@params[4].ToString());
