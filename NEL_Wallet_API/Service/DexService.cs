@@ -730,7 +730,7 @@ namespace NEL_Wallet_API.Service
             return new JArray { new JObject { { "fulldomain", fulldomain }, { "state", state }, { "price", price } } };
         }
 
-        public JArray searchDexDomainLikeInfo(string domainPrefix, int pageNum = 1, int pageSize = 10)
+        public JArray searchDexDomainLikeInfo(string address, string domainPrefix, int pageNum = 1, int pageSize = 10)
         {
             var findJo = MongoFieldHelper.likeFilter("fullDomain", domainPrefix);
             findJo.Add("ttl", new JObject { { "$gte", TimeHelper.GetTimeStamp() } });
@@ -739,7 +739,7 @@ namespace NEL_Wallet_API.Service
             if (count == 0) return new JArray { };
 
             string sortStr = new JObject { { "fullDomain", 1 } }.ToString();
-            string fieldStr = new JObject { { "fullDomain", 1 }, { "starCount", 1 }, { "assetName", 1 }, { "nowPrice", 1 }, { "saleRate", 1 }, { "sellType", 1 }, { "_id", 0 } }.ToString();
+            string fieldStr = new JObject { { "fullDomain", 1 }, { "seller", 1 }, { "assetName", 1 }, { "nowPrice", 1 }, { "saleRate", 1 }, { "sellType", 1 }, { "_id", 0 } }.ToString();
             var queryRes = mh.GetDataNewPages(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, findStr, sortStr, pageSize * (pageNum - 1), pageSize, fieldStr);
             var res = queryRes.Select(p =>
             {
@@ -750,9 +750,9 @@ namespace NEL_Wallet_API.Service
                 tmp = NumberDecimalHelper.formatDecimal(jo["saleRate"].ToString());
                 jo.Remove("saleRate");
                 jo.Add("saleRate", tmp);
-
                 jo.Add("isStar", false);
-                jo.Remove("starCount");
+                jo.Add("isMine", jo["seller"].ToString() == address);
+                jo.Remove("seller");
                 return jo;
             }).ToArray();
             
