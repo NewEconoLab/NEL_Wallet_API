@@ -821,12 +821,16 @@ namespace NEL_Wallet_API.Service
         public JArray getEmailState(string address)
         {
             string findStr = new JObject { { "address", address } }.ToString();
-            string fieldStr = new JObject { { "email", 1 }, { "activeState", 1 }, { "verifyState", 1 }, { "_id", 1 } }.ToString();
+            string fieldStr = new JObject { { "email", 1 }, { "activeState", 1 }, { "verifyState", 1 }, { "_id", 0 } }.ToString();
             var queryRes = mh.GetDataNew(Notify_mongodbConnStr, Notify_mongodbDatabase, dexEmailStateCol, findStr, fieldStr);
             return queryRes;
         }
         public JArray bindEmail(string address, string email)
         {
+            if(!email.checkEmail())
+            {
+                return new JArray { new JObject { { "res", EmailBindState.InvalidEmail } } };
+            }
             string findStr = new JObject { { "address", address } }.ToString();
             var queryRes = mh.GetDataNew(Notify_mongodbConnStr, Notify_mongodbDatabase, dexEmailStateCol, findStr); ;
             
@@ -890,12 +894,8 @@ namespace NEL_Wallet_API.Service
                     || info["verifyUid"].ToString() != ""
                     )
                 {
-                    info["email"] = "";
-                    info["activeState"] = ActiveState.NOT;
-                    info["verifyState"] = VerifyState.NOT;
-                    info["verifyUid"] = "";
-                    info["time"] = TimeHelper.GetTimeStamp();
-                    mh.ReplaceData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexEmailStateCol, findStr, info.ToString());
+                    string updateStr = new JObject { {"email","" },{ "activeState", ActiveState.NOT}, { "verifyState", VerifyState.NOT},{ "verifyUid",""},{ "time", TimeHelper.GetTimeStamp()} }.ToString();
+                    mh.UpdateData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexEmailStateCol, updateStr, findStr);
                 }   
             }
             return new JArray { new JObject { { "res", true } } };
@@ -911,15 +911,15 @@ namespace NEL_Wallet_API.Service
             }
             
             var info = (JObject)queryRes[0];
-            if(info["email"].ToString() != email)
-            {
-                // 无效邮箱
-                return new JArray { new JObject { { "res", EmailVerifyState.InvalidEmail } } };
-            }
-            if(info["activeState"].ToString() == ActiveState.NOT)
+            if (info["activeState"].ToString() == ActiveState.NOT)
             {
                 // 邮箱通知功能未激活
                 return new JArray { new JObject { { "res", EmailVerifyState.NotActiveNotifyFunction } } };
+            }
+            if (info["email"].ToString() != email)
+            {
+                // 无效邮箱
+                return new JArray { new JObject { { "res", EmailVerifyState.InvalidEmail } } };
             }
             if(info["verifyState"].ToString() != VerifyState.HaveSend || info["verifyUid"].ToString() != verifyUid)
             {
@@ -935,16 +935,17 @@ namespace NEL_Wallet_API.Service
     class EmailBindState
     {
         // 绑定返回码
-        public const string Succ = "0000"; 
+        public const string Succ = "0000";
         public const string CannotRepeatBindEmail = "0101"; //"已验证通过邮箱不能重复绑定";
         public const string CannotRepeatVerifyEmail = "0102"; //"60秒内不能重复操作";
+        public const string InvalidEmail = "0112"; //"无效邮箱";
     }
     class EmailVerifyState
     {
         // 验证返回码
         public const string Succ = "0000";
         public const string InvalidAddress = "0111"; //"无效地址";
-        public const string InvalidEmail = "0112"; //"无效有效";
+        public const string InvalidEmail = "0112"; //"无效邮箱";
         public const string NotActiveNotifyFunction = "0113"; //"通知功能未激活";
         public const string InvalidVerifyUid = "0114"; //"无效验证码";
     }
