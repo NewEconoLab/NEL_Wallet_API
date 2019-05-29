@@ -349,6 +349,18 @@ namespace NEL_Wallet_API.Controllers
                 switch (req.method)
                 {
                     // dex
+                    case "verifyEmail":
+                        result = dexService.verifyEmail(req.@params[0].ToString(), req.@params[0].ToString(), req.@params[0].ToString());
+                        break;
+                    case "clearEmail":
+                        result = dexService.clearEmail(req.@params[0].ToString());
+                        break;
+                    case "bindEmail":
+                        result = dexService.bindEmail(req.@params[0].ToString(), req.@params[1].ToString());
+                        break;
+                    case "getEmailState":
+                        result = dexService.getEmailState(req.@params[0].ToString());
+                        break;
                     case "hasStarDomain":
                         result = dexService.hasStarDomain(req.@params[0].ToString(), req.@params[1].ToString());
                         break;
