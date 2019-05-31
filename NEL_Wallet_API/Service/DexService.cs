@@ -194,7 +194,7 @@ namespace NEL_Wallet_API.Service
             // 关注信息处理
             bool hasStar = false;
             Dictionary<string, bool> orderidsStarDict = null;
-            var orderids = queryRes.Select(p => p["fullDomain"].ToString()).ToArray();
+            var orderids = queryRes.Select(p => p["orderid"].ToString()).ToArray();
             if (orderids != null && orderids.Count() > 0)
             {
                 orderidsStarDict = GetOrderidStarDict(address, orderids, out hasStar, false);
@@ -715,6 +715,8 @@ namespace NEL_Wallet_API.Service
             string fulldomain = domain;
             string state = null;
             string price = null;
+            string assetName = "";
+            string orderid = "";
             string findStr = new JObject { { "fulldomain", domain }, { "TTL", new JObject { { "$gt", TimeHelper.GetTimeStamp() } } } }.ToString();
             var queryRes = mh.GetDataNew(Notify_mongodbConnStr, Notify_mongodbDatabase, domainOwnerCol, findStr);
             if (queryRes != null && queryRes.Count > 0)
@@ -725,6 +727,9 @@ namespace NEL_Wallet_API.Service
                 {
                     state = DomainState.YesSelling;
                     price = queryRes[0]["dexLaunchPrice"].ToString();
+                    orderid = queryRes[0]["dexLaunchOrderid"].ToString();
+                    assetName = queryRes[0]["dexLaunchAssetName"].ToString();
+
                 }
                 else
                 {
@@ -742,6 +747,8 @@ namespace NEL_Wallet_API.Service
                 {
                     state = DomainState.Auctioning;
                     price = NumberDecimalHelper.formatDecimal(queryRes[0]["maxPrice"].ToString());
+                    assetName = queryRes[0]["maxPrice"].ToString();
+                    assetName = "CGAS";
                 }
                 else
                 {
@@ -750,7 +757,7 @@ namespace NEL_Wallet_API.Service
                 }
             }
 
-            return new JArray { new JObject { { "fulldomain", fulldomain }, { "state", state }, { "price", price } } };
+            return new JArray { new JObject { { "fulldomain", fulldomain }, { "state", state }, { "price", price },{ "assetName", assetName},{ "orderid", orderid} } };
         }
 
         public JArray searchDexDomainLikeInfo(string address, string domainPrefix, int pageNum = 1, int pageSize = 10)
@@ -762,7 +769,7 @@ namespace NEL_Wallet_API.Service
             if (count == 0) return new JArray { };
 
             string sortStr = new JObject { { "fullDomain", 1 } }.ToString();
-            string fieldStr = new JObject { { "fullDomain", 1 }, { "seller", 1 }, { "assetName", 1 }, { "nowPrice", 1 }, { "saleRate", 1 }, { "sellType", 1 }, { "_id", 0 } }.ToString();
+            string fieldStr = new JObject { { "orderid", 1 },{ "fullDomain", 1 }, { "seller", 1 }, { "assetName", 1 }, { "nowPrice", 1 }, { "saleRate", 1 }, { "sellType", 1 }, { "_id", 0 } }.ToString();
             var queryRes = mh.GetDataNewPages(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, findStr, sortStr, pageSize * (pageNum - 1), pageSize, fieldStr);
 
             // 关注信息处理
