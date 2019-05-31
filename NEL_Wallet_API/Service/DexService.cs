@@ -69,12 +69,12 @@ namespace NEL_Wallet_API.Service
                 list.Add(new JObject { { "$match", new JObject { { "dex.assetName", assetFilterType } } } }.ToString());
             }
             //           
-            var count = mh.AggregateCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexStarStateCol, list);
+            var count = mh.AggregateCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexStarSellStateCol, list);
             if (count == 0) return new JArray { };
             list.Add(new JObject { { "$sort", getSortStr(sortType, "sell", "dex.") } }.ToString());
             list.Add(new JObject { { "$skip", pageSize * (pageNum - 1) } }.ToString());
             list.Add(new JObject { { "$limit", pageSize } }.ToString());
-            var queryRes = mh.Aggregate(Notify_mongodbConnStr, Notify_mongodbDatabase, dexStarStateCol, list);
+            var queryRes = mh.Aggregate(Notify_mongodbConnStr, Notify_mongodbDatabase, dexStarSellStateCol, list);
             var res = queryRes.SelectMany(p => (JArray)p["dex"]).Select(p =>
             {
                 return new JObject {
@@ -141,7 +141,7 @@ namespace NEL_Wallet_API.Service
         {
             //
             List<string> list = new List<string>();
-            list.Add(new JObject { { "$match", new JObject { { "address", address }, { "state", "1" } } } }.ToString());
+            list.Add(new JObject { { "$match", new JObject { { "address", address }, { "state", StarState.YesStar } } } }.ToString());
             list.Add(new JObject{{"$lookup", new JObject {
                     { "from", dexDomainBuyStateCol},
                     { "localField", "orderid" },
@@ -153,12 +153,12 @@ namespace NEL_Wallet_API.Service
                 list.Add(new JObject { { "$match", new JObject { { "dex.assetName", assetFilterType } } } }.ToString());
             }
             //         
-            var count = mh.AggregateCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexStarStateCol, list);
+            var count = mh.AggregateCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexStarBuyStateCol, list);
             if (count == 0) return new JArray { };
             list.Add(new JObject { { "$sort", getSortStr(sortType, "buy", "dex.") } }.ToString());
             list.Add(new JObject { { "$skip", pageSize * (pageNum - 1) } }.ToString());
             list.Add(new JObject { { "$limit", pageSize } }.ToString());
-            var queryRes = mh.Aggregate(Notify_mongodbConnStr, Notify_mongodbDatabase, dexStarStateCol, list);
+            var queryRes = mh.Aggregate(Notify_mongodbConnStr, Notify_mongodbDatabase, dexStarBuyStateCol, list);
             var res = queryRes.SelectMany(p => (JArray)p["dex"]).Select(p =>
             {
                 return new JObject {
@@ -475,7 +475,7 @@ namespace NEL_Wallet_API.Service
         public JArray getDexDomainOrderDeal(string address, int pageNum = 1, int pageSize = 10)
         {
             // 成交
-            var findStr = new JObject { { "$or", new JArray { new JObject { { "seller", address } }, new JObject { { "buyer", address } } } } }.ToString();
+            var findStr = new JObject { { "$or", new JArray { new JObject { { "seller", address },{ "displayName", "NNSbet" } }, new JObject { { "buyer", address },{ "displayName", "NNSsell" } } } } }.ToString();
             var dealCount = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainDealHistStateCol, findStr);
             if (dealCount == 0) return new JArray { };
 
