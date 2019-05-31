@@ -685,6 +685,7 @@ namespace NEL_Wallet_API.Service
                 jo.Add("isSelling", p["dexLaunchFlag"] != null && p["dexLaunchFlag"].ToString() == "1");
                 jo.Add("isBind", p["bindflag"] != null && p["bindflag"].ToString() == "1");
                 jo.Add("isTTL", long.Parse(p["TTL"].ToString()) < TimeHelper.GetTimeStamp());
+                jo.Add("orderid", p["dexLaunchOrderid"] != null ? p["dexLaunchOrderid"].ToString():"");
                 return jo;
             }).ToArray();
             
