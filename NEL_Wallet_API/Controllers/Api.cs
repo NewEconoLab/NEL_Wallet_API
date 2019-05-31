@@ -371,7 +371,8 @@ namespace NEL_Wallet_API.Controllers
                         result = dexService.getStarDomainCount(req.@params[0].ToString());
                         break;
                     case "starDexDomain":
-                        result = dexService.starDexDomain(req.@params[0].ToString(), req.@params[1].ToString(), req.@params[2].ToString());
+                        //result = dexService.starDexDomain(req.@params[0].ToString(), req.@params[1].ToString(), req.@params[2].ToString());
+                        result = dexService.starDexDomain(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), req.@params[2].ToString(), req.@params[3].ToString());
                         break;
                     case "searchDexDomainLikeInfo":
                         result = dexService.searchDexDomainLikeInfo(req.@params[0].ToString(), req.@params[1].ToString(), int.Parse(req.@params[2].ToString()), int.Parse(req.@params[3].ToString()));
@@ -398,13 +399,13 @@ namespace NEL_Wallet_API.Controllers
                         result = dexService.getDexDomainBuyOther(req.@params[0].ToString(), req.@params[1].ToString());
                         break;
                     case "getDexDomainBuyDetail":
-                        result = dexService.getDexDomainBuyDetail(req.@params[0].ToString(), req.@params[1].ToString());
+                        result = dexService.getDexDomainBuyDetail(req.@params[0].ToString());
                         break;
                     case "getDexDomainSellOther":
                         result = dexService.getDexDomainSellOther(req.@params[0].ToString());
                         break;
                     case "getDexDomainSellDetail":
-                        result = dexService.getDexDomainSellDetail(req.@params[0].ToString(), req.@params[1].ToString());
+                        result = dexService.getDexDomainSellDetail(req.@params[0].ToString());
                         break;
                     case "getDexDomainDealHistList":
                         result = dexService.getDexDomainDealHistList(req.@params[0].ToString(), int.Parse(req.@params[1].ToString()), int.Parse(req.@params[2].ToString()), req.@params[3].ToString(), req.@params[4].ToString());

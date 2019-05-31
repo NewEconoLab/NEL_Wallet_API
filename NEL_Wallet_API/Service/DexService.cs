@@ -13,6 +13,8 @@ namespace NEL_Wallet_API.Service
         public string Notify_mongodbDatabase { get; set; }
         public string dexEmailStateCol { get; set; } = "dexEmailState";
         public string dexStarStateCol { get; set; } = "dexStarState";
+        public string dexStarSellStateCol { get; set; } = "dexStarSellState";
+        public string dexStarBuyStateCol { get; set; } = "dexStarBuyState";
         public string domainOwnerCol { get; set; } = "domainOwnerCol";
         public string auctionStateCol { get; set; } = "auctionState";
         public string dexBalanceStateCol { get; set; }
@@ -58,8 +60,8 @@ namespace NEL_Wallet_API.Service
             list.Add(new JObject { { "$match", new JObject { { "address", address }, { "state", StarState.YesStar } } } }.ToString());
             list.Add(new JObject{{"$lookup", new JObject {
                     { "from", dexDomainSellStateCol},
-                    { "localField", "fullDomain" },
-                    { "foreignField", "fullDomain" },
+                    { "localField", "orderid" },
+                    { "foreignField", "orderid" },
                     { "as", "dex"} } }}.ToString());
             list.Add(new JObject { { "$match", new JObject { { "dex", new JObject { { "$gt", new JArray { } } } } } } }.ToString());
             if (assetFilterType == SortFilterType.AssetFilter_CGAS || assetFilterType == SortFilterType.AssetFilter_NNC)
@@ -76,6 +78,7 @@ namespace NEL_Wallet_API.Service
             var res = queryRes.SelectMany(p => (JArray)p["dex"]).Select(p =>
             {
                 return new JObject {
+                    {"orderid", p["orderid"] },
                     {"fullDomain", p["fullDomain"] },
                     {"sellType", p["sellType"] },
                     {"assetName", p["assetName"] },
@@ -100,7 +103,7 @@ namespace NEL_Wallet_API.Service
             }
             string findStr = getFindStr(assetFilterType, starFilterType, true);
             string sortStr = getSortStr(sortType, "sell").ToString();
-            string fieldStr = new JObject { { "fullDomain", 1 }, { "owner", 1 }, { "ttl", 1 }, { "starCount", 1 }, { "assetName", 1 }, { "nowPrice", 1 }, { "saleRate", 1 }, { "sellType", 1 }, { "_id", 0 } }.ToString();
+            string fieldStr = new JObject { { "orderid", 1 }, { "fullDomain", 1 }, { "owner", 1 }, { "ttl", 1 }, { "starCount", 1 }, { "assetName", 1 }, { "nowPrice", 1 }, { "saleRate", 1 }, { "sellType", 1 }, { "_id", 0 } }.ToString();
             var count = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, findStr);
             if (count == 0) return new JArray { };
 
@@ -141,8 +144,8 @@ namespace NEL_Wallet_API.Service
             list.Add(new JObject { { "$match", new JObject { { "address", address }, { "state", "1" } } } }.ToString());
             list.Add(new JObject{{"$lookup", new JObject {
                     { "from", dexDomainBuyStateCol},
-                    { "localField", "fullDomain" },
-                    { "foreignField", "fullDomain" },
+                    { "localField", "orderid" },
+                    { "foreignField", "orderid" },
                     { "as", "dex"} } }}.ToString());
             list.Add(new JObject { { "$match", new JObject { { "dex", new JObject { { "$gt", new JArray { } } } } } } }.ToString());
             if (assetFilterType == SortFilterType.AssetFilter_CGAS || assetFilterType == SortFilterType.AssetFilter_NNC)
@@ -159,6 +162,7 @@ namespace NEL_Wallet_API.Service
             var res = queryRes.SelectMany(p => (JArray)p["dex"]).Select(p =>
             {
                 return new JObject {
+                    {"orderid", p["orderid"] },
                     {"fullDomain", p["fullDomain"] },
                     {"assetName", p["assetName"] },
                     {"buyer", p["buyer"] },
@@ -182,7 +186,7 @@ namespace NEL_Wallet_API.Service
             }
             string findStr = getFindStr(assetFilterType, starFilterType);
             string sortStr = getSortStr(sortType, "buy").ToString();
-            string fieldStr = new JObject { { "fullDomain", 1 }, { "buyer", 1 }, { "assetName", 1 }, { "price", 1 }, { "time", 1 }, { "owner", 1 }, { "_id", 0 } }.ToString();
+            string fieldStr = new JObject { { "orderid", 1 }, { "fullDomain", 1 }, { "buyer", 1 }, { "assetName", 1 }, { "price", 1 }, { "time", 1 }, { "owner", 1 }, { "_id", 0 } }.ToString();
             var count = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr);
             if (count == 0) return new JArray { };
 
@@ -328,17 +332,11 @@ namespace NEL_Wallet_API.Service
             return new JObject { };
         }
 
-        public JArray getDexDomainSellDetail(string fullDomain, string seller="")
+        public JArray getDexDomainSellDetail(string orderid)
         {
-            //string findStr = new JObject { { "fullDomain", fullDomain } }.ToString();
-            var findJo = new JObject { { "fullDomain", fullDomain } };
-            if(seller != "")
-            {
-                findJo.Add("seller", seller);
-            }
-            string findStr = findJo.ToString();
+            string findStr = new JObject { { "orderid", orderid } }.ToString();
             string sortStr = new JObject { { "ttl", -1 } }.ToString();
-            string fieldStr = new JObject { { "auctionid", 1 }, { "fullDomain", 1 }, { "sellType", 1 }, { "ttl", 1 }, { "assetName", 1 }, { "nowPrice", 1 }, { "salePrice", 1 }, { "endPrice", 1 }, { "seller", 1 }, { "startTimeStamp", 1 }, { "_id", 0 } }.ToString();
+            string fieldStr = new JObject { { "orderid", 1 }, { "fullDomain", 1 }, { "sellType", 1 }, { "ttl", 1 }, { "assetName", 1 }, { "nowPrice", 1 }, { "salePrice", 1 }, { "endPrice", 1 }, { "seller", 1 }, { "startTimeStamp", 1 }, { "_id", 0 } }.ToString();
             var queryRes = mh.GetDataNewPages(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, findStr, sortStr, 0,1,fieldStr);
             if (queryRes == null || queryRes.Count == 0) return new JArray { };
 
@@ -347,7 +345,7 @@ namespace NEL_Wallet_API.Service
             {
                 new JObject
                 {
-                    { "auctionid", info["auctionid"]},
+                    { "orderid", info["orderid"]},
                     { "fullDomain", info["fullDomain"]},
                     { "sellType", info["sellType"]},
                     { "assetName", info["assetName"]},
@@ -372,6 +370,7 @@ namespace NEL_Wallet_API.Service
             var queryRes = mh.GetDataNewPages(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr, sortStr, pageSize*(pageNum-1), pageSize);
             var res = queryRes.Select(p => {
                 return new JObject {
+                    { "orderid",p["orderid"] },
                     { "assetHash",p["assetHash"] },
                     { "assetName",p["assetName"] },
                     { "address",p["buyer"] },
@@ -387,9 +386,9 @@ namespace NEL_Wallet_API.Service
                 {"list", new JArray{ res } }
             }};
         }
-        public JArray getDexDomainBuyDetail(string fullDomain, string buyer)
+        public JArray getDexDomainBuyDetail(string orderid)
         {
-            string findStr = new JObject { { "fullDomain", fullDomain }, { "buyer", buyer } }.ToString();
+            string findStr = new JObject { { "orderid", orderid }}.ToString();
             var queryRes = mh.GetDataNew(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr);
             if (queryRes == null || queryRes.Count == 0) return new JArray { };
 
@@ -397,8 +396,9 @@ namespace NEL_Wallet_API.Service
             var res = new JArray
             {
                 new JObject{
-                    { "fullDomain",  fullDomain},
-                    { "buyer", buyer},
+                    { "orderid",  orderid},
+                    { "fullDomain",  info["fullDomain"]},
+                    { "buyer", info["buyer"]},
                     { "assetName", info["assetName"].ToString()},
                     { "price", NumberDecimalHelper.formatDecimal(info["price"].ToString())},
                     { "time", info["time"]},
@@ -423,6 +423,7 @@ namespace NEL_Wallet_API.Service
                 count += 1;
                 list.Add(new JObject
                 {
+                    {"orderid", queryRes[0]["orderid"] },
                     {"assetHash", queryRes[0]["assetHash"] },
                     {"assetName", queryRes[0]["assetName"] },
                     {"address", queryRes[0]["seller"] },
@@ -452,6 +453,8 @@ namespace NEL_Wallet_API.Service
                         jo.Add("price", price);
                         jo.Add("orderType", MarketType.Buy);
                         jo.Add("sellType", -1);
+                        jo["orderid"] = p["offerid"].ToString();
+                        jo.Remove("offerid");
                         return jo;
                     }).ToArray();
                     if (res != null && res.Count() > 0) list.AddRange(res);
@@ -862,7 +865,49 @@ namespace NEL_Wallet_API.Service
             return new JArray { new JObject { { "isStar", flag } } };
         }
 
-        
+
+        // new
+        public JArray starDexDomain(string address, int orderType,/*0表示出售订单,1表示求购订单*/string orderid, string starFlag= "0"/*1表示开始关注;0表示取消关注*/)
+        {
+            if(orderType == OrderType.Sell)
+            {
+                return starDexDomain(address, dexStarSellStateCol, "orderid", orderid, starFlag);
+            }
+            if(orderType == OrderType.Buy)
+            {
+                return starDexDomain(address, dexStarBuyStateCol, "orderid", orderid, starFlag);
+            }
+            return new JArray { new JObject { { "res", false } } };
+        }
+        private JArray starDexDomain(string address, string coll, string key, string orderid, string starFlag)
+        {
+            long time = TimeHelper.GetTimeStamp();
+            string findStr = new JObject { { "address", address }, { key, orderid } }.ToString();
+            var queryRes = mh.GetDataNew(Notify_mongodbConnStr, Notify_mongodbDatabase, coll, findStr);
+
+            if ((queryRes == null || queryRes.Count == 0))
+            {
+                if (starFlag == "1")
+                {
+                    // 开始关注&Null
+                    var info = new JObject { { "address", address }, { key, orderid }, { "state", StarState.YesStar }, { "time", time}, { "lastUpdateTime", time } }.ToString();
+                    mh.InsertOneData(Notify_mongodbConnStr, Notify_mongodbDatabase, coll, info);
+                }
+            }
+            else
+            {
+                // 开始关注&NotNull/取消关注
+                string state = starFlag == "0" ? StarState.NotStar : StarState.YesStar;
+                if (queryRes[0]["state"].ToString() != state)
+                {
+                    string updateStr = new JObject { { "$set", new JObject { { "state", state }, { "lastUpdateTime", time } } } }.ToString();
+                    mh.UpdateData(Notify_mongodbConnStr, Notify_mongodbDatabase, coll, updateStr, findStr);
+                }
+            }
+            return new JArray { new JObject { { "res", true } } };
+        }
+
+
         public JArray getEmailState(string address)
         {
             string findStr = new JObject { { "address", address } }.ToString();
@@ -976,6 +1021,10 @@ namespace NEL_Wallet_API.Service
 
             return new JArray { new JObject { { "res", EmailVerifyState.Succ } } };
         }
+    }
+    class OrderType {
+        public const int Sell = 0;
+        public const int Buy = 1;
     }
     class EmailBindState
     {
