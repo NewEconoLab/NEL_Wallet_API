@@ -110,11 +110,11 @@ namespace NEL_Wallet_API.Service
             var queryRes = mh.GetDataNewPages(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, findStr, sortStr, pageSize*(pageNum-1), pageSize, fieldStr);
             // 关注信息处理
             bool hasStar = false;
-            Dictionary<string, bool> fullDomainStarDict = null;
-            var fullDomainArr = queryRes.Select(p => p["fullDomain"].ToString()).ToArray();
-            if (fullDomainArr != null && fullDomainArr.Count() > 0)
+            Dictionary<string, bool> orderidsStarDict = null;
+            var orderids = queryRes.Select(p => p["orderid"].ToString()).ToArray();
+            if (orderids != null && orderids.Count() > 0)
             {
-                fullDomainStarDict = GetFullDomainStarDict(address, fullDomainArr, out hasStar);
+                orderidsStarDict = GetOrderidStarDict(address, orderids, out hasStar);
             }
             var res = queryRes.Select(p =>
             {
@@ -128,7 +128,7 @@ namespace NEL_Wallet_API.Service
 
                 jo.Add("isMine", jo["owner"].ToString() == address);
                 jo.Remove("owner");
-                jo.Add("isStar", hasStar ? fullDomainStarDict.GetValueOrDefault(p["fullDomain"].ToString(), false) : false);
+                jo.Add("isStar", hasStar ? orderidsStarDict.GetValueOrDefault(p["orderid"].ToString(), false) : false);
                 jo.Remove("starCount");
                 return jo;
             }).ToArray();
@@ -193,11 +193,11 @@ namespace NEL_Wallet_API.Service
             var queryRes = mh.GetDataNewPages(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainBuyStateCol, findStr, sortStr, pageSize*(pageNum-1), pageSize, fieldStr);
             // 关注信息处理
             bool hasStar = false;
-            Dictionary<string, bool> fullDomainStarDict = null;
-            var fullDomainArr = queryRes.Select(p => p["fullDomain"].ToString()).ToArray();
-            if (fullDomainArr != null && fullDomainArr.Count() > 0)
+            Dictionary<string, bool> orderidsStarDict = null;
+            var orderids = queryRes.Select(p => p["fullDomain"].ToString()).ToArray();
+            if (orderids != null && orderids.Count() > 0)
             {
-                fullDomainStarDict = GetFullDomainStarDict(address, fullDomainArr, out hasStar);
+                orderidsStarDict = GetOrderidStarDict(address, orderids, out hasStar, false);
             }
             var res = queryRes.Select(p =>
             {
@@ -209,7 +209,7 @@ namespace NEL_Wallet_API.Service
                 jo.Remove("time");
                 jo.Add("canSell", jo["owner"].ToString() == address);
                 jo.Remove("owner");
-                jo.Add("isStar", hasStar ? fullDomainStarDict.GetValueOrDefault(p["fullDomain"].ToString(), false) : false);
+                jo.Add("isStar", hasStar ? orderidsStarDict.GetValueOrDefault(p["orderid"].ToString(), false) : false);
                 return jo;
             }).ToArray();
             return new JArray { new JObject {
@@ -770,7 +770,7 @@ namespace NEL_Wallet_API.Service
             var fullDomainArr = queryRes.Select(p => p["fullDomain"].ToString()).ToArray();
             if (fullDomainArr != null && fullDomainArr.Count() > 0)
             {
-                fullDomainStarDict = GetFullDomainStarDict(address, fullDomainArr, out hasStar);
+                fullDomainStarDict = GetOrderidStarDict(address, fullDomainArr, out hasStar);
             }
 
             var res = queryRes.Select(p =>
@@ -794,17 +794,17 @@ namespace NEL_Wallet_API.Service
             } };
         }
 
-        private Dictionary<string, bool> GetFullDomainStarDict(string address, string[] fullDomainArr, out bool hasStar)
+        private Dictionary<string, bool> GetOrderidStarDict(string address, string[] orderids, out bool hasStar, bool isSell = true)
         {
-            var findJA = fullDomainArr.Select(p => new JObject { { "address", address }, { "fullDomain", p }, { "state", StarState.YesStar } }).ToArray();
+            var findJA = orderids.Select(p => new JObject { { "address", address }, { "orderid", p }, { "state", StarState.YesStar } }).ToArray();
             string findStr = new JObject { { "$or", new JArray { findJA } } }.ToString();
-            var queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexStarStateCol, findStr);
+            var queryRes = mh.GetData(Notify_mongodbConnStr, Notify_mongodbDatabase, isSell ? dexStarSellStateCol:dexStarBuyStateCol, findStr);
             if(queryRes != null && queryRes.Count > 0)
             {
                 hasStar = true;
-                return fullDomainArr.ToDictionary(k => k, v =>
+                return orderids.ToDictionary(k => k, v =>
                 {
-                    return queryRes.Any(p => p["fullDomain"].ToString() == v);
+                    return queryRes.Any(p => p["orderid"].ToString() == v);
                 });
             }
             else
