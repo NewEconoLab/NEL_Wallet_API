@@ -1028,7 +1028,7 @@ namespace NEL_Wallet_API.Service
                 // 无效验证码
                 return new JArray { new JObject { { "res", EmailVerifyState.InvalidVerifyUid } } };
             }
-            if(long.Parse(info["time"].ToString()) + 600/*验证信息10分钟内有效*/ > TimeHelper.GetTimeStamp())
+            if(long.Parse(info["time"].ToString()) + 600/*验证信息10分钟内有效*/ < TimeHelper.GetTimeStamp())
             {
                 return new JArray { new JObject { { "res", EmailVerifyState.ExpireVerifyUid } } };
             }
