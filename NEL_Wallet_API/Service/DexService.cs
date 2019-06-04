@@ -982,9 +982,9 @@ namespace NEL_Wallet_API.Service
             }
             return new JArray { new JObject { { "res", EmailBindState.Succ } } };
         }
-        public JArray clearEmail(string address)
+        public JArray clearEmail(string address, string email)
         {
-            string findStr = new JObject { { "address", address } }.ToString();
+            string findStr = new JObject { { "address", address },{ "email", email } }.ToString();
             var queryRes = mh.GetDataNew(Notify_mongodbConnStr, Notify_mongodbDatabase, dexEmailStateCol, findStr);
             if (queryRes != null && queryRes.Count > 0)
             {

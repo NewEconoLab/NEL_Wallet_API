@@ -353,7 +353,7 @@ namespace NEL_Wallet_API.Controllers
                         result = dexService.verifyEmail(req.@params[0].ToString(), req.@params[1].ToString(), req.@params[1].ToString());
                         break;
                     case "clearEmail":
-                        result = dexService.clearEmail(req.@params[0].ToString());
+                        result = dexService.clearEmail(req.@params[0].ToString(), req.@params[1].ToString());
                         break;
                     case "bindEmail":
                         result = dexService.bindEmail(req.@params[0].ToString(), req.@params[1].ToString());
