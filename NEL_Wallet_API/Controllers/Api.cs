@@ -350,7 +350,7 @@ namespace NEL_Wallet_API.Controllers
                 {
                     // dex
                     case "verifyEmail":
-                        result = dexService.verifyEmail(req.@params[0].ToString(), req.@params[1].ToString(), req.@params[1].ToString());
+                        result = dexService.verifyEmail(req.@params[0].ToString(), req.@params[1].ToString(), req.@params[2].ToString());
                         break;
                     case "clearEmail":
                         result = dexService.clearEmail(req.@params[0].ToString(), req.@params[1].ToString());
