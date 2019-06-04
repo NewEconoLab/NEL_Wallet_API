@@ -1022,10 +1022,15 @@ namespace NEL_Wallet_API.Service
                 // 无效邮箱
                 return new JArray { new JObject { { "res", EmailVerifyState.InvalidEmail } } };
             }
-            if(info["verifyState"].ToString() != VerifyState.HaveSend || info["verifyUid"].ToString() != verifyUid)
+            if(info["verifyState"].ToString() != VerifyState.HaveSend || info["verifyUid"].ToString() != verifyUid 
+                || (info["verifyState"].ToString() == VerifyState.YES && info["verifyUid"].ToString() == verifyUid))
             {
                 // 无效验证码
                 return new JArray { new JObject { { "res", EmailVerifyState.InvalidVerifyUid } } };
+            }
+            if(long.Parse(info["time"].ToString()) + 600/*验证信息10分钟内有效*/ > TimeHelper.GetTimeStamp())
+            {
+                return new JArray { new JObject { { "res", EmailVerifyState.ExpireVerifyUid } } };
             }
             string updateStr = new JObject { { "$set", new JObject { { "verifyState", VerifyState.YES } } } }.ToString();
             mh.UpdateData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexEmailStateCol, updateStr, findStr);
@@ -1053,6 +1058,7 @@ namespace NEL_Wallet_API.Service
         public const string InvalidEmail = "0112"; //"无效邮箱";
         public const string NotActiveNotifyFunction = "0113"; //"通知功能未激活";
         public const string InvalidVerifyUid = "0114"; //"无效验证码";
+        public const string ExpireVerifyUid = "0115"; //"过期验证码";
     }
 
     class ActiveState
