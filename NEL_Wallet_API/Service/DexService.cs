@@ -995,7 +995,7 @@ namespace NEL_Wallet_API.Service
                     || info["verifyUid"].ToString() != ""
                     )
                 {
-                    string updateStr = new JObject { {"email","" },{ "activeState", ActiveState.NOT}, { "verifyState", VerifyState.NOT},{ "verifyUid",""},{ "time", TimeHelper.GetTimeStamp()} }.ToString();
+                    string updateStr = new JObject { { "$set", new JObject { { "email", "" }, { "activeState", ActiveState.NOT }, { "verifyState", VerifyState.NOT }, { "verifyUid", "" }, { "time", TimeHelper.GetTimeStamp() } } } }.ToString();
                     mh.UpdateData(Notify_mongodbConnStr, Notify_mongodbDatabase, dexEmailStateCol, updateStr, findStr);
                 }   
             }
