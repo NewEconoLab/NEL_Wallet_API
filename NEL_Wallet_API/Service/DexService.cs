@@ -924,6 +924,10 @@ namespace NEL_Wallet_API.Service
             string findStr = new JObject { { "address", address } }.ToString();
             string fieldStr = new JObject { { "email", 1 }, { "activeState", 1 }, { "verifyState", 1 }, { "_id", 0 } }.ToString();
             var queryRes = mh.GetDataNew(Notify_mongodbConnStr, Notify_mongodbDatabase, dexEmailStateCol, findStr, fieldStr);
+            if(queryRes == null || queryRes.Count ==0)
+            {
+                return new JArray{ new JObject { { "email", ""},{ "activeState","0"},{ "verifyState","0"} }};
+            }
             return queryRes;
         }
         public JArray bindEmail(string address, string email)
