@@ -740,6 +740,7 @@ namespace NEL_Wallet_API.Service
             else
             {
                 var findJo = MongoFieldHelper.toFilter(new string[] { AuctionState.STATE_CONFIRM, AuctionState.STATE_RANDOM }, "auctionState");
+                findJo.Add("fulldomain", fulldomain);
                 findStr = findJo.ToString();
                 string fieldStr = new JObject { { "maxPrice", 1 } }.ToString();
                 queryRes = mh.GetDataNew(Notify_mongodbConnStr, Notify_mongodbDatabase, auctionStateCol, findStr, fieldStr);
