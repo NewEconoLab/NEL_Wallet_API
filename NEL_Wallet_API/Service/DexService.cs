@@ -285,7 +285,7 @@ namespace NEL_Wallet_API.Service
                 case SortFilterType.Sort_LaunchTime_New:
                     if (sellOrBuyOrDeal == "buy")
                     {
-                        return new JObject { { starSuffix + "maxTime", -1 } };
+                        return new JObject { { starSuffix + "time", -1 } };
                     }
                     if (sellOrBuyOrDeal == "deal")
                     {
@@ -295,7 +295,7 @@ namespace NEL_Wallet_API.Service
                 case SortFilterType.Sort_LaunchTime_Old:
                     if (sellOrBuyOrDeal == "buy")
                     {
-                        return new JObject { { starSuffix + "maxTime", 1 } };
+                        return new JObject { { starSuffix + "time", 1 } };
                     }
                     if (sellOrBuyOrDeal == "deal")
                     {
@@ -306,7 +306,7 @@ namespace NEL_Wallet_API.Service
                 case SortFilterType.Sort_Price_High:
                     if (sellOrBuyOrDeal == "buy")
                     {
-                        return new JObject { { starSuffix + "maxPrice", -1 } };
+                        return new JObject { { starSuffix + "price", -1 } };
                     }
                     if (sellOrBuyOrDeal == "deal")
                     {
@@ -316,7 +316,7 @@ namespace NEL_Wallet_API.Service
                 case SortFilterType.Sort_Price_Low:
                     if (sellOrBuyOrDeal == "buy")
                     {
-                        return new JObject { { starSuffix + "maxPrice", 1 } };
+                        return new JObject { { starSuffix + "price", 1 } };
                     }
                     if (sellOrBuyOrDeal == "deal")
                     {
