@@ -34,8 +34,12 @@ namespace NEL_Wallet_API.lib
             };
         }
     
-        public static JObject likeFilter(string key, string regex)
+        public static JObject likeFilter(string key, string regex, string notIncludeValue="")
         {
+            if(notIncludeValue != "")
+            {
+                return new JObject() { { key, new JObject() { { "$ne", notIncludeValue }, { "$regex", regex }, { "$options", "i" } } } };
+            }
             return new JObject() { { key, new JObject() { { "$regex", regex }, { "$options", "i" } } } };
         }
         public static JObject toFilter(long[] blockindexArr, string field, string logicalOperator = "$or")

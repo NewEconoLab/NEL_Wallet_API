@@ -6,6 +6,32 @@ namespace NEL_Wallet_API.lib
 {
     public class DomainHelper
     {
+        private const string ROOT_NEO = ".neo";
+        private const string ROOT_TEST = ".neo";
+        public static bool IsSupportRoot(string domain)
+        {
+            return domain.EndsWith(ROOT_NEO) || domain.EndsWith(ROOT_TEST);
+        }
+        public static string getFullDomain4Neo(string domain)
+        {
+            //if (domain.EndsWith(ROOT_NEO)) return domain;
+            return domain + ROOT_NEO;
+        }
+        public static string getFullDomain4Test(string domain)
+        {
+            //if (domain.EndsWith(ROOT_TEST)) return domain;
+            return domain + ROOT_TEST;
+        }
+        public static string[] getFullDomain(string domain)
+        {
+            return new string[] { getFullDomain4Neo(domain), getFullDomain4Test(domain) };
+        }
+        public static string getDefalutFullDomain(string domain)
+        {
+            if (domain.EndsWith(ROOT_NEO)) return domain;
+            if (domain.EndsWith(ROOT_TEST)) return domain;
+            return domain + ROOT_NEO;
+        }
         public static Hash256 nameHash(string domain)
         {
             byte[] data = System.Text.Encoding.UTF8.GetBytes(domain);

@@ -712,7 +712,7 @@ namespace NEL_Wallet_API.Service
              * 未出售  : domain + state
              * 出售中  : domain + state + price
              */
-            string fulldomain = domain;
+            string fulldomain = DomainHelper.getDefalutFullDomain(domain);
             string state = null;
             string price = null;
             string assetName = "";
@@ -763,7 +763,19 @@ namespace NEL_Wallet_API.Service
 
         public JArray searchDexDomainLikeInfo(string address, string domainPrefix, int pageNum = 1, int pageSize = 10)
         {
-            var findJo = MongoFieldHelper.likeFilter("fullDomain", domainPrefix);
+            string newDomainPrefix = "";
+            string newFullDomain = "";
+            if(DomainHelper.IsSupportRoot(domainPrefix))
+            {
+                newDomainPrefix = domainPrefix.Substring(0, domainPrefix.LastIndexOf("."));
+                newFullDomain = domainPrefix;
+            } else
+            {
+                newDomainPrefix = domainPrefix;
+                newFullDomain = DomainHelper.getDefalutFullDomain(domainPrefix);
+            }
+
+            var findJo = MongoFieldHelper.likeFilter("fullDomain", newDomainPrefix, newFullDomain);
             findJo.Add("ttl", new JObject { { "$gte", TimeHelper.GetTimeStamp() } });
             string findStr = findJo.ToString();
             var count = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, findStr);
