@@ -7,7 +7,7 @@ namespace NEL_Wallet_API.lib
     public class DomainHelper
     {
         private const string ROOT_NEO = ".neo";
-        private const string ROOT_TEST = ".neo";
+        private const string ROOT_TEST = ".test";
         public static bool IsSupportRoot(string domain)
         {
             return domain.EndsWith(ROOT_NEO) || domain.EndsWith(ROOT_TEST);

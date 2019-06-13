@@ -714,6 +714,7 @@ namespace NEL_Wallet_API.Service
              * 未出售  : domain + state
              * 出售中  : domain + state + price
              */
+            domain = domain.ToLower();
             string fulldomain = DomainHelper.getDefalutFullDomain(domain);
             string state = null;
             string price = null;
@@ -765,6 +766,7 @@ namespace NEL_Wallet_API.Service
 
         public JArray searchDexDomainLikeInfo(string address, string domainPrefix, int pageNum = 1, int pageSize = 10)
         {
+            domainPrefix = domainPrefix.ToLower();
             string newDomainPrefix = "";
             string newFullDomain = "";
             if(DomainHelper.IsSupportRoot(domainPrefix))
