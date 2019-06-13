@@ -719,7 +719,7 @@ namespace NEL_Wallet_API.Service
             string price = null;
             string assetName = "";
             string orderid = "";
-            string findStr = new JObject { { "fulldomain", domain }, { "TTL", new JObject { { "$gt", TimeHelper.GetTimeStamp() } } } }.ToString();
+            string findStr = new JObject { { "fulldomain", fulldomain }, { "TTL", new JObject { { "$gt", TimeHelper.GetTimeStamp() } } } }.ToString();
             var queryRes = mh.GetDataNew(Notify_mongodbConnStr, Notify_mongodbDatabase, domainOwnerCol, findStr);
             if (queryRes != null && queryRes.Count > 0)
             {
