@@ -703,7 +703,7 @@ namespace NEL_Wallet_API.Service
             string findStr = new JObject { { "mortgagePayments", new JObject { { "$gte", nncAmount } } } }.ToString();
             var count = mh.GetDataCount(Notify_mongodbConnStr, Notify_mongodbDatabase, dexDomainSellStateCol, findStr);
 
-            return new JArray { new JObject { { "orderRange", count + 1 } } };
+            return new JArray { new JObject { { "orderRange", count } } };
         }
 
         public JArray searchDexDomainInfo(string domain)
