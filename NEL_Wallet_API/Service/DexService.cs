@@ -668,7 +668,7 @@ namespace NEL_Wallet_API.Service
             }
             else if (sortFilter == SortFilterType.Sort_ttl)
             {
-                sortJo.Add("TTL", -1);
+                sortJo.Add("TTL", 1);
             }
 
             var findStr = findJo.ToString();
