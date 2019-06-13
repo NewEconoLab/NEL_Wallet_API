@@ -170,7 +170,8 @@ namespace NEL_Wallet_API.Service
                     {"isNewly", nowTime < long.Parse(p["time"].ToString()) + newlyDataTimeRange },
                     {"canSell", p["owner"].ToString() == address },
                     {"isStar", true },
-                };
+                    {"isMineOrder", p["buyer"].ToString() == address }
+            };
             }).ToArray();
 
             return new JArray { new JObject {
@@ -210,6 +211,7 @@ namespace NEL_Wallet_API.Service
                 jo.Add("canSell", jo["owner"].ToString() == address);
                 jo.Remove("owner");
                 jo.Add("isStar", hasStar ? orderidsStarDict.GetValueOrDefault(p["orderid"].ToString(), false) : false);
+                jo.Add("isMineOrder", jo["buyer"].ToString() == address);
                 return jo;
             }).ToArray();
             return new JArray { new JObject {
