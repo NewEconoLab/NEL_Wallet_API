@@ -172,7 +172,7 @@ namespace NEL_Wallet_API.Service
                     {"isStar", true },
                     {"isMineOrder", p["buyer"].ToString() == address }
             };
-            }).ToArray();
+            }).OrderByDescending(p => p["canSell"]).ToArray();
 
             return new JArray { new JObject {
                 {"count",count },
@@ -213,7 +213,7 @@ namespace NEL_Wallet_API.Service
                 jo.Add("isStar", hasStar ? orderidsStarDict.GetValueOrDefault(p["orderid"].ToString(), false) : false);
                 jo.Add("isMineOrder", jo["buyer"].ToString() == address);
                 return jo;
-            }).ToArray();
+            }).OrderByDescending(p => p["canSell"]).ToArray();
             return new JArray { new JObject {
                 { "count", count},
                 { "list", new JArray{ res } }
