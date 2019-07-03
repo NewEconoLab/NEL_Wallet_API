@@ -30,7 +30,7 @@ namespace NEL_Wallet_API.Service
                     return new JArray();
                 }
             }
-            return new JArray { new JObject { { "fulldomain", item["fulldomain"]} } };
+            return new JArray { new JObject { { "fulldomain", item["fulldomain"]},{"ttl", queryRes[0]["TTL"]} } };
         }
     }
 }
