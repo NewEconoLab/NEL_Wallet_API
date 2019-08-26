@@ -24,7 +24,7 @@ namespace NEL_Wallet_API.Controllers
                 // 第一笔失败，直接返回
                 res = new JObject() {
                     { "errCode", TxState.TX_FAILD.code},
-                    { "errMessage", TxState.TX_FAILD.codeMessage},
+                    { "errMessage", err },// TxState.TX_FAILD.codeMessage},
                     { "txid", ""}
                 };
             } else
