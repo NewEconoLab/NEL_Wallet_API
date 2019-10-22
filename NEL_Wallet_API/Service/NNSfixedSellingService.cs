@@ -1,4 +1,5 @@
-﻿using NEL_Wallet_API.lib;
+﻿using NEL_Wallet_API.Controllers;
+using NEL_Wallet_API.lib;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -110,7 +111,7 @@ namespace NEL_Wallet_API.Service
             string ttl = query[0]["TTL"].ToString();
 
             findStr = new JObject() { {"fullDomain", domain } }.ToString();
-            fieldStr = new JObject() { {"price",1 }, { "displayName", 1 },{ "seller",1 } }.ToString();
+            fieldStr = new JObject() { {"price",1 }, { "displayName", 1 },{ "seller",1 },{ "blockindex",1} }.ToString();
             sortStr = new JObject() { {"blockindex", -1 } }.ToString();
             query = mh.GetDataPagesWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, NNSfixedSellingColl, fieldStr, 1, 1, sortStr, findStr);
 
@@ -118,9 +119,9 @@ namespace NEL_Wallet_API.Service
             string state = "";
             if(query != null && query.Count > 0)
             {
-                price = query[0]["price"].ToString();
-                if (query[0]["displayName"].ToString() == "NNSfixedSellingLaunched")
+                if (query[0]["displayName"].ToString() == "NNSfixedSellingLaunched" && !hasExpire(namehash, long.Parse(query[0]["blockindex"].ToString())))
                 {
+                    price = query[0]["price"].ToString();
                     state = "0901";
                     owner = query[0]["seller"].ToString() ;
                 }
@@ -137,7 +138,16 @@ namespace NEL_Wallet_API.Service
                 }
             };
         }
-        
+        private bool hasExpire(string namehash, long blockindex)
+        {
+            var findStr = new JObject { { "namehash", namehash }, { "blockindex", new JObject { { "$lt", blockindex } } } }.ToString();
+            var fieldStr = new JObject { { "TTL",1 } }.ToString();
+            var sortStr = new JObject() { { "blockindex", -1 } }.ToString();
+            var queryRes = mh.GetDataPagesWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, domainCenterColl, fieldStr, 1, 1, sortStr, findStr);
+            if (queryRes.Count == 0 || long.Parse(queryRes[0]["TTL"].ToString()) <= TimeHelper.GetTimeStamp()) return true;
+            return false;
+        }
+
         public JArray getHasBuyListByAddress(string address, string root, int pageNum=1, int pageSize=10)
         {
             
