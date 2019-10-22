@@ -67,7 +67,7 @@ namespace NEL_Wallet_API.Service
                 jo.Add("domain", domain + root);
                 if(jo["price"] == null) { jo.Add("price", new JObject() { { "$numberDecimal", "0"} }); }
                 if(jo["type"] == null) { jo.Add("type", ""); }
-                jo.Add("state", jo["type"].ToString() == "NNSfixedSellingLaunched" ? "0901" : "");
+                jo.Add("state", jo["type"].ToString() == "NNSfixedSellingLaunched" ? /*"0901"*/formatState(DomainHelper.nameHashFullDomain(domain + root)) : "");
                 return jo;
             }).OrderByDescending(p => long.Parse(p["ttl"].ToString())).ToArray();
 
@@ -77,6 +77,10 @@ namespace NEL_Wallet_API.Service
                 {"count", cnt },
                 { "list", new JArray{res } }
             } };
+        }
+        private string formatState(string namehash)
+        {
+            return NNSfixedSellingService.hasExpire(namehash) ?  "" : "0901";
         }
         public JArray getDomainByAddress(string owner, string root = ".test")
         {

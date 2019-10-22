@@ -63,7 +63,7 @@ namespace NEL_Wallet_API.Service
         }
         private bool checkDomainSelling(string domain)
         {
-            string findStr = new JObject() { {"fullDomain", domain }, { "displayName", "NNSfixedSellingLaunched" } }.ToString();
+            string findStr = new JObject() { {"fullDomain", domain }, { "displayName", "NNSfixedSellingLaunched" },{ "ttl", new JObject { { "$gt", TimeHelper.GetTimeStamp()} } } }.ToString();
             return mh.GetDataCount(mongodbConnStr, mongodbDatabase, NNSfixedSellingStateCol, findStr) > 0;
         }
         private string getdomainAuctionState(string domain)

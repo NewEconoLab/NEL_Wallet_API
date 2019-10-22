@@ -147,6 +147,16 @@ namespace NEL_Wallet_API.Service
             if (queryRes.Count == 0 || long.Parse(queryRes[0]["TTL"].ToString()) <= TimeHelper.GetTimeStamp()) return true;
             return false;
         }
+        public bool hasExpire(string namehash, string displayName= "NNSfixedSellingLaunched")
+        {
+            var findStr = new JObject { { "fullHash", namehash }, { "displayName", displayName } }.ToString();
+            var fieldStr = new JObject { { "blockindex", 1 } }.ToString();
+            var sortStr = new JObject { { "blockindex", -1 } }.ToString();
+            var queryRes = mh.GetDataPagesWithField(Notify_mongodbConnStr, Notify_mongodbDatabase, NNSfixedSellingColl, fieldStr, 1, 1, sortStr, findStr);
+            if (queryRes.Count == 0) return false;
+            var index = long.Parse(queryRes[0]["blockindex"].ToString());
+            return hasExpire(namehash, index);
+        }
 
         public JArray getHasBuyListByAddress(string address, string root, int pageNum=1, int pageSize=10)
         {
